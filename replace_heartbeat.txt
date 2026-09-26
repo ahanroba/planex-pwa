@@ -1,0 +1,97 @@
+﻿  // --- WebSocket Study Room ---
+  window.studyRoomWS = null;
+  window.wsReconnectTimeout = null;
+  let wsReconnectDelay = 1000;
+
+  function connectStudyRoomWS(roomId, roomName, ownerId) {
+    let token = localStorage.getItem('planex_jwt_token'); 
+    if (token === 'null' || token === 'undefined') token = null;
+    if (!token) return;
+
+    const wsUrl = window.location.protocol === 'https:' ? 'wss://' : 'ws://' + window.location.host + '/api/v1/rooms/' + roomId + '/ws';
+    window.studyRoomWS = new WebSocket(wsUrl);
+
+    window.studyRoomWS.onopen = () => {
+      console.log('WS Connected');
+      wsReconnectDelay = 1000; // reset
+      sendStudyRoomHeartbeat();
+    };
+
+    window.studyRoomWS.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'pong') return;
+        if (msg.type === 'ROOM_STATE' && msg.participants) {
+          state.studyRoomParticipants = msg.participants;
+          // Only update DOM selectively if modal is active
+          if (state.activeModal === 'studyRoom' && typeof window.updateStudyRoomUserDOM === 'function') {
+            msg.participants.forEach(p => window.updateStudyRoomUserDOM(p));
+            // Call renderApp only if participant count changed
+            const existingCount = document.querySelectorAll('.study-room-user-card').length;
+            if (existingCount !== msg.participants.length) renderApp();
+          } else if (state.activeModal === 'studyRoom') {
+            renderApp();
+          }
+        }
+      } catch(e){}
+    };
+
+    window.studyRoomWS.onclose = () => {
+      console.log('WS Closed');
+      if (state.currentRoom && state.currentRoom.id === roomId) {
+        window.wsReconnectTimeout = setTimeout(() => {
+          wsReconnectDelay = Math.min(wsReconnectDelay * 2, 30000);
+          connectStudyRoomWS(roomId, roomName, ownerId);
+        }, wsReconnectDelay);
+      }
+    };
+  }
+
+  async function sendStudyRoomHeartbeat(explicitStatus = null) {
+    if (!state.currentRoom || !window.studyRoomWS || window.studyRoomWS.readyState !== WebSocket.OPEN) return;
+    
+    let focusMinutes = 0;
+    let todayStudyTime = 0;
+    let currentSubject = '';
+    
+    const isRunning = state.focusTimerType === 0 ? state.isStopwatchRunning : state.isPomodoroRunning;
+    let status = explicitStatus || (isRunning ? 'active' : 'paused');
+    
+    if (typeof db !== 'undefined') {
+      const timerData = db.getRecordedTimerToday();
+      focusMinutes = timerData.minutes || 0;
+      
+      const cw = db.getCurrentWeek();
+      const weekId = cw ? cw.id : 1;
+      
+      const d = new Date();
+      const dayIndex = (d.getDay() + 1) % 7;
+      const currentSlotIdx = d.getHours() * 2 + (d.getMinutes() >= 30 ? 1 : 0);
+      
+      const todayLogs = db.getHourlyLogs(weekId);
+      let slotMins = 0;
+      for (let i = 0; i < 48; i++) {
+        const log = todayLogs[${dayIndex}_];
+        if (log && log.categoryCode && (log.categoryCode.startsWith('O1-') || log.categoryCode === 'O1-O3')) {
+          slotMins += 30;
+        }
+      }
+      todayStudyTime = slotMins + focusMinutes + (isRunning ? (state.focusTimerType === 0 ? Math.floor(state.stopwatchTime / 60) : Math.floor((state.focusPresetMins * 60 - state.pomodoroTime) / 60)) : 0);
+
+      const currentLog = todayLogs[${dayIndex}_];
+      if (currentLog && currentLog.subject && status === 'active') {
+          currentSubject = currentLog.subject;
+      }
+    }
+
+    const payload = {
+      status,
+      focus_minutes: focusMinutes,
+      weekly_focus_minutes: focusMinutes,
+      today_study_time: todayStudyTime,
+      current_subject: currentSubject,
+      session_start_timestamp: Date.now()
+    };
+
+    window.studyRoomWS.send(JSON.stringify({ type: 'update', payload }));
+  }

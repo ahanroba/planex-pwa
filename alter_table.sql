@@ -1,0 +1,1 @@
+ALTER TABLE study_rooms ADD COLUMN emoji TEXT DEFAULT '📚';

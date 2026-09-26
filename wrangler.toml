@@ -1,0 +1,15 @@
+name = "planexapp"
+pages_build_output_dir = "dist"
+compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2026-08-01"
+
+[[kv_namespaces]]
+binding = "PLANEX_KV"
+id = "8556d6821a944a1ab042bf8b9de77abf"
+
+[[kv_namespaces]]
+binding = "LEADERBOARD_KV"
+id = "d04f9f343f41443ab19a01326914a7e5"
+
+[ai]
+binding = "AI"

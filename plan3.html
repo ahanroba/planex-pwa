@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامه جامع ۳۲ روزه آزمون پیش‌کارورزی (پره‌انترنی) | @medicalaa</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --primary-dark: #0f172a;
+            --secondary: #0d9488;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Tahoma, 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Repeating Diagonal Watermark */
+        .watermark-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.045;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+            overflow: hidden;
+        }
+
+        .watermark-item {
+            font-size: 26px;
+            font-weight: 900;
+            transform: rotate(-30deg);
+            color: #0f172a;
+            user-select: none;
+            margin: 60px 40px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0d9488 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 12pt;
+            opacity: 0.92;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .channel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            padding: 8px 22px;
+            border-radius: 50px;
+            margin-top: 20px;
+            font-size: 11.5pt;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .main-content {
+            padding: 35px 30px;
+        }
+
+        /* Section Titles */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15pt;
+            color: var(--primary);
+            margin: 35px 0 18px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+
+        /* Cards Grid */
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .stat-number {
+            font-size: 22pt;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10pt;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0 25px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .custom-table th {
+            background: #1e3a8a;
+            color: #ffffff;
+            padding: 12px 14px;
+            font-size: 10pt;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .custom-table td {
+            padding: 10px 14px;
+            font-size: 9.5pt;
+            border-bottom: 1px solid #edf2f7;
+            text-align: right;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .custom-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .custom-table tr:hover td {
+            background-color: #f1f5f9;
+        }
+
+        /* Badges */
+        .pill {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 8.5pt;
+            font-weight: bold;
+        }
+
+        .pill-major { background: #fee2e2; color: #b91c1c; }
+        .pill-minor { background: #e0e7ff; color: #3730a3; }
+        .pill-floating { background: #fef3c7; color: #92400e; }
+
+        /* Day row special styles */
+        .simulation-row {
+            background: #ecfdf5 !important;
+            font-weight: bold;
+        }
+        .simulation-row td {
+            color: #065f46;
+        }
+
+        .review-row {
+            background: #fffbeb !important;
+            font-weight: bold;
+        }
+        .review-row td {
+            color: #92400e;
+        }
+
+        .rest-row {
+            background: #fee2e2 !important;
+            font-weight: bold;
+        }
+        .rest-row td {
+            color: #991b1b;
+        }
+
+        /* Rules Box */
+        .rule-card {
+            background: #f0fdf4;
+            border-right: 5px solid var(--success);
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+
+        .rule-card h3 {
+            color: #166534;
+            margin-bottom: 10px;
+            font-size: 11.5pt;
+        }
+
+        .rule-card ul {
+            padding-right: 20px;
+            color: #1f2937;
+            font-size: 9.5pt;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 22px;
+            font-size: 10pt;
+            border-top: 1px solid #1e293b;
+        }
+
+        .footer strong {
+            color: #38bdf8;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+            .header { padding: 25px 12px; }
+            .header h1 { font-size: 16pt; }
+            .main-content { padding: 18px 12px; }
+            .custom-table th, .custom-table td { padding: 8px 8px; font-size: 8.5pt; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Watermark Background Layer -->
+    <div class="watermark-bg">
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>برنامه جامع مطالعاتی آزمون پیش‌کارورزی (پره‌انترنی)</h1>
+            <p>برنامه عملیاتی ۳۲ روزه (۱ شهریور تا ۲ مهر) بر اساس سرفصل‌های واقعی با پوشش ماژورها، مینورها و دروس شناور (پاتولوژی اختصاصی، ایمنولوژی، ژنتیک، تغذیه و فیزیک پزشکی)</p>
+            <div class="channel-badge">
+                <span>کانال تلگرام:</span>
+                <span>@medicalaa</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+
+            <!-- Stats Overview -->
+            <div class="grid-stats">
+                <div class="stat-card">
+                    <div class="stat-number">۲۰۰</div>
+                    <div class="stat-label">تعداد کل سوالات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۱۰۰</div>
+                    <div class="stat-label">سوالات ۴ درس ماژور (۵۰٪)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۶۸</div>
+                    <div class="stat-label">سوالات مینورهای بالینی (۳۴٪)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۳۲</div>
+                    <div class="stat-label">سوالات دروس شناور (۱۶٪)</div>
+                </div>
+            </div>
+
+            <!-- Section 1: Exact Budget Breakdown -->
+            <h2 class="section-title">۱. بودجه‌بندی رسمی و اصلاح‌شده آزمون پره‌انترنی (۲۰۰ سوال)</h2>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 18%;">گروه درسی</th>
+                        <th style="width: 44%;">عناوین دروس آزمون</th>
+                        <th style="width: 15%; text-align: center;">تعداد سوال</th>
+                        <th style="width: 23%;">ارزش استراتژیک</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Majors -->
+                    <tr>
+                        <td><strong>ماژور ۱</strong></td>
+                        <td><strong>بیماری‌های داخلی</strong> (گوارش، ریه و مسمومیت، غدد، کلیه، روماتولوژی، قلب، خون)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۴۰</td>
+                        <td><span class="pill pill-major">ماژور پایه و حیاتی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ماژور ۲</strong></td>
+                        <td><strong>کودکان و نوزادان</strong> (رشد، نوزادان، تغذیه اطفال، عفونی، گوارش و ...)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۲۰</td>
+                        <td><span class="pill pill-major">ماژور بسیار پربازده</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ماژور ۳</strong></td>
+                        <td><strong>جراحی عمومی و تروما</strong> (شکم حاد، تروما، شوک، پستان، تیروئید، عروق)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۲۰</td>
+                        <td><span class="pill pill-major">ماژور ساختاریافته</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ماژور ۴</strong></td>
+                        <td><strong>زنان و زایمان</strong> (مامایی، بیماری‌های زنان، انکولوژی زنان)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۲۰</td>
+                        <td><span class="pill pill-major">ماژور سوالات مشخص</span></td>
+                    </tr>
+
+                    <!-- Minors -->
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>بیماری‌های عفونی</td>
+                        <td style="text-align: center; font-weight: bold;">۷</td>
+                        <td><span class="pill pill-minor">مینور پربازده</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>نورولوژی (بیماری‌های مغز و اعصاب)</td>
+                        <td style="text-align: center; font-weight: bold;">۸</td>
+                        <td><span class="pill pill-minor">مینور بالینی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>ارتوپدی و شکستگی‌ها</td>
+                        <td style="text-align: center; font-weight: bold;">۷</td>
+                        <td><span class="pill pill-minor">تصویرمحور</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>روان‌پزشکی (اختلالات خلقی، سایکوز و داروها)</td>
+                        <td style="text-align: center; font-weight: bold;">۷</td>
+                        <td><span class="pill pill-minor">مینور طلایی و نمره‌ساز</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>پوست (درماتولوژی)</td>
+                        <td style="text-align: center; font-weight: bold;">۷</td>
+                        <td><span class="pill pill-minor">مینور سریع و نمره‌آور</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>فارماکولوژی کاربردی (دارودرمانی بالینی)</td>
+                        <td style="text-align: center; font-weight: bold;">۶</td>
+                        <td><span class="pill pill-minor">دارودرمانی بالینی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>اورولوژی (جراحی کلیه، مجاری ادراری، سنگ‌ها، BPH و بیضه)</td>
+                        <td style="text-align: center; font-weight: bold;">۶</td>
+                        <td><span class="pill pill-minor">روتین</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>چشم‌پزشکی</td>
+                        <td style="text-align: center; font-weight: bold;">۶</td>
+                        <td><span class="pill pill-minor">مینور طلایی و کم‌حجم</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>گوش، حلق، بینی و جراحی سر و گردن (ENT)</td>
+                        <td style="text-align: center; font-weight: bold;">۶</td>
+                        <td><span class="pill pill-minor">مینور طلایی و کم‌حجم</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور بالینی</strong></td>
+                        <td>رادیولوژی و تصویربرداری تشخیصی</td>
+                        <td style="text-align: center; font-weight: bold;">۵</td>
+                        <td><span class="pill pill-minor">تست‌محور</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پاراکلینیک</strong></td>
+                        <td>آمار حیاتی و اپیدمیولوژی</td>
+                        <td style="text-align: center; font-weight: bold;">۶</td>
+                        <td><span class="pill pill-minor">فرمول‌های قطعی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پاراکلینیک</strong></td>
+                        <td>اخلاق پزشکی و تصمیم‌گیری بالینی</td>
+                        <td style="text-align: center; font-weight: bold;">۳</td>
+                        <td><span class="pill pill-minor">۱۰۰٪ نمره</span></td>
+                    </tr>
+
+                    <!-- Floating Subjects (دروس شناور اصلاح‌شده) -->
+                    <tr>
+                        <td><strong>درس شناور</strong></td>
+                        <td><strong>پاتولوژی اختصاصی (Systemic Pathology)</strong></td>
+                        <td style="text-align: center; font-weight: bold; color: #b45309;">۹</td>
+                        <td><span class="pill pill-floating">شناور بالینی پرتکرار</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>درس شناور</strong></td>
+                        <td><strong>ایمونولوژی پزشکی (ایمنی‌شناسی)</strong></td>
+                        <td style="text-align: center; font-weight: bold; color: #b45309;">۸</td>
+                        <td><span class="pill pill-floating">شناور با ضریب بالا</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>درس شناور</strong></td>
+                        <td><strong>ژنتیک پزشکی</strong></td>
+                        <td style="text-align: center; font-weight: bold; color: #b45309;">۵</td>
+                        <td><span class="pill pill-floating">شناور الگوریتمی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>درس شناور</strong></td>
+                        <td><strong>علوم تغذیه</strong></td>
+                        <td style="text-align: center; font-weight: bold; color: #b45309;">۵</td>
+                        <td><span class="pill pill-floating">شناور حفظی و سریع</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>درس شناور</strong></td>
+                        <td><strong>فیزیک پزشکی</strong></td>
+                        <td style="text-align: center; font-weight: bold; color: #b45309;">۵</td>
+                        <td><span class="pill pill-floating">شناور فرمولی و کاربردی</span></td>
+                    </tr>
+                    <tr style="background: #0f172a; color: #ffffff; font-weight: bold;">
+                        <td style="color: #ffffff;" colspan="2">مجموع کل سوالات دفترچه آزمون پیش‌کارورزی</td>
+                        <td style="text-align: center; color: #38bdf8; font-size: 11pt;">۲۰۰ سوال</td>
+                        <td style="color: #38bdf8;">مدت آزمون: ۲۰۰ دقیقه</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Section 2: Step by Step Daily Plan -->
+            <h2 class="section-title">۲. جدول زمان‌بندی روز‌به‌روز (۱ شهریور تا ۲ مهر - ۳۲ روز)</h2>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 14%; text-align: center;">تاریخ / روز</th>
+                        <th style="width: 43%;">مبحث ماژور روز</th>
+                        <th style="width: 43%;">مبحث مینور / دروس شناور روز</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱ شهریور (روز ۱)</td>
+                        <td><strong>داخلی قلب:</strong> ایسکمی قلبی، آنژین، نوار قلب (ECG) و آریتمی‌ها</td>
+                        <td><strong>روان‌پزشکی:</strong> اختلالات خلقی (افسردگی، دوقطبی) و داروها</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲ شهریور (روز ۲)</td>
+                        <td><strong>داخلی قلب:</strong> نارسایی قلبی، فشار خون، بیماری‌های دریچه‌ای</td>
+                        <td><strong>روان‌پزشکی:</strong> اسکیزوفرنی، سایکوز، اضطراب و PTSD</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۳ شهریور (روز ۳)</td>
+                        <td><strong>داخلی ریه:</strong> آسم، COPD، پنومونی، آمبولی ریه (PTE)</td>
+                        <td><strong>شناور (ایمونولوژی ۱):</strong> آنتی‌بادی‌ها، سیستم کمپلمان، واکنش‌های ازدیاد حساسیت (Hypersensitivity)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۴ شهریور (روز ۴)</td>
+                        <td><strong>داخلی گوارش و کبد:</strong> زخم پپتیک، IBD، خونریزی گوارشی، سیروز و هپاتیت</td>
+                        <td><strong>شناور (ایمونولوژی ۲):</strong> خودایمنی (Autoimmunity)، ایمنی‌شناسی پیوند و واکسن‌ها</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۵ شهریور (روز ۵)</td>
+                        <td><strong>داخلی غدد:</strong> دیابت (DKA و HHS)، تیروئید، آدرنال، متابولیسم کلسیم</td>
+                        <td><strong>آمار و اپیدمیولوژی:</strong> انواع مطالعات (Cohort، RCT) و شاخص‌های تشخیصی (Sens, Spec)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۶ شهریور (روز ۶)</td>
+                        <td><strong>داخلی کلیه و روماتولوژی:</strong> اسید-باز، الکترولیت‌ها، AKI، CKD، لوپوس و RA</td>
+                        <td><strong>شناور (پاتولوژی اختصاصی ۱):</strong> پاتولوژی سیستم قلبی عروقی، ریه و کلیه (گلومرولوپاتی‌ها)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۷ شهریور (روز ۷)</td>
+                        <td><strong>داخلی خون:</strong> کم‌خونی‌ها (آنمی‌ها)، لوسمی‌ها، ترومبوسیتوپنی و انعقاد</td>
+                        <td><strong>مرور جامع داخلی:</strong> حل ۱۰۰ تست منتخب قطب‌های کشوری</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۸ شهریور (روز ۸)</td>
+                        <td><strong>جراحی عمومی:</strong> پروتکل‌های ATLS، ترومای شکم و قفسه سینه، شوک، سوختگی</td>
+                        <td><strong>چشم‌پزشکی:</strong> گلوکوم حاد زاویه بسته، ترومای چشم و چشم قرمز</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۹ شهریور (روز ۹)</td>
+                        <td><strong>جراحی عمومی:</strong> آپاندیسیت، انسداد روده، هرنی‌ها، بیماری‌های صفراوی</td>
+                        <td><strong>چشم‌پزشکی:</strong> کاهش بینایی حاد، کاتاراکت، رتینوپاتی و تست‌های چشم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۰ شهریور (روز ۱۰)</td>
+                        <td><strong>جراحی عمومی:</strong> تومورهای کولورکتال، پستان، تیروئید و عروق</td>
+                        <td><strong>گوش، حلق و بینی (ENT):</strong> اوتیت، سینوزیت حاد و مزمن، اپیستاکسی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۱ شهریور (روز ۱۱)</td>
+                        <td><strong>کودکان:</strong> پایش رشد و تکامل، تغذیه، مایع‌درمانی، واکسیناسیون کشوری</td>
+                        <td><strong>گوش، حلق و بینی (ENT):</strong> انواع سرگیجه (BPPV، منیر)، فلج بل و توده‌های گردن</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۲ شهریور (روز ۱۲)</td>
+                        <td><strong>کودکان (نوزادان):</strong> زردی، سپسیس نوزادی، RDS تنفسی، آسفیکسی</td>
+                        <td><strong>اورولوژی:</strong> سنگ‌های ادراری، هماچوری، BPH، تومورهای کلیه/مثانه/بیضه</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۳ شهریور (روز ۱۳)</td>
+                        <td><strong>کودکان:</strong> گاستروانتریت، برونشیولیت، کروپ، راش‌های اگزانتماتوز اطفال</td>
+                        <td><strong>شناور (ژنتیک پزشکی):</strong> الگوهای توارث (اتوزوم، وابسته به X)، ناهنجاری‌های کروموزومی و کاریوتایپ</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۴ شهریور (روز ۱۴)</td>
+                        <td><strong>کودکان:</strong> تشنج تب‌دار، گلومرولونفریت و سندروم نفروتیک اطفال</td>
+                        <td><strong>ارتوپدی:</strong> شکستگی‌ها، دررفتگی‌های شایع اندام‌ها و سندرم کمپارتمان</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۵ شهریور (روز ۱۵)</td>
+                        <td><strong>مامایی:</strong> مراقبت‌های پره‌ناتال، پره‌اکلامپسی، اکلامپسی، HELLP، دیابت بارداری</td>
+                        <td><strong>پوست:</strong> عفونت‌های باکتریایی، ویروسی، قارچی و تاولی‌های خودایمن</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۶ شهریور (روز ۱۶)</td>
+                        <td><strong>مامایی:</strong> مراحل زایمان طبیعی، NST/CST، خونریزی‌های قبل و بعد زایمان</td>
+                        <td><strong>پوست:</strong> اگزما، پسوریازیس، آکنه، درماتوزها و ضایعات بدخیم پوست</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۷ شهریور (روز ۱۷)</td>
+                        <td><strong>مامایی:</strong> حاملگی خارج رحمی (EP)، سقط جنین، زایمان زودرس و PROM</td>
+                        <td><strong>شناور (علوم تغذیه):</strong> ویتامین‌ها، مواد معدنی، سوءتغذیه (ماراسموس، کواشیورکور) و تغذیه انترال/پارنترال</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۸ شهریور (روز ۱۸)</td>
+                        <td><strong>ژینکولوژی:</strong> خونریزی غیرطبیعی رحم (AUB)، واژینیت‌ها، عفونت لگنی (PID)</td>
+                        <td><strong>نورولوژی:</strong> سکته مغزی (ایسکمیک/هموراژیک)، ترومبولیز و سردردها</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۹ شهریور (روز ۱۹)</td>
+                        <td><strong>ژینکولوژی:</strong> آندومتریوز، تخمدان پلی‌کیستیک (PCOS)، توده‌های خوش‌خیم لگن</td>
+                        <td><strong>نورولوژی:</strong> صرع و انواع تشنج، ام‌اس (MS)، میاستنی گراویس</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۰ شهریور (روز ۲۰)</td>
+                        <td><strong>انکولوژی زنان و تنظیم خانواده:</strong> سرطان‌های سرویکس، اندومتر، تخمدان، روش‌های پیشگیری</td>
+                        <td><strong>نورولوژی:</strong> پارکینسون، گیلن‌باره، نوروپاتی‌ها و تست‌های جامع نورولوژی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۱ شهریور (روز ۲۱)</td>
+                        <td><strong>مرور زنان و زایمان:</strong> حل آزمون تست‌های قطب مامایی و ژینکولوژی</td>
+                        <td><strong>ارتوپدی:</strong> عفونت‌های استخوان/مفصل (آرتریت سپتیک، استئومیلیت)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۲ شهریور (روز ۲۲)</td>
+                        <td><strong>بیماری‌های عفونی:</strong> سپسیس، مننژیت حاد، اندوکاردیت، تب با منشا ناشناخته (FUO)</td>
+                        <td><strong>رادیولوژی:</strong> تفسیر CXR، پنوموتوراکس، پلورال افیوژن، کدورت‌های ریه</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۳ شهریور (روز ۲۳)</td>
+                        <td><strong>بیماری‌های عفونی:</strong> سل، تب مالت (بروسلوز)، مالاریا، لیشمانیوز</td>
+                        <td><strong>رادیولوژی:</strong> گرافی شکم ساده (انسداد و هوای آزاد)، CT مغز تروما</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۴ شهریور (روز ۲۴)</td>
+                        <td><strong>بیماری‌های عفونی:</strong> HIV/AIDS، عفونت‌های ادراری و زخم جراحی</td>
+                        <td><strong>شناور (فیزیک پزشکی):</strong> پرتوهای یونساز، حفاظت در برابر اشعه، اصول MRI، CT و سونوگرافی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۵ شهریور (روز ۲۵)</td>
+                        <td><strong>فارماکولوژی بالینی:</strong> داروهای قلب و عروق، دیورتیک‌ها، آنتی‌بیوتیک‌ها و داروهای CNS</td>
+                        <td><strong>شناور (پاتولوژی اختصاصی ۲):</strong> پاتولوژی سیستم گوارش، کبد، پستان و تومورهای دستگاه تناسلی-ادراری</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۶ شهریور (روز ۲۶)</td>
+                        <td><strong>اخلاق پزشکی:</strong> اصول چهارگانه، رازداری، رضایت آگاهانه، اتانازی و خطای بالینی</td>
+                        <td><strong>تست جامع شناورها:</strong> حل تست‌های قطب‌های اخیر پاتولوژی اختصاصی، ایمونو، ژنتیک و فیزیک پزشکی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۷ شهریور (روز ۲۷)</td>
+                        <td><strong>جمع‌بندی ماژورها:</strong> مرور فرمول‌ها، معیارهای تشخیصی و دوزهای اورژانس</td>
+                        <td><strong>مرور تست‌های نشان‌دار:</strong> مرور کلیه تست‌های علامت‌زده و اشتباه دوره‌های قبل</td>
+                    </tr>
+                    <tr class="simulation-row">
+                        <td style="text-align: center;">۲۸ شهریور (روز ۲۸)</td>
+                        <td><strong>آزمون شبیه‌سازی ۱:</strong> آزمون پره‌انترنی اسفند سال قبل (۲۰۰ سوال در ۲۰۰ دقیقه)</td>
+                        <td><strong>تحلیل جامع عصرگاهی:</strong> تحلیل دقیق کارنامه، بررسی اشتباهات و دام‌های طراحان</td>
+                    </tr>
+                    <tr class="simulation-row">
+                        <td style="text-align: center;">۲۹ شهریور (روز ۲۹)</td>
+                        <td><strong>آزمون شبیه‌سازی ۲:</strong> آزمون پره‌انترنی شهریور سال قبل (۲۰۰ سوال در ۲۰۰ دقیقه)</td>
+                        <td><strong>تحلیل جامع عصرگاهی:</strong> رفع اشکالات باقی‌مانده و مرور مباحث شک‌دار</td>
+                    </tr>
+                    <tr class="review-row">
+                        <td style="text-align: center;">۳۰ شهریور (روز ۳۰)</td>
+                        <td><strong>تورق سریع ۱:</strong> جداول دارویی، دوزهای احیا، جدول واکسیناسیون و معیارهای بالینی</td>
+                        <td><strong>مرور تصاویر:</strong> گرافی‌های رادیولوژی و نوارهای قلب (ECG) پرتکرار آزمون‌ها</td>
+                    </tr>
+                    <tr class="review-row">
+                        <td style="text-align: center;">۳۱ شهریور (روز ۳۱)</td>
+                        <td><strong>تورق سریع ۲:</strong> خواندن خلاصه‌های دست‌نویس و دفترچه دام‌های تستی</td>
+                        <td><strong>مرور سریع مینورها و شناورها:</strong> مرور نکات فرار پاتولوژی اختصاصی، ایمونو، ژنتیک و پوست</td>
+                    </tr>
+                    <tr class="rest-row">
+                        <td style="text-align: center;">۱ مهر (روز ۳۲)</td>
+                        <td><strong>آرام‌سازی و تثبیت روانی:</strong> توقف کامل مطالعه از ساعت ۱۵:۰۰</td>
+                        <td>آماده‌سازی مدارک، کارت ورود به جلسه، استراحت و خواب زودهنگام برای صبح آزمون ۲ مهر</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Section 3: Golden Rules -->
+            <div class="rule-card">
+                <h3>چهار اصل کلیدی موفقیت در آزمون پره‌انترنی:</h3>
+                <ul>
+                    <li><strong>تست‌محوری قطب‌های کشوری:</strong> بیش از ۶۰ درصد سوالات سناریوهای تکراری دوره‌های قبل هستند؛ اولویت نخست با تحلیل تست و پاسخ تشریحی است.</li>
+                    <li><strong>اهمیت دروس شناور (۳۲ سوال):</strong> در برنامه جدید، ۳۲ سوال مربوط به دروس شناور (پاتولوژی اختصاصی، ایمنی‌شناسی، ژنتیک، تغذیه و فیزیک پزشکی) است که سوالاتی کاملاً روتین دارند و میانگین درصد شما را جهش می‌دهند.</li>
+                    <li><strong>تحلیل گزینه‌های غلط:</strong> طراحان سوال معمولاً گزینه‌های انحرافی دوره‌های قبل را به سوالات دوره‌های بعد تبدیل می‌کنند.</li>
+                    <li><strong>مدیریت زمان در آزمون ۲۰۰ سوالی:</strong> در دو آزمون شبیه‌سازی حتماً ۲۰۰ دقیقه پیوسته بدون وقفه تمرین کنید تا در جلسه آزمون دچار افت تمرکز نشوید.</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>برنامه مطالعاتی اختصاصی آزمون پیش‌کارورزی | عضویت در کانال تلگرام: <strong>@medicalaa</strong></p>
+        </footer>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+Please read the project files in this folder and implement Phase 2 for PlanEx. 
+1) Create a Universal Offline-First sync endpoint (POST /api/v1/sync/batch) for D1 to handle queued actions with zero request waste. Add Farsi status indicators. 
+2) Implement Routine Sharing with the reciprocity rule (user must share 1 public routine to view others). 
+3) Implement Live Study Rooms using Durable Objects and WebSockets (only broadcast state changes). 
+4) Implement Leaderboards (Daily/Weekly/Monthly) using Cron Trigger and KV storage. 
+5) Implement dynamic Farsi Open Graph tags for public profiles (/u/:username). All UI must be Farsi and RTL.

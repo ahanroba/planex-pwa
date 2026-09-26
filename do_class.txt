@@ -1,0 +1,152 @@
+﻿// -------------------------------------------------------------
+// Durable Object: Live Study Rooms
+// -------------------------------------------------------------
+export class StudyRoomDO {
+  constructor(state, env) {
+    this.state = state;
+    this.env = env;
+    this.users = new Map(); // userId -> userData
+    this.sessions = []; // Array of { ws, userId, lastPing }
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+    const userId = request.headers.get('X-User-Id');
+    const userName = request.headers.get('X-User-Name') || 'کاربر';
+    const userAvatar = request.headers.get('X-User-Avatar') || '';
+    
+    if (!userId) {
+      return new Response(JSON.stringify({ success: false, message: 'Unauthorized' }), { status: 401 });
+    }
+
+    // WebSocket Upgrade Endpoint
+    if (request.headers.get('Upgrade') === 'websocket') {
+      const pair = new WebSocketPair();
+      const client = pair[0];
+      const server = pair[1];
+
+      this.handleSession(server, userId, userName, userAvatar);
+
+      return new Response(null, { status: 101, webSocket: client });
+    }
+
+    const now = Date.now();
+    
+    // Cleanup stale users (fallback for non-WS HTTP)
+    for (const [id, user] of this.users.entries()) {
+      if (now - user.lastSeen > 45 * 1000) {
+        this.users.delete(id);
+      }
+    }
+
+    // Handle Fallback Heartbeat (POST /api/v1/rooms/:id/heartbeat)
+    if (request.method === 'POST' && url.pathname.endsWith('/heartbeat')) {
+      const body = await request.json().catch(() => ({}));
+      this.updateUser(userId, userName, userAvatar, body);
+      this.broadcastState();
+      return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
+    }
+    
+    // Handle State Fetch (GET /api/v1/rooms/:id/state)
+    if (request.method === 'GET' && url.pathname.endsWith('/state')) {
+      const participants = Array.from(this.users.values());
+      return new Response(JSON.stringify({
+        success: true,
+        type: 'ROOM_STATE',
+        participants
+      }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    return new Response('Not Found', { status: 404 });
+  }
+
+  handleSession(server, userId, userName, userAvatar) {
+    server.accept();
+    const session = { ws: server, userId, lastPing: Date.now() };
+    this.sessions.push(session);
+
+    server.addEventListener('message', async (event) => {
+      session.lastPing = Date.now();
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'ping') {
+          server.send(JSON.stringify({ type: 'pong' }));
+          return;
+        }
+        if (msg.type === 'update') {
+          this.updateUser(userId, userName, userAvatar, msg.payload);
+          this.broadcastState();
+        }
+      } catch (e) {
+      }
+    });
+
+    server.addEventListener('close', () => {
+      this.handleDisconnect(session);
+    });
+    
+    server.addEventListener('error', () => {
+      this.handleDisconnect(session);
+    });
+
+    server.send(JSON.stringify({
+      type: 'ROOM_STATE',
+      participants: Array.from(this.users.values())
+    }));
+  }
+
+  handleDisconnect(session) {
+    this.sessions = this.sessions.filter(s => s !== session);
+    const hasOtherSessions = this.sessions.some(s => s.userId === session.userId);
+    if (!hasOtherSessions) {
+      this.users.delete(session.userId);
+      this.broadcastState();
+    }
+  }
+
+  updateUser(userId, userName, userAvatar, data) {
+    const now = Date.now();
+    const existing = this.users.get(userId) || {};
+    
+    if (data.status === 'offline') {
+      this.users.delete(userId);
+    } else {
+      this.users.set(userId, {
+        id: userId,
+        name: userName,
+        avatar: userAvatar,
+        status: data.status || 'active',
+        is_studying: (data.status || 'active') === 'active',
+        current_subject: data.current_subject || '',
+        today_study_time: data.today_study_time || 0,
+        focus_minutes: data.focus_minutes || 0,
+        weekly_focus_minutes: data.weekly_focus_minutes || 0,
+        session_start_timestamp: data.session_start_timestamp || now,
+        lastSeen: now,
+        joinedAt: existing.joinedAt || now
+      });
+    }
+  }
+
+  broadcastState() {
+    const participants = Array.from(this.users.values());
+    const message = JSON.stringify({
+      type: 'ROOM_STATE',
+      participants
+    });
+    
+    const now = Date.now();
+    this.sessions = this.sessions.filter(session => {
+      try {
+        if (now - session.lastPing > 45 * 1000) {
+          session.ws.close();
+          return false;
+        }
+        session.ws.send(message);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    });
+  }
+}

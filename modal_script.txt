@@ -1,0 +1,53 @@
+﻿  if (!window.updateStudyRoomUserDOM) {
+    window.updateStudyRoomUserDOM = (user) => {
+      const card = document.getElementById('user-card-' + user.id);
+      if (!card) return; // Need a re-render if user doesn't exist
+      
+      const isOffline = user.status === 'offline';
+      const isActive = user.status === 'active';
+      const isPaused = user.status === 'paused';
+      
+      let statusColor = isOffline ? '#6b7280' : (isActive ? '#10b981' : '#f59e0b');
+      let statusText = isOffline ? 'آفلاین' : (isActive ? 'در حال مطالعه' : 'استراحت');
+      
+      card.style.opacity = isOffline ? '0.6' : '1';
+      
+      const avatarContainer = document.getElementById('user-avatar-' + user.id);
+      if (avatarContainer) {
+        avatarContainer.style.borderColor = statusColor;
+        avatarContainer.style.filter = isOffline ? 'grayscale(100%)' : 'none';
+      }
+      
+      const indicator = document.getElementById('user-indicator-' + user.id);
+      if (indicator) {
+        indicator.style.background = statusColor;
+        indicator.style.boxShadow = isActive ? '0 0 8px #10b981' : 'none';
+        indicator.style.animation = isActive ? 'pulse 2s infinite' : 'none';
+      }
+      
+      const statusEl = document.getElementById('user-status-' + user.id);
+      if (statusEl) {
+        statusEl.style.color = statusColor;
+        statusEl.innerHTML = statusText + (isActive && user.current_subject ? 
+          \<span style="color: rgba(255,255,255,0.3); margin: 0 6px;">|</span>
+           <span style="color: #60a5fa; background: rgba(59, 130, 246, 0.1); padding: 2px 6px; border-radius: 4px;">\</span>\ : '');
+      }
+      
+      const timeEl = document.getElementById('user-time-' + user.id);
+      if (timeEl) {
+        timeEl.style.color = isOffline ? '#9ca3af' : '#a78bfa';
+        timeEl.style.background = \gba(139, 92, 246, \)\;
+        timeEl.style.border = \1px solid rgba(139, 92, 246, \)\;
+        
+        let totalMins = user.today_study_time || user.focus_minutes || 0;
+        if (isActive && user.session_start_timestamp) {
+          totalMins += Math.floor((Date.now() - user.session_start_timestamp) / 60000);
+        }
+        
+        const h = Math.floor(totalMins / 60);
+        const m = totalMins % 60;
+        if (h > 0) timeEl.innerText = \امروز: \ ساعت و \ دقیقه\;
+        else timeEl.innerText = \امروز: \ دقیقه\;
+      }
+    };
+  }

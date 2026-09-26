@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامه جامع ۳۰ روزه جمع‌بندی پایه کنکور تجربی | @medicalaa & @stodybots</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --primary-dark: #0f172a;
+            --secondary: #0d9488;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Tahoma, 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Repeating Diagonal Dual Watermark */
+        .watermark-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.045;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+            overflow: hidden;
+        }
+
+        .watermark-item {
+            font-size: 24px;
+            font-weight: 900;
+            transform: rotate(-30deg);
+            color: #0f172a;
+            user-select: none;
+            margin: 55px 35px;
+            white-space: nowrap;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0d9488 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 12pt;
+            opacity: 0.92;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Dual Channel Badge */
+        .channel-badge-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .channel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 11pt;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            color: #ffffff;
+        }
+
+        .main-content {
+            padding: 35px 30px;
+        }
+
+        /* Section Titles */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15pt;
+            color: var(--primary);
+            margin: 35px 0 18px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+
+        /* Cards Grid */
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .stat-number {
+            font-size: 22pt;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10pt;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0 25px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .custom-table th {
+            background: #1e3a8a;
+            color: #ffffff;
+            padding: 12px 14px;
+            font-size: 10pt;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .custom-table td {
+            padding: 10px 14px;
+            font-size: 9.5pt;
+            border-bottom: 1px solid #edf2f7;
+            text-align: right;
+            vertical-align: top;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .custom-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .custom-table tr:hover td {
+            background-color: #f1f5f9;
+        }
+
+        /* Badges */
+        .pill {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 8.5pt;
+            font-weight: bold;
+        }
+
+        .pill-bio { background: #dcfce7; color: #166534; }
+        .pill-chem { background: #fee2e2; color: #b91c1c; }
+        .pill-phy { background: #e0e7ff; color: #3730a3; }
+        .pill-math { background: #fef3c7; color: #92400e; }
+
+        /* Day row special styles */
+        .simulation-row {
+            background: #ecfdf5 !important;
+            font-weight: bold;
+        }
+        .simulation-row td {
+            color: #065f46;
+        }
+
+        .review-row {
+            background: #fffbeb !important;
+            font-weight: bold;
+        }
+        .review-row td {
+            color: #92400e;
+        }
+
+        /* Rules Box */
+        .rule-card {
+            background: #f0fdf4;
+            border-right: 5px solid var(--success);
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+
+        .rule-card h3 {
+            color: #166534;
+            margin-bottom: 10px;
+            font-size: 11.5pt;
+        }
+
+        .rule-card ul {
+            padding-right: 20px;
+            color: #1f2937;
+            font-size: 9.5pt;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 22px;
+            font-size: 10pt;
+            border-top: 1px solid #1e293b;
+        }
+
+        .footer strong {
+            color: #38bdf8;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+            .header { padding: 25px 12px; }
+            .header h1 { font-size: 16pt; }
+            .main-content { padding: 18px 12px; }
+            .custom-table th, .custom-table td { padding: 8px 8px; font-size: 8.5pt; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Watermark Background Layer -->
+    <div class="watermark-bg">
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+        <span class="watermark-item">@medicalaa ✕ @stodybots</span>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>برنامه جامع ۳۰ روزه جمع‌بندی پایه کنکور تجربی</h1>
+            <p>نقشه راه ۱ ماهه ویژه دانش‌آموزان ورودی دوازدهم (جمع‌بندی کامل زیست، شیمی، فیزیک و ریاضی پایه دهم و یازدهم قبل از شروع سال تحصیلی)</p>
+            <div class="channel-badge-wrapper">
+                <div class="channel-badge">
+                    <span>کانال تلگرام:</span>
+                    <span>@medicalaa</span>
+                </div>
+                <div class="channel-badge">
+                    <span>پشتیبانی و ربات:</span>
+                    <span>@stodybots</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+
+            <!-- Stats Overview -->
+            <div class="grid-stats">
+                <div class="stat-card">
+                    <div class="stat-number">۶۰٪</div>
+                    <div class="stat-label">سهم پایه دهم و یازدهم در کنکور</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۸ تا ۱۰</div>
+                    <div class="stat-label">ساعت مطالعه روزانه هدف</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۱۶۰+</div>
+                    <div class="stat-label">تعداد تست روزانه برگزیده</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۴</div>
+                    <div class="stat-label">آزمون جامع شبیه‌سازی پایه</div>
+                </div>
+            </div>
+
+            <!-- Section 1: Daily Schedule Model -->
+            <h2 class="section-title">۱. ساختار اجرایی باکس‌های مطالعاتی روزانه (۴ باکس تخصصی)</h2>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 22%;">باکس روزانه</th>
+                        <th style="width: 18%; text-align: center;">زمان پیشنهادی</th>
+                        <th style="width: 60%;">برنامه اجرایی و درصد تست‌زنی</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>باکس ۱ (صبح زود)</strong></td>
+                        <td style="text-align: center; font-weight: bold;">۲.۵ تا ۳ ساعت</td>
+                        <td><span class="pill pill-bio">زیست‌شناسی پایه</span> (متن‌خوانی دقیق کتاب درسی + حل تست‌های سراسری و ترکیبی + شکل‌شناسی)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>باکس ۲ (قبل از ظهر)</strong></td>
+                        <td style="text-align: center; font-weight: bold;">۲ تا ۲.۵ ساعت</td>
+                        <td><span class="pill pill-chem">شیمی پایه</span> (مرور مفاهیم و واکنش‌ها + تیپ‌بندی و حل مسئله استوکیومتری/ترمودینامیک/محلول‌ها)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>باکس ۳ (عصر)</strong></td>
+                        <td style="text-align: center; font-weight: bold;">۲ تا ۲.۵ ساعت</td>
+                        <td><span class="pill pill-phy">فیزیک پایه</span> یا <span class="pill pill-math">ریاضی پایه</span> (چرخشی روزهای زوج و فرد + تست‌زنی سرعتی)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>باکس ۴ (پایان شب)</strong></td>
+                        <td style="text-align: center; font-weight: bold;">۱.۵ ساعت</td>
+                        <td><strong>روتین شبانه:</strong> حل ۱۰ تست قرابت/آرایه نهایی، ریدینگ زبان/کلوز، مرور فرمول‌ها و تحلیل غلط‌های روز</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Section 2: Step by Step Daily Plan -->
+            <h2 class="section-title">۲. جدول زمان‌بندی روز‌به‌روز (۳۰ روز طلایی شهریور)</h2>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 12%; text-align: center;">روز</th>
+                        <th style="width: 44%;">زیست و شیمی روز</th>
+                        <th style="width: 44%;">فیزیک / ریاضی و روتین روز</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Week 1: 10th Base -->
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱</td>
+                        <td><strong>زیست ۱۰ (ف ۱ و ۲):</strong> دنیای زنده، گوارش و جذب مواد<br><strong>شیمی ۱۰ (ف ۱):</strong> کیهان زادگاه الفبای هستی، ساختار اتم و جرم اتمی</td>
+                        <td><strong>فیزیک ۱۰ (ف ۱):</strong> فیزیک و اندازه‌گیری، چگالی، خطای اندازه‌گیری<br><strong>روتین:</strong> مسائل مقدماتی استوکیومتری (۱۰ تست)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲</td>
+                        <td><strong>زیست ۱۰ (ف ۳):</strong> تبادلات گازی، تنفس و مکانیک تنفس<br><strong>شیمی ۱۰ (ف ۱):</strong> آرایش الکترونی، جدول تناوبی و موازنه</td>
+                        <td><strong>ریاضی ۱۰ (ف ۱ و ۲):</strong> الگو و دنباله، مثلثات (نسبت‌ها، دایره مثلثاتی)<br><strong>روتین:</strong> متن زیست گیاهی دهم (مرور مقدماتی)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۳</td>
+                        <td><strong>زیست ۱۰ (ف ۴ - پارت ۱):</strong> قلب و رگ‌ها، الکتروکاردیوگرام، گردش خون عمومی و ششی<br><strong>شیمی ۱۰ (ف ۱):</strong> استوکیومتری فرمولی و جرمی، درصد جرمی و ایزوتوپ‌ها</td>
+                        <td><strong>فیزیک ۱۰ (ف ۲):</strong> ویژگی‌های فیزیکی مواد، فشار، لوله‌های U شکل و مانومتر<br><strong>روتین:</strong> ریدینگ زبان انگلیسی (۲ متن کنکور)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۴</td>
+                        <td><strong>زیست ۱۰ (ف ۴ - پارت ۲):</strong> گردش خون جانوران، لنف و خون<br><strong>شیمی ۱۰ (ف ۲):</strong> ردپای گازها، قانون گازها و استوکیومتری گازها</td>
+                        <td><strong>ریاضی ۱۰ (ف ۳ و ۴):</strong> توان‌های گویا و عبارت‌های جبری، معادله درجه دوم و نامعادلات<br><strong>روتین:</strong> تست ترکیبی قلب با سایر فصول</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۵</td>
+                        <td><strong>زیست ۱۰ (ف ۵):</strong> تنظیم اسمزی و دفع مواد زائد، کلیه و عملکرد نفرون‌ها<br><strong>شیمی ۱۰ (ف ۲):</strong> ساختار لوویس، اکسیدهای فلزی/نافلزی و باران اسیدی</td>
+                        <td><strong>فیزیک ۱۰ (ف ۳):</strong> کار، انرژی جنبشی، پایستگی انرژی مکانیکی و توان<br><strong>روتین:</strong> مسائل استوکیومتری با راندمان درصدی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۶</td>
+                        <td><strong>زیست ۱۰ (ف ۶ و ۷):</strong> جذب و انتقال در گیاهان، تغذیه و فتوسنتز پایه دهم<br><strong>شیمی ۱۰ (ف ۳):</strong> آب، محلول‌ها، درصد جرمی، غلظت مولار و ppm</td>
+                        <td><strong>ریاضی ۱۰ (ف ۵ و ۶):</strong> مفهوم تابع، بازنمایی‌های تابع، شمارش و جایگشت<br><strong>روتین:</strong> خلاصه‌نویسی نکات گیاهی دهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۷</td>
+                        <td><strong>فیزیک ۱۰ (ف ۴):</strong> دما، گرما، ظرفیت گرمایی، تعادل گرمایی و قانون گازها<br><strong>شیمی ۱۰ (ف ۳):</strong> انحلال‌پذیری، رسانایی محلول‌ها و اسمز</td>
+                        <td><strong>ریاضی ۱۰ (ف ۷):</strong> آمار و احتمال پایه دهم<br><strong>ایستگاه تست جامع دهم:</strong> حل یک دفترچه اختصاصی پایه دهم قلم‌چی/سنجش</td>
+                    </tr>
+
+                    <!-- Week 2: 11th Base Start -->
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۸</td>
+                        <td><strong>زیست ۱۱ (ف ۱):</strong> تنظیم عصبی، پتانسیل عمل، ساختار مغز و نخاع<br><strong>شیمی ۱۱ (ف ۱ - پارت ۱):</strong> قدر هدایای زمین را بدانیم، هیدروکربن‌ها و آلکان‌ها</td>
+                        <td><strong>فیزیک ۱۱ (ف ۱ - پارت ۱):</strong> الکتریسیته ساکن، قانون کولن و میدان الکتریکی<br><strong>روتین:</strong> ۱۰ تست قرابت معنایی + ۵ تست آرایه ادبی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۹</td>
+                        <td><strong>زیست ۱۱ (ف ۲):</strong> حواس (چشم، گوش، گیرنده‌های حسی پوست و جانوران)<br><strong>شیمی ۱۱ (ف ۱ - پارت ۲):</strong> آلکن، آلکین، هیدروکربن‌های حلقوی و نفت خام</td>
+                        <td><strong>ریاضی ۱۱ (ف ۱):</strong> هندسه تحلیلی و معادله خط، معادله درجه دوم و سهمی<br><strong>روتین:</strong> تست ترکیبی اعصاب و حواس با جانوری</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۰</td>
+                        <td><strong>زیست ۱۱ (ف ۳):</strong> دستگاه حرکتی (اسکلت، استخوان‌ها، مفصل و مکانیسم انقباض عضله)<br><strong>شیمی ۱۱ (ف ۱ - پارت ۳):</strong> واکنش‌های شیمیایی، آلیاژها و بازده درصدی یازدهم</td>
+                        <td><strong>فیزیک ۱۱ (ف ۱ - پارت ۲):</strong> انرژی پتانسیل الکتریکی، پتانسیل و خازن‌ها<br><strong>روتین:</strong> واژگان زبان انگلیسی دهم و یازدهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۱</td>
+                        <td><strong>زیست ۱۱ (ف ۴):</strong> تنظیم شیمیایی (غدد، هورمون‌های هیپوفیز، تیروئید، آدرنال، کلسیم)<br><strong>شیمی ۱۱ (ف ۲ - پارت ۱):</strong> در پی غذای سالم، آنتالپی واکنش و گرماسنجی</td>
+                        <td><strong>ریاضی ۱۱ (ف ۲):</strong> هندسه پایه (ترسیم‌های هندسی، قضیه تالس، تشابه مثلث‌ها)<br><strong>روتین:</strong> شکل‌های مهم دستگاه حرکتی و غدد</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۲</td>
+                        <td><strong>زیست ۱۱ (ف ۵):</strong> ایمنی (خط اول، دوم و سوم دفاعی، آنتی‌بادی، لنفوسیت B و T)<br><strong>شیمی ۱۱ (ف ۲ - پارت ۲):</strong> آنتالپی پیوند، قانون هس و گروه‌های عاملی</td>
+                        <td><strong>فیزیک ۱۱ (ف ۲ - پارت ۱):</strong> جریان الکتریکی، مقاومت، قانون اهم و عوامل موثر بر مقاومت<br><strong>روتین:</strong> مسائل گرماشیمی و قانون هس</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۳</td>
+                        <td><strong>زیست ۱۱ (ف ۶ - پارت ۱):</strong> تقسیم یاخته، کروموزوم‌ها، چرخه یاخته‌ای و میتوز<br><strong>شیمی ۱۱ (ف ۲ - پارت ۳):</strong> سینتیک، عوامل موثر بر سرعت واکنش و محاسبات سرعت</td>
+                        <td><strong>ریاضی ۱۱ (ف ۳):</strong> تابع (اعمال روی توابع، توابع یک‌به‌یک و وارون، تساوی توابع)<br><strong>روتین:</strong> نکات ترکیبی ایمنی با لنف دهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۴</td>
+                        <td><strong>مرور میان‌دوره‌ای یازدهم:</strong> تست مبحثی زیست ۱ تا ۵ یازدهم + مسائل شیمی ۱ و ۲ یازدهم</td>
+                        <td><strong>فیزیک ۱۱ (ف ۲ - پارت ۲):</strong> مدارها، ترکیب مقاومت‌ها، مدار تک‌حلقه‌ای و توان مصرفی<br><strong>آزمون مبحثی:</strong> ۵۰ تست فیزیک الکتریسیته ساکن و جاری</td>
+                    </tr>
+
+                    <!-- Week 3: 11th Base Complete -->
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۵</td>
+                        <td><strong>زیست ۱۱ (ف ۶ - پارت ۲):</strong> میوز و تولید مثل جنسی، کراسینگ‌اور و ناهنجاری‌ها<br><strong>شیمی ۱۱ (ف ۳ - پارت ۱):</strong> پوشاک نیازی پایان‌ناپذیر، پلیمرها و الکل‌ها/اسیدها</td>
+                        <td><strong>ریاضی ۱۱ (ف ۴):</strong> مثلثات یازدهم (روابط تکمیلی مثلثاتی، نمودار توابع سینوس/کسینوس)<br><strong>روتین:</strong> رسم مراحل میوز و میتوز روی کاغذ</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۶</td>
+                        <td><strong>زیست ۱۱ (ف ۷ - پارت ۱):</strong> دستگاه تولید مثل مرد و زن، هورمون‌های جنسی و چرخه جنسی<br><strong>شیمی ۱۱ (ف ۳ - پارت ۲):</strong> استرها، پلی‌استرها و پلی‌آمیدها</td>
+                        <td><strong>فیزیک ۱۱ (ف ۳ - پارت ۱):</strong> مغناطیس و قطب‌ها، میدان مغناطیسی، نیروی وارد بر بار و سیم متحرک<br><strong>روتین:</strong> تست ترکیبی چرخه جنسی با هورمون‌های هیپوفیز</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۷</td>
+                        <td><strong>زیست ۱۱ (ف ۷ - پارت ۲):</strong> لقاح، نمو جنین و سونوگرافی<br><strong>شیمی ۱۱ (ف ۳ - پارت ۳):</strong> واکنش‌های پلیمری‌شدن، پلی‌استرها و بازیافت</td>
+                        <td><strong>ریاضی ۱۱ (ف ۵):</strong> توابع نمایی و لگاریتمی و ویژگی‌های لگاریتم<br><strong>روتین:</strong> تست مسائل شیمی کل فصل ۳ یازدهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۸</td>
+                        <td><strong>زیست ۱۱ (ف ۸ و ۹):</strong> تولید مثل نهاندانگان، پاسخ گیاهان به محرک‌ها (هورمون‌های گیاهی)<br><strong>شیمی پایه (جمع‌بندی مفاهیم):</strong> مرور کل متن شیمی دهم و یازدهم</td>
+                        <td><strong>فیزیک ۱۱ (ف ۳ - پارت ۲):</strong> القای الکترومغناطیسی، قانون فارادی و قانون لنز<br><strong>روتین:</strong> جمع‌بندی گیاهی پایه (دهم + یازدهم)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۱۹</td>
+                        <td><strong>زیست پایه (ژنتیک و سلولی):</strong> تست‌های ترکیبی ژنتیک و میوز ۱۰ و ۱۱<br><strong>شیمی پایه (استوکیومتری جامع):</strong> ۳۰ مسئله استوکیومتری ترکیبی دهم و یازدهم</td>
+                        <td><strong>ریاضی ۱۱ (ف ۶):</strong> حد و پیوستگی (مفهوم حد، قضایای حد، حد چپ و راست و پیوستگی)<br><strong>روتین:</strong> تست‌های پرچالش فیزیک یازدهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲۰</td>
+                        <td><strong>زیست پایه (جانوری جامع):</strong> مرور کل جانوری‌های دهم و یازدهم در یک نگاه<br><strong>شیمی پایه (شیمی آلی جامع):</strong> آلکان تا پلیمر و گروه‌های عاملی</td>
+                        <td><strong>ریاضی ۱۱ (ف ۷):</strong> آمار و احتمال یازدهم (احتمال شرطی و پیشامدهای مستقل)<br><strong>روتین:</strong> جدول مقایسه‌ای جانوری دهم و یازدهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲۱</td>
+                        <td><strong>ایستگاه جمع‌بندی یازدهم:</strong> آزمون جامع شیمی و زیست یازدهم (سراسری‌های ۱۴۰۰ تا ۱۴۰۳)</td>
+                        <td><strong>ایستگاه جمع‌بندی یازدهم:</strong> آزمون جامع فیزیک و ریاضی یازدهم کنکورهای اخیر</td>
+                    </tr>
+
+                    <!-- Week 4: Integration & Mega-Review -->
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲۲</td>
+                        <td><strong>زیست‌شناسی:</strong> مرور آزمون‌محور فصول ۱ تا ۴ دهم (۵۰ تست سراسری)</td>
+                        <td><strong>فیزیک پایه:</strong> جمع‌بندی فرمول‌ها و ۵۰ تست منتخب فیزیک دهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲۳</td>
+                        <td><strong>زیست‌شناسی:</strong> مرور آزمون‌محور فصول ۵ تا ۷ دهم (۵۰ تست سراسری)</td>
+                        <td><strong>ریاضی پایه:</strong> جمع‌بندی و تست مثلثات، تابع و معادلات دهم و یازدهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲۴</td>
+                        <td><strong>شیمی پایه:</strong> آزمون جامع شیمی دهم (۳۵ تست شبیه‌ساز کنکور)</td>
+                        <td><strong>فیزیک پایه:</strong> جمع‌بندی فرمول‌ها و ۵۰ تست منتخب فیزیک یازدهم</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲۵</td>
+                        <td><strong>زیست‌شناسی:</strong> مرور آزمون‌محور فصول ۱ تا ۵ یازدهم (۵۰ تست سراسری)</td>
+                        <td><strong>ریاضی پایه:</strong> جمع‌بندی حد، لگاریتم، هندسه و احتمال پایه</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">روز ۲۶</td>
+                        <td><strong>زیست‌شناسی:</strong> مرور آزمون‌محور فصول ۶ تا ۹ یازدهم (۵۰ تست سراسری)</td>
+                        <td><strong>شیمی پایه:</strong> آزمون جامع شیمی یازدهم (۳۵ تست شبیه‌ساز کنکور)</td>
+                    </tr>
+
+                    <!-- Final Simulations -->
+                    <tr class="simulation-row">
+                        <td style="text-align: center;">روز ۲۷</td>
+                        <td><strong>آزمون جامع ۱ (شبیه‌ساز پایه تجربی):</strong> دفترچه ۱ (زیست‌شناسی ۴۵ سوال در ۴۵ دقیقه)</td>
+                        <td><strong>دفترچه ۲ و ۳:</strong> فیزیک ۳۰ سوال + شیمی ۳۵ سوال + ریاضی ۳۰ سوال در زمان استاندارد</td>
+                    </tr>
+                    <tr class="simulation-row">
+                        <td style="text-align: center;">روز ۲۸</td>
+                        <td><strong>تحلیل جامع آزمون ۲۷:</strong> بررسی موشکافانه پاسخنامه، رفع اشکال علمی در کتاب درسی</td>
+                        <td><strong>ثبت خطاهای محاسباتی:</strong> یادداشت دام‌های تستی در دفترچه خودآموز</td>
+                    </tr>
+                    <tr class="simulation-row">
+                        <td style="text-align: center;">روز ۲۹</td>
+                        <td><strong>آزمون جامع ۲ (شبیه‌ساز دوم پایه کنکور):</strong> اجرای کامل در شرایط استاندارد کنکور</td>
+                        <td><strong>تحلیل آزمون عصرگاهی:</strong> چک‌کردن درصدهای پایانی و اصلاح اشتباهات</td>
+                    </tr>
+                    <tr class="review-row">
+                        <td style="text-align: center;">روز ۳۰</td>
+                        <td><strong>تورق سریع و آرام‌سازی:</strong> تورق شکل‌های مهم زیست پایه و جدول تناوبی شیمی</td>
+                        <td><strong>آمادگی روانی مهرماه:</strong> مرور خلاصه فرمول‌ها و آغاز پرقدرت دوازدهم</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Section 3: Strategic Rules -->
+            <div class="rule-card">
+                <h3>پنج اصل طلایی رتبه‌های برتر برای جمع‌بندی تابستان:</h3>
+                <ul>
+                    <li><strong>کتاب درسی خط قرمز زیست‌شناسی:</strong> قبل از هر تستی، خط‌به‌خط متن و قیدهای کتاب درسی دهم و یازدهم را مرور کنید؛ شکل‌ها منبع اصلی طراحی تست‌های دام‌دار کنکور هستند.</li>
+                    <li><strong>تیپ‌بندی در مسائل شیمی و فیزیک:</strong> در مسائل استوکیومتری، الکتریسیته و حرکت، الگوهای حل را دسته‌بندی کنید و از فرمول‌های تستی عجیب بپرهیزید.</li>
+                    <li><strong>زنده نگه‌داشتن مباحث پیوسته:</strong> مباحثی مثل تابع، مثلثات، ژنتیک و استوکیومتری مستقیماً در سال دوازدهم تکرار می‌شوند؛ ضعف در این مباحث پایه، مانع پیشرفت در دوازدهم خواهد شد.</li>
+                    <li><strong>تحلیل آزمون از خود آزمون مهم‌تر است:</strong> تستی که غلط زده‌اید یا نزده‌اید، دقیقاً نقطه ضعف پنهان شماست؛ تا دلیل آن را در کتاب پیدا نکرده‌اید از آن عبور نکنید.</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>برنامه جامع مطالعاتی کنکور سراسری تجربی | عضویت در کانال‌های تلگرام:</p>
+            <p><strong>@medicalaa</strong> &nbsp;|&nbsp; <strong>@stodybots</strong></p>
+        </footer>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Central Safe Zone Group (Fit in 66dp x 66dp centered at 54,54) -->
+    <group>
+        <!-- Outer Glowing Ring/Plate -->
+        <path
+            android:pathData="M54,23 C68,23 79,34 79,48 C79,62 68,73 54,73 C40,73 29,62 29,48 C29,34 40,23 54,23 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="29"
+                    android:startY="23"
+                    android:endX="79"
+                    android:endY="73"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#2563EB" />
+                    <item android:offset="0.5" android:color="#7C3AED" />
+                    <item android:offset="1.0" android:color="#C084FC" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Inner White Circle Base -->
+        <path
+            android:fillColor="#1E293B"
+            android:pathData="M54,26 C66.1,26 76,35.9 76,48 C76,60.1 66.1,70 54,70 C41.9,70 32,60.1 32,48 C32,35.9 41.9,26 54,26 Z" />
+
+        <!-- Stylized Hourglass & Clock Arc (Vibrant Gold & Cyan) -->
+        <!-- Hourglass Top Glass -->
+        <path
+            android:pathData="M43,34 L65,34 L56,46 L52,46 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="43"
+                    android:startY="34"
+                    android:endX="65"
+                    android:endY="46"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#38BDF8" />
+                    <item android:offset="1.0" android:color="#818CF8" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Hourglass Bottom Glass -->
+        <path
+            android:pathData="M56,48 L65,60 L43,60 L52,48 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="43"
+                    android:startY="48"
+                    android:endX="65"
+                    android:endY="60"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#F59E0B" />
+                    <item android:offset="1.0" android:color="#FCD34D" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Hourglass Frame & Accents -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M41,32 L67,32 L67,35 L57,47 L67,59 L67,62 L41,62 L41,59 L51,47 L41,35 Z M44,35 L50,44 L44,53 L44,59 L64,59 L64,53 L58,44 L64,35 Z" />
+
+        <!-- Center Sparkling Success Star/Checkmark -->
+        <path
+            android:fillColor="#10B981"
+            android:pathData="M49,46 L53,50 L61,40 L63,42 L53,54 L47,48 Z" />
+
+        <!-- "PLANEX" Crisp Text Branding at Bottom -->
+        <!-- P -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M31,76 L34,76 C35.5,76 36.5,76.8 36.5,78 C36.5,79.2 35.5,80 34,80 L32.5,80 L32.5,83 L31,83 Z M32.5,77.2 L32.5,78.8 L34,78.8 C34.6,78.8 35,78.5 35,78 C35,77.5 34.6,77.2 34,77.2 Z" />
+        <!-- L -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M38,76 L39.5,76 L39.5,81.8 L42.5,81.8 L42.5,83 L38,83 Z" />
+        <!-- A -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M44,83 L46.5,76 L48,76 L50.5,83 L49,83 L48.3,81 L46.2,81 L45.5,83 Z M46.6,79.8 L47.9,79.8 L47.2,77.5 Z" />
+        <!-- N -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M52,76 L53.5,76 L56,80.5 L56,76 L57.2,76 L57.2,83 L55.7,83 L53.2,78.5 L53.2,83 L52,83 Z" />
+        <!-- E -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M59,76 L63,76 L63,77.2 L60.5,77.2 L60.5,78.8 L62.5,78.8 L62.5,80 L60.5,80 L60.5,81.8 L63,81.8 L63,83 L59,83 Z" />
+        <!-- X -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M64.5,76 L66.2,76 L67.8,78.8 L69.4,76 L71.1,76 L68.7,79.4 L71.2,83 L69.5,83 L67.8,80.1 L66,83 L64.3,83 L66.9,79.4 Z" />
+    </group>
+</vector>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامه جامع ۳۲ روزه آزمون جامع علوم پایه پزشکی | @medicalaa</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --primary-dark: #0f172a;
+            --secondary: #0d9488;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Tahoma, 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Repeating Diagonal Watermark */
+        .watermark-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.045;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+            overflow: hidden;
+        }
+
+        .watermark-item {
+            font-size: 26px;
+            font-weight: 900;
+            transform: rotate(-30deg);
+            color: #0f172a;
+            user-select: none;
+            margin: 60px 40px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0d9488 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 12pt;
+            opacity: 0.92;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .channel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            padding: 8px 22px;
+            border-radius: 50px;
+            margin-top: 20px;
+            font-size: 11.5pt;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .main-content {
+            padding: 35px 30px;
+        }
+
+        /* Section Titles */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15pt;
+            color: var(--primary);
+            margin: 35px 0 18px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+
+        /* Cards Grid */
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .stat-number {
+            font-size: 22pt;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10pt;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0 25px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .custom-table th {
+            background: #1e3a8a;
+            color: #ffffff;
+            padding: 12px 14px;
+            font-size: 10pt;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .custom-table td {
+            padding: 10px 14px;
+            font-size: 9.5pt;
+            border-bottom: 1px solid #edf2f7;
+            text-align: right;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .custom-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .custom-table tr:hover td {
+            background-color: #f1f5f9;
+        }
+
+        /* Badges */
+        .pill {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 8.5pt;
+            font-weight: bold;
+        }
+
+        .pill-major { background: #fee2e2; color: #b91c1c; }
+        .pill-minor { background: #e0e7ff; color: #3730a3; }
+        .pill-general { background: #dcfce7; color: #166534; }
+
+        /* Day row special styles */
+        .simulation-row {
+            background: #ecfdf5 !important;
+            font-weight: bold;
+        }
+        .simulation-row td {
+            color: #065f46;
+        }
+
+        .review-row {
+            background: #fffbeb !important;
+            font-weight: bold;
+        }
+        .review-row td {
+            color: #92400e;
+        }
+
+        .rest-row {
+            background: #fee2e2 !important;
+            font-weight: bold;
+        }
+        .rest-row td {
+            color: #991b1b;
+        }
+
+        /* Rules Box */
+        .rule-card {
+            background: #f0fdf4;
+            border-right: 5px solid var(--success);
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+
+        .rule-card h3 {
+            color: #166534;
+            margin-bottom: 10px;
+            font-size: 11.5pt;
+        }
+
+        .rule-card ul {
+            padding-right: 20px;
+            color: #1f2937;
+            font-size: 9.5pt;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 22px;
+            font-size: 10pt;
+            border-top: 1px solid #1e293b;
+        }
+
+        .footer strong {
+            color: #38bdf8;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+            .header { padding: 25px 12px; }
+            .header h1 { font-size: 16pt; }
+            .main-content { padding: 18px 12px; }
+            .custom-table th, .custom-table td { padding: 8px 8px; font-size: 8.5pt; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Watermark Background Layer -->
+    <div class="watermark-bg">
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+        <span class="watermark-item">@medicalaa</span>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>برنامه جامع مطالعاتی آزمون علوم پایه پزشکی</h1>
+            <p>برنامه عملیاتی ۳۲ روزه (۱ شهریور تا ۲ مهر) بر اساس بودجه‌بندی استاندارد ۲۰۰ سوالی قطب‌های کشوری، پوشش فیزیولوژی، آناتومی، بیوشیمی، میکروب‌شناسی و عمومی</p>
+            <div class="channel-badge">
+                <span>کانال تلگرام:</span>
+                <span>@medicalaa</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+
+            <!-- Stats Overview -->
+            <div class="grid-stats">
+                <div class="stat-card">
+                    <div class="stat-number">۲۰۰</div>
+                    <div class="stat-label">تعداد کل سوالات آزمون</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۱۱۸</div>
+                    <div class="stat-label">سوالات دروس اختصاصی ماژور (۵۹٪)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۵۸</div>
+                    <div class="stat-label">سوالات علوم زیستی و انگل/میکروب (۲۹٪)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">۲۴</div>
+                    <div class="stat-label">سوالات دروس عمومی و معارف (۱۲٪)</div>
+                </div>
+            </div>
+
+            <!-- Section 1: Exact Budget Breakdown -->
+            <h2 class="section-title">۱. بودجه‌بندی دقیق آزمون جامع علوم پایه پزشکی (۲۰۰ سوال)</h2>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 18%;">گروه درسی</th>
+                        <th style="width: 44%;">عناوین دروس و مباحث</th>
+                        <th style="width: 15%; text-align: center;">تعداد سوال</th>
+                        <th style="width: 23%;">ارزش استراتژیک</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Majors -->
+                    <tr>
+                        <td><strong>ماژور ۱</strong></td>
+                        <td><strong>فیزیولوژی</strong> (قلب و گردش خون، تنفس، کلیه، گوارش، غدد و اعصاب)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۴۴</td>
+                        <td><span class="pill pill-major">سنگین‌ترین و پرنمره‌ترین</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ماژور ۲</strong></td>
+                        <td><strong>آناتومی</strong> (اندام فوقانی/تحتانی، تنه و شکم، سر و گردن و نوروآناتومی)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۴۰</td>
+                        <td><span class="pill pill-major">پایه، تصویری و پرتکرار</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ماژور ۳</strong></td>
+                        <td><strong>بیوشیمی پزشکی</strong> (متابولیسم کربوهیدرات، چربی، پروتئین، ویتامین‌ها و مولکولی)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۲۲</td>
+                        <td><span class="pill pill-major">قاعده‌مند و فرمولی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ماژور ۴</strong></td>
+                        <td><strong>باکتری‌شناسی پزشکی</strong> (کوکسی‌های گرم مثبت، باسیل‌های گرم منفی، آنتی‌بیوتیک‌ها)</td>
+                        <td style="text-align: center; font-weight: bold; color: #b91c1c;">۱۲</td>
+                        <td><span class="pill pill-major">حفظی و بسیار روتین</span></td>
+                    </tr>
+
+                    <!-- Minors -->
+                    <tr>
+                        <td><strong>مینور پایه</strong></td>
+                        <td><strong>بافت‌شناسی</strong> (بافت‌های عمومی و ارگان‌های اختصاصی)</td>
+                        <td style="text-align: center; font-weight: bold;">۱۱</td>
+                        <td><span class="pill pill-minor">تصویرمحور و سریع</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پایه</strong></td>
+                        <td><strong>جنین‌شناسی</strong> (لقاح، تکامل لایه‌ها، ناهنجاری‌ها و تکامل ارگان‌ها)</td>
+                        <td style="text-align: center; font-weight: bold;">۹</td>
+                        <td><span class="pill pill-minor">مبحثی و مفهومی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پایه</strong></td>
+                        <td><strong>انگل‌شناسی و قارچ‌شناسی</strong> (تک‌یاخته‌ها، کرم‌ها، قارچ‌های جلدی و سیستمیک)</td>
+                        <td style="text-align: center; font-weight: bold;">۱۰</td>
+                        <td><span class="pill pill-minor">روتین و پرتکرار</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پایه</strong></td>
+                        <td><strong>ویروس‌شناسی پزشکی</strong> (ویروس‌های DNA و RNA، هپاتیت‌ها، HIV، هرپس)</td>
+                        <td style="text-align: center; font-weight: bold;">۸</td>
+                        <td><span class="pill pill-minor">کم‌حجم و طلایی</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پایه</strong></td>
+                        <td><strong>ایمونولوژی پایه</strong> (آنتی‌بادی‌ها، کمپلمان، ارگان‌های لنفاوی و هایپرسنسیتیویتی)</td>
+                        <td style="text-align: center; font-weight: bold;">۸</td>
+                        <td><span class="pill pill-minor">مفهومی و نمره‌ساز</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پایه</strong></td>
+                        <td><strong>ژنتیک و فیزیک پزشکی</strong></td>
+                        <td style="text-align: center; font-weight: bold;">۶</td>
+                        <td><span class="pill pill-minor">فرمول‌ها و قوانین</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>مینور پایه</strong></td>
+                        <td><strong>روان‌شناسی سلامت و بهداشت</strong></td>
+                        <td style="text-align: center; font-weight: bold;">۶</td>
+                        <td><span class="pill pill-minor">سریع و آسان</span></td>
+                    </tr>
+
+                    <!-- General -->
+                    <tr>
+                        <td><strong>عمومی / معارف</strong></td>
+                        <td><strong>اندیشه اسلامی ۱</strong></td>
+                        <td style="text-align: center; font-weight: bold; color: #166534;">۱۲</td>
+                        <td><span class="pill pill-general">تضمین ۱۰۰٪ نمره</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>عمومی / معارف</strong></td>
+                        <td><strong>انقلاب اسلامی ایران</strong></td>
+                        <td style="text-align: center; font-weight: bold; color: #166534;">۱۲</td>
+                        <td><span class="pill pill-general">تضمین ۱۰۰٪ نمره</span></td>
+                    </tr>
+                    <tr style="background: #0f172a; color: #ffffff; font-weight: bold;">
+                        <td style="color: #ffffff;" colspan="2">مجموع کل سوالات آزمون علوم پایه</td>
+                        <td style="text-align: center; color: #38bdf8; font-size: 11pt;">۲۰۰ سوال</td>
+                        <td style="color: #38bdf8;">مدت زمان آزمون: ۲۰۰ دقیقه</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Section 2: Step by Step Daily Plan -->
+            <h2 class="section-title">۲. جدول زمان‌بندی روز‌به‌روز (۱ شهریور تا ۲ مهر - ۳۲ روز)</h2>
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 14%; text-align: center;">تاریخ / روز</th>
+                        <th style="width: 43%;">مبحث ماژور روز (فیزیو / آناتومی / بیوشیمی)</th>
+                        <th style="width: 43%;">مبحث مینور / عمومی روز</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱ شهریور (روز ۱)</td>
+                        <td><strong>فیزیولوژی قلب:</strong> پتانسیل عمل، الکتروفیزیولوژی، چرخه قلبی، بازده و نوار قلب (ECG)</td>
+                        <td><strong>بافت‌شناسی:</strong> بافت پوششی، همبند، خون و بافت عضلانی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲ شهریور (روز ۲)</td>
+                        <td><strong>فیزیولوژی گردش خون:</strong> همودینامیک، تنظیم فشار خون، میکروسیرکولاسیون و شوک</td>
+                        <td><strong>بافت‌شناسی:</strong> بافت عصبی، غضروف و استخوان، ارگان‌های لنفاوی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۳ شهریور (روز ۳)</td>
+                        <td><strong>آناتومی تنه:</strong> قفسه سینه، مدیاستینوم، قلب، پریکارد و عروق کرونر، ریه‌ها</td>
+                        <td><strong>جنین‌شناسی:</strong> گامتوژنز، لقاح، لانه‌گزینی و هفته اول تا سوم جنینی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۴ شهریور (روز ۴)</td>
+                        <td><strong>فیزیولوژی تنفس:</strong> مکانیک تنفس، حجم‌ها و ظرفیت‌ها، تبادل گازها و انتقال اکسیژن</td>
+                        <td><strong>جنین‌شناسی:</strong> تکامل سیستم قلبی عروقی و تکامل دستگاه تنفس</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۵ شهریور (روز ۵)</td>
+                        <td><strong>بیوشیمی:</strong> ساختار و متابولیسم کربوهیدرات‌ها (گلیکولیز، چرخه کربس، گلوکونئوژنز)</td>
+                        <td><strong>عمومی:</strong> اندیشه اسلامی ۱ (بخش خداشناسی و براهین اثبات وجود خدا)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۶ شهریور (روز ۶)</td>
+                        <td><strong>بیوشیمی:</strong> متابولیسم گلیکوژن، مسیر پنتوز فسفات، ساختار و متابولیسم لیپیدها</td>
+                        <td><strong>ایمونولوژی:</strong> ایمنی ذاتی و اکتسابی، آنتی‌ژن‌ها، ساختار ایمونوگلوبولین‌ها</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۷ شهریور (روز ۷)</td>
+                        <td><strong>مرور جامع هفتگی ۱:</strong> حل ۱۰۰ تست برگزیده قطب‌های کشوری (فیزیولوژی قلب/تنفس + بیوشیمی)</td>
+                        <td><strong>ایمونولوژی:</strong> سیستم کمپلمان، پردازش و ارائه آنتی‌ژن (MHC)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۸ شهریور (روز ۸)</td>
+                        <td><strong>آناتومی اندام فوقانی:</strong> استخوان‌ها، شبکه بازویی، عضلات شانه، بازو و ساعد</td>
+                        <td><strong>باکتری‌شناسی:</strong> ساختار دیواره، استافیلوکوک‌ها، استرپتوکوک‌ها و انتروکوک‌ها</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۹ شهریور (روز ۹)</td>
+                        <td><strong>آناتومی اندام فوقانی:</strong> عروق، اعصاب (مدین، اولنار، رادیال)، آناتومی دست و آسیب‌ها</td>
+                        <td><strong>باکتری‌شناسی:</strong> باسیل‌های گرم مثبت (باسیلوس، کلستریدیوم، کورینه‌باکتریوم)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۰ شهریور (روز ۱۰)</td>
+                        <td><strong>فیزیولوژی کلیه:</strong> فیلتراسیون گلومرولی (GFR)، کلیرانس، بازجذب و ترشح توبولی</td>
+                        <td><strong>باکتری‌شناسی:</strong> انتروباکتریاسه (اشریشیا، سالمونلا، شیگلا، کلبسیلا) و سودوموناس</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۱ شهریور (روز ۱۱)</td>
+                        <td><strong>فیزیولوژی کلیه و اسید-باز:</strong> تغلیظ و رقیق‌سازی ادرار، تنظیم اسمولاریته، تعادل اسید و باز</td>
+                        <td><strong>ویروس‌شناسی:</strong> ساختار، هرپس‌ویروس‌ها، هپاتیت‌ها (HAV, HBV, HCV) و HIV</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۲ شهریور (روز ۱۲)</td>
+                        <td><strong>آناتومی شکم و لگن:</strong> جدار قدامی شکم، صفاق، معده، روده، کبد، طحال، کلیه‌ها و مجاری</td>
+                        <td><strong>ویروس‌شناسی:</strong> ویروس‌های تنفسی (آنفلوآنزا، کرونا)، پولیو، هاری و آربوویروس‌ها</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۳ شهریور (روز ۱۳)</td>
+                        <td><strong>بیوشیمی:</strong> متابولیسم اسیدهای آمینه، چرخه اوره، سنتز پورین و پیریمیدین</td>
+                        <td><strong>عمومی:</strong> انقلاب اسلامی (زمینه‌ها، علل وقوع و نقش رهبری امام خمینی)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۴ شهریور (روز ۱۴)</td>
+                        <td><strong>مرور جامع هفتگی ۲:</strong> حل ۱۰۰ تست قطب‌های کشوری (آناتومی اندام فوقانی/تنه + کلیه)</td>
+                        <td><strong>انگل‌شناسی:</strong> تک‌یاخته‌های روده‌ای و خونی (آمیب، ژیاردیا، لیشمانیا، مالاریا)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۵ شهریور (روز ۱۵)</td>
+                        <td><strong>آناتومی اندام تحتانی:</strong> استخوان‌ها، شبکه لومبوساکرال، عضلات ناحیه گلوتئال، ران و ساق</td>
+                        <td><strong>انگل‌شناسی:</strong> کرم‌های نواری و لوله‌ای (آسکاریس، اکینوکوکوس، فاسیولا، تنیا)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۶ شهریور (روز ۱۶)</td>
+                        <td><strong>آناتومی اندام تحتانی:</strong> عروق و اعصاب (سیاتیک، فمورال، تیبیال، پرونئال)، زانو و مچ پا</td>
+                        <td><strong>قارچ‌شناسی:</strong> درماتوفیت‌ها، کاندیدا، آسپرژیلوس و قارچ‌های سیستمیک</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۷ شهریور (روز ۱۷)</td>
+                        <td><strong>فیزیولوژی گوارش:</strong> حرکات دستگاه گوارش، ترشحات بزاق، معده، پانکراس، کبد و جذب</td>
+                        <td><strong>بافت‌شناسی اختصاصی:</strong> بافت دستگاه گوارش، کبد، کلیه و سیستم تناسلی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۸ شهریور (روز ۱۸)</td>
+                        <td><strong>فیزیولوژی غدد:</strong> هیپوفیز، تیروئید، آدرنال (کورتکس و مدولا)، پانکراس و هورمون‌های کلسیم</td>
+                        <td><strong>جنین‌شناسی:</strong> تکامل دستگاه گوارش، کلیه و مجاری ادراری-تناسلی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۱۹ شهریور (روز ۱۹)</td>
+                        <td><strong>بیوشیمی:</strong> بیولوژی مولکولی (همانندسازی، رونویسی، ترجمه)، هورمون‌ها و ویتامین‌ها</td>
+                        <td><strong>ژنتیک پزشکی:</strong> قوانین مندل، الگوهای وراثت مغلوب/غالب، ناهنجاری‌های کروموزومی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۰ شهریور (روز ۲۰)</td>
+                        <td><strong>آناتومی سر و گردن:</strong> استخوان‌های جمجمه و صورت، مثلث‌های گردن، حلق، حنجره و تیروئید</td>
+                        <td><strong>ایمونولوژی:</strong> واکنش‌های افزایش حساسیت (تیپ I تا IV)، خودایمنی و نقص ایمنی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۱ شهریور (روز ۲۱)</td>
+                        <td><strong>مرور جامع هفتگی ۳:</strong> حل آزمون تست‌های قطب اندام تحتانی، غدد و گوارش (۱۰۰ تست)</td>
+                        <td><strong>عمومی:</strong> اندیشه اسلامی ۱ (نبوت، امامت، معاد و عدل الهی)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۲ شهریور (روز ۲۲)</td>
+                        <td><strong>نوروآناتومی:</strong> نخاع، ساقه مغز (بصل‌النخاع، پل، مغز میانی) و هسته‌های اعصاب کرانیال</td>
+                        <td><strong>فیزیک پزشکی:</strong> پرتوهای یونساز، حفاظت، امواج صوتی و تصویربرداری تشخیصی</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۳ شهریور (روز ۲۳)</td>
+                        <td><strong>نوروآناتومی:</strong> مخچه، دیانسفال، نیمکره‌های مخ، بطن‌های مغزی و پرده‌های مننژ و عروق مغز</td>
+                        <td><strong>روان‌شناسی و بهداشت:</strong> اصول سلامت روان، انواع استرس، بهداشت عمومی و اپیدمیولوژی پایه</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۴ شهریور (روز ۲۴)</td>
+                        <td><strong>فیزیولوژی اعصاب:</strong> پتانسیل عمل غشا، سیناپس‌ها، سیستم حس، گیرنده‌ها و راه‌های صعودی</td>
+                        <td><strong>عمومی:</strong> انقلاب اسلامی (دستاوردهای انقلاب، قانون اساسی و ولایت فقیه)</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۵ شهریور (روز ۲۵)</td>
+                        <td><strong>فیزیولوژی اعصاب:</strong> قشر حرکتی، راه‌های نزولی، مخچه، عقده‌های قاعده‌ای و سیستم خودمختار (ANS)</td>
+                        <td><strong>تست مبحثی نورو:</strong> حل تست‌های قطب نوروآناتومی و فیزیولوژی اعصاب ۵ سال اخیر</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۶ شهریور (روز ۲۶)</td>
+                        <td><strong>آناتومی اعصاب کرانیال و حواس ویژه:</strong> مسیر ۱۲ زوج عصب مغزی، چشم و گوش</td>
+                        <td><strong>تست‌های کشوری مینورها:</strong> حل تست‌های جامع جنین، بافت، میکروب و ایمونو</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold;">۲۷ شهریور (روز ۲۷)</td>
+                        <td><strong>جمع‌بندی ماژورها:</strong> مرور جدول عضلات و عصب‌دهی‌ها، فرمول‌های فیزیولوژی و مسیرهای بیوشیمی</td>
+                        <td><strong>مرور تست‌های نشان‌دار:</strong> مرور کلیه تست‌های غلط و علامت‌زده روزهای ۱ تا ۲۶</td>
+                    </tr>
+                    <tr class="simulation-row">
+                        <td style="text-align: center;">۲۸ شهریور (روز ۲۸)</td>
+                        <td><strong>آزمون شبیه‌سازی ۱:</strong> آزمون جامع علوم پایه اسفند سال قبل (۲۰۰ سوال در ۲۰۰ دقیقه)</td>
+                        <td><strong>تحلیل جامع عصرگاهی:</strong> بررسی کارنامه، تحلیل دقیق تست‌های غلط و رفع اشکال فوری</td>
+                    </tr>
+                    <tr class="simulation-row">
+                        <td style="text-align: center;">۲۹ شهریور (روز ۲۹)</td>
+                        <td><strong>آزمون شبیه‌سازی ۲:</strong> آزمون جامع علوم پایه شهریور سال قبل (۲۰۰ سوال در ۲۰۰ دقیقه)</td>
+                        <td><strong>تحلیل جامع عصرگاهی:</strong> تثبیت نکات پرتکرار و بررسی گزینه‌های انحرافی</td>
+                    </tr>
+                    <tr class="review-row">
+                        <td style="text-align: center;">۳۰ شهریور (روز ۳۰)</td>
+                        <td><strong>تورق سریع ۱:</strong> مرور اطلس تصاویر آناتومی و بافت‌شناسی، فرمول‌های تنفس و کلیه</td>
+                        <td><strong>مرور مسیرها:</strong> مرور چرخه اسید اوریک، چرخه‌های بیوشیمی و جداول باکتری‌ها</td>
+                    </tr>
+                    <tr class="review-row">
+                        <td style="text-align: center;">۳۱ شهریور (روز ۳۱)</td>
+                        <td><strong>تورق سریع ۲:</strong> خلاصه‌های دست‌نویس، کدهای حفظی داروها/میکروب‌ها و دروس عمومی</td>
+                        <td><strong>تثبیت روانی:</strong> آرام‌سازی ذهنی، حل تست‌های مروری سریع و چک‌لیست نهایی</td>
+                    </tr>
+                    <tr class="rest-row">
+                        <td style="text-align: center;">۱ مهر (روز ۳۲)</td>
+                        <td><strong>آرام‌سازی و استراحت کامل:</strong> توقف کامل مطالعه از ساعت ۱۵:۰۰</td>
+                        <td>آماده‌سازی کارت ورود به جلسه، مدارک، خواب زودهنگام برای صبح آزمون ۲ مهر</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Section 3: Golden Rules -->
+            <div class="rule-card">
+                <h3>چهار اصل کلیدی قبولی قطعی و کسب استریت در آزمون علوم پایه پزشکی:</h3>
+                <ul>
+                    <li><strong>تست‌محوری قطب‌های ۱۰ گانه:</strong> حداقل ۶۵٪ سوالات آزمون علوم پایه عیناً یا با تغییر اندک از تست‌های ۵ سال گذشته تکرار می‌شوند؛ الویت اول باید حل تست‌های قطب‌ها باشد.</li>
+                    <li><strong>برگ برنده دروس عمومی (۲۴ سوال):</strong> ۲۴ سوال اندیشه و انقلاب اسلامی ساده‌ترین نمرات آزمون هستند؛ با ۴ تا ۵ ساعت مرور می‌توانید درصد ۱۰۰ این بخش را تضمین کنید.</li>
+                    <li><strong>استراتژی مطالعه فیزیولوژی و آناتومی:</strong> این دو درس به تنهایی ۸۴ سوال (۴۲٪ نمره) را تشکیل می‌دهند؛ تسلط بر نوار قلب، اسپیرومتری، GFR و شبکه‌های عصبی ضامن قبولی است.</li>
+                    <li><strong>شبیه‌سازی شرایط آزمون:</strong> در روزهای ۲۸ و ۲۹ شهریور، دقیقاً ۲۰۰ سوال را در ۲۰۰ دقیقه و بدون بلند شدن از صندلی پاسخ دهید تا مقاومت ذهنی لازم ایجاد شود.</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>برنامه جامع آزمون علوم پایه پزشکی | عضویت در کانال تخصصی تلگرام: <strong>@medicalaa</strong></p>
+        </footer>
+    </div>
+
+</body>
+</html>
