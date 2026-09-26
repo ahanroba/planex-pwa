@@ -1,4 +1,5 @@
 // src/data/examsRegistry.js
+// Bundled directly into JavaScript chunks by Vite during build (no raw JSON MIME type requests at runtime)
 import questions1405Khordad from './questions-1405-khordad.json';
 import questions1404Azar from './questions-1404-azar.json';
 import questions1404 from './questions-1404.json';
@@ -23,7 +24,6 @@ export const EXAMS_REGISTRY = [
     badgeColor: '#f59e0b',
     icon: '📝',
     isComplete: true,
-    dataFile: './questions-1405-khordad.json',
     questions: questions1405Khordad
   },
   {
@@ -90,7 +90,6 @@ export const EXAMS_REGISTRY = [
     badgeColor: '#10b981',
     icon: '🎯',
     isComplete: true,
-    dataFile: './questions-1403-shahrivar.json',
     questions: questions1403Shahrivar
   },
   {
@@ -105,7 +104,6 @@ export const EXAMS_REGISTRY = [
     badgeColor: '#f97316',
     icon: '⚡',
     isComplete: true,
-    dataFile: './questions-1403-khordad.json',
     questions: questions1403Khordad
   },
   {
@@ -120,7 +118,6 @@ export const EXAMS_REGISTRY = [
     badgeColor: '#f59e0b',
     icon: '📝',
     isComplete: true,
-    dataFile: './questions-1402-esfand.json',
     questions: questions1402Esfand
   },
   {
@@ -135,7 +132,6 @@ export const EXAMS_REGISTRY = [
     badgeColor: '#06b6d4',
     icon: '🎯',
     isComplete: true,
-    dataFile: './questions-1402-shahrivar.json',
     questions: questions1402Shahrivar
   },
   {
@@ -150,7 +146,6 @@ export const EXAMS_REGISTRY = [
     badgeColor: '#f59e0b',
     icon: '📝',
     isComplete: true,
-    dataFile: './questions-1402-khordad.json',
     questions: questions1402Khordad
   }
 ];
