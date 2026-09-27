@@ -38,13 +38,13 @@ function updateHeaderDOM() {
     const headerBtn = document.getElementById('btn-header-user-account');
     if (headerBtn) {
       const nameSpan = headerBtn.querySelector('span:last-child');
-      if (nameSpan) nameSpan.textContent = displayName;
+      if (nameSpan && nameSpan.textContent !== displayName) nameSpan.textContent = displayName;
 
       // Patch avatar image or swap to image if previously showing default icon
       const avatarImg = headerBtn.querySelector('img');
       if (avatar) {
         if (avatarImg) {
-          avatarImg.src = avatar;
+          if (avatarImg.src !== avatar) avatarImg.src = avatar;
         } else {
           // Replace the 👤 placeholder span with an actual img element
           const placeholder = headerBtn.querySelector('span:first-child');

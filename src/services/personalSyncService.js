@@ -380,6 +380,8 @@ export const personalSyncService = {
         const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
         const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com')) ? pulledAvatar : (pulledAvatar || currentAvatar);
 
+        let isDataChanged = false;
+
         // Pre-patch backupData so importLocalState does not pollute localStorage with stale values
         if (json.backupData && typeof json.backupData === 'object') {
           if (pulledName && pulledName !== 'x' && pulledName !== 'دانش آموز پرتلاش' && pulledName !== 'دانش‌آموز پرتلاش') {
@@ -394,12 +396,20 @@ export const personalSyncService = {
             json.backupData.planex_user_profile.avatar = targetAvatar;
             json.backupData.planex_user_profile.avatar_url = targetAvatar;
           }
-          this.importLocalState(json.backupData);
+          const oldBackupStr = JSON.stringify(this.exportLocalState() || {});
+          const newBackupStr = JSON.stringify(json.backupData);
+          if (oldBackupStr !== newBackupStr) {
+            isDataChanged = true;
+            this.importLocalState(json.backupData);
+          }
         }
 
         // 3. Force UI Update: Overwrite all name & avatar localStorage keys immediately with server's response
         if (pulledName && pulledName !== 'کاربر مهمان') {
           try {
+            const oldName = localStorage.getItem('planex_user_nickname');
+            if (oldName !== pulledName) isDataChanged = true;
+            
             localStorage.setItem('planex_user_nickname', pulledName);
             localStorage.setItem('planex_leaderboard_nickname', pulledName);
             localStorage.setItem('planex_nickname', pulledName);
@@ -424,6 +434,9 @@ export const personalSyncService = {
 
         if (targetAvatar) {
           try {
+            const oldAvatar = localStorage.getItem('planex_user_avatar');
+            if (oldAvatar !== targetAvatar) isDataChanged = true;
+            
             localStorage.setItem('planex_user_avatar', targetAvatar);
             let userAccount = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
             userAccount.avatar_url = targetAvatar;
@@ -446,21 +459,31 @@ export const personalSyncService = {
         }
 
         if (Array.isArray(json.rooms) && json.rooms.length > 0) {
-          localStorage.setItem('planex_my_groups', JSON.stringify(json.rooms));
-          localStorage.setItem('planex_my_rooms', JSON.stringify(json.rooms));
-          if (db && typeof db.setUserGroups === 'function') {
-            db.setUserGroups(json.rooms);
+          const oldRoomsStr = localStorage.getItem('planex_my_groups') || '[]';
+          const newRoomsStr = JSON.stringify(json.rooms);
+          if (oldRoomsStr !== newRoomsStr) {
+            isDataChanged = true;
+            localStorage.setItem('planex_my_groups', newRoomsStr);
+            localStorage.setItem('planex_my_rooms', newRoomsStr);
+            if (db && typeof db.setUserGroups === 'function') {
+              db.setUserGroups(json.rooms);
+            }
           }
         }
         if (Array.isArray(json.study_logs) && json.study_logs.length > 0) {
-          if (db && typeof db.saveStudyLogs === 'function') {
-            db.saveStudyLogs(json.study_logs);
-          } else {
-            localStorage.setItem('planex_study_logs', JSON.stringify(json.study_logs));
-            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(json.study_logs));
+          const oldLogsStr = localStorage.getItem('planex_study_logs') || '[]';
+          const newLogsStr = JSON.stringify(json.study_logs);
+          if (oldLogsStr !== newLogsStr) {
+            isDataChanged = true;
+            if (db && typeof db.saveStudyLogs === 'function') {
+              db.saveStudyLogs(json.study_logs);
+            } else {
+              localStorage.setItem('planex_study_logs', newLogsStr);
+              localStorage.setItem('planex_recent_activity_sessions', newLogsStr);
+            }
           }
         }
-        if (db) {
+        if (db && isDataChanged) {
           db._breakdownMemoMap = {};
         }
         db.markPersonalSyncSuccess();
@@ -490,15 +513,17 @@ export const personalSyncService = {
             });
           }
 
-          window.dispatchEvent(new CustomEvent('profileUpdated'));
-          window.dispatchEvent(new CustomEvent('auth-changed'));
-          window.dispatchEvent(new CustomEvent('study-logs-updated'));
-          window.dispatchEvent(new CustomEvent('sessions-updated'));
-          window.dispatchEvent(new CustomEvent('activity-saved', { detail: { sync: true } }));
-          if (window.dashboardChartInstances) window.dashboardChartInstances = null;
-          if (typeof window.updateCharts === 'function') window.updateCharts();
-          if (typeof window.renderApp === 'function') {
-            window.renderApp();
+          if (isDataChanged) {
+            window.dispatchEvent(new CustomEvent('profileUpdated'));
+            window.dispatchEvent(new CustomEvent('auth-changed'));
+            window.dispatchEvent(new CustomEvent('study-logs-updated'));
+            window.dispatchEvent(new CustomEvent('sessions-updated'));
+            window.dispatchEvent(new CustomEvent('activity-saved', { detail: { sync: true } }));
+            if (window.dashboardChartInstances) window.dashboardChartInstances = null;
+            if (typeof window.updateCharts === 'function') window.updateCharts();
+            if (typeof window.renderApp === 'function') {
+              window.renderApp();
+            }
           }
         }
 

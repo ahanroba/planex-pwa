@@ -334,16 +334,21 @@ window.handleSaveProfileSubmit = async function() {
 
     // 5. Trigger Cloud Sync (push personal data including the new name)
     const pSync = window.personalSyncService;
+    let pushPromise = Promise.resolve();
     if (pSync && typeof pSync.pushToCloud === 'function') {
-      pSync.pushToCloud(null, newName, newAvatar).catch(() => {});
+      pushPromise = pSync.pushToCloud(null, newName, newAvatar);
     }
 
     // 6. Also sync leaderboard score if in a group
+    let lbPromise = Promise.resolve();
     if (leaderboardService && typeof leaderboardService.syncUserScore === 'function') {
-      leaderboardService.syncUserScore(true).catch(() => {});
+      lbPromise = leaderboardService.syncUserScore(true);
     }
 
-    // 6. Close Modal
+    // Await syncs to bypass any background pause and show loading state
+    await Promise.allSettled([pushPromise, lbPromise]);
+
+    // 7. Close Modal
     if (window.closeActiveModal) {
       window.closeActiveModal();
     } else if (window.appState) {
