@@ -477,8 +477,88 @@ export async function triggerAutoSync(forceImmediate = false) {
   }
 }
 
+// ══════════════════════════════════════════════
+// ─── Smart Sync Engine ───
+// ══════════════════════════════════════════════
+
+let _lastFocusPullTime = 0;
+let _smartSyncInterval = null;
+let _actionPushDebounceTimeout = null;
+
+/**
+ * 1. Focus-driven Sync:
+ * Runs pullFromCloud() silently when tab becomes visible or receives focus.
+ * Debounced to at most once per 10 seconds to avoid spamming server on rapid tab switching.
+ */
+export function handleFocusDrivenSync() {
+  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+  const now = Date.now();
+  if (now - _lastFocusPullTime < 10000) return;
+  _lastFocusPullTime = now;
+
+  if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pullFromCloud === 'function') {
+    personalSyncService.pullFromCloud().catch(err => {
+      console.warn('[SmartSync] Focus-driven pull deferred:', err);
+    });
+  }
+}
+
+/**
+ * 2. Interval-driven Sync (60s):
+ * Periodically pulls data from server every 60 seconds in the background.
+ */
+export function startSmartSyncInterval() {
+  if (typeof window === 'undefined') return;
+  if (_smartSyncInterval) clearInterval(_smartSyncInterval);
+
+  _smartSyncInterval = setInterval(() => {
+    if (window.navigator && !window.navigator.onLine) return;
+    if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pullFromCloud === 'function') {
+      personalSyncService.pullFromCloud().catch(err => {
+        console.warn('[SmartSync] Interval-driven pull deferred:', err);
+      });
+    }
+  }, 60000);
+}
+
+/**
+ * 3. Action-driven Sync:
+ * Immediately triggers pushToCloud() (debounced by 300ms) when user completes an action
+ * (e.g. task added/toggled, pomodoro finished, profile saved).
+ */
+export function triggerActionDrivenPush(delayMs = 300) {
+  if (typeof window === 'undefined') return;
+  if (_actionPushDebounceTimeout) clearTimeout(_actionPushDebounceTimeout);
+
+  _actionPushDebounceTimeout = setTimeout(() => {
+    if (window.navigator && !window.navigator.onLine) return;
+    if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pushToCloud === 'function') {
+      personalSyncService.pushToCloud().catch(err => {
+        console.warn('[SmartSync] Action-driven push deferred:', err);
+      });
+    }
+  }, delayMs);
+}
+
 if (typeof window !== 'undefined') {
+  // 1. Focus-driven Event Listeners
+  window.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') handleFocusDrivenSync();
+  });
+  window.addEventListener('focus', handleFocusDrivenSync);
+
+  // 2. Start 60-Second Interval Sync
+  startSmartSyncInterval();
+
+  // 3. Listen for activity saving (pomodoro finish / manual log)
+  window.addEventListener('activity-saved', () => {
+    triggerActionDrivenPush(300);
+  });
+
   window.personalSyncService = personalSyncService;
   window.triggerAutoSync = triggerAutoSync;
   window.updateCloudSyncIndicatorUI = updateCloudSyncIndicatorUI;
+  window.handleFocusDrivenSync = handleFocusDrivenSync;
+  window.startSmartSyncInterval = startSmartSyncInterval;
+  window.triggerActionDrivenPush = triggerActionDrivenPush;
 }

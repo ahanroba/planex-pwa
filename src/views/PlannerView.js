@@ -41,6 +41,7 @@ window.addPlannerTaskToQuadrant = (quadrantId) => {
     : (new Date().getDay() + 1) % 7;
   db.addDailyPlan(weekId, dayIndex, input.value.trim(), quadrantId);
   input.value = '';
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -57,6 +58,7 @@ window.addPlannerDailyTask = () => {
     : (new Date().getDay() + 1) % 7;
   db.addDailyPlan(weekId, dayIndex, input.value.trim(), priority);
   input.value = '';
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -76,6 +78,7 @@ window.togglePlannerTask = (planId, event = null) => {
   if (willBeDone && window.triggerCompletionBurst) {
     window.triggerCompletionBurst(event);
   }
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -83,6 +86,7 @@ window.deletePlannerTask = (planId) => {
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
   db.deleteDailyPlan(weekId, planId);
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -91,6 +95,7 @@ window.movePlannerTaskPriority = (planId, quadrantId) => {
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
   db.setDailyPlanPriority(weekId, planId, quadrantId);
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -110,6 +115,7 @@ window.toggleWeeklyGoal = (goalId, event = null) => {
   if (willBeDone && window.triggerCompletionBurst) {
     window.triggerCompletionBurst(event);
   }
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -120,6 +126,7 @@ window.addWeeklyGoal = () => {
   const weekId = currentWeek ? currentWeek.id : 1;
   db.addWeeklyGoal(weekId, input.value.trim());
   input.value = '';
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -127,6 +134,7 @@ window.deleteWeeklyGoal = (goalId) => {
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
   db.deleteWeeklyGoal(weekId, goalId);
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 

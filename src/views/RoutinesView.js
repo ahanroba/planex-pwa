@@ -134,6 +134,7 @@ window.toggleRoutineChecklistItem = (id, event = null) => {
   if (willBeDone && window.triggerCompletionBurst) {
     window.triggerCompletionBurst(event);
   }
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
@@ -142,11 +143,13 @@ window.addRoutineChecklistItem = () => {
   if (!input || !input.value.trim()) return;
   db.addRoutineChecklistItem(input.value.trim());
   input.value = '';
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
 window.deleteRoutineChecklistItem = (id) => {
   db.deleteRoutineChecklistItem(id);
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   if (window.renderApp) window.renderApp();
 };
 
