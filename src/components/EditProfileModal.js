@@ -332,7 +332,13 @@ window.handleSaveProfileSubmit = async function() {
       leaderboardService.saveUserProfile(newName, newTarget, newAvatar);
     }
 
-    // 5. Trigger Cloud Sync
+    // 5. Trigger Cloud Sync (push personal data including the new name)
+    const pSync = window.personalSyncService;
+    if (pSync && typeof pSync.pushToCloud === 'function') {
+      pSync.pushToCloud().catch(() => {});
+    }
+
+    // 6. Also sync leaderboard score if in a group
     if (leaderboardService && typeof leaderboardService.syncUserScore === 'function') {
       leaderboardService.syncUserScore(true).catch(() => {});
     }

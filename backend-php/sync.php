@@ -236,18 +236,25 @@ function handleSave(PDO $pdo, array $input): void
         return;
     }
 
+    // Merge incoming data with existing stored data (don't overwrite the whole record)
+    $stmt2 = $pdo->prepare("SELECT data FROM users WHERE phone = :phone LIMIT 1");
+    $stmt2->execute([':phone' => $phone]);
+    $row = $stmt2->fetch();
+    $existingData = $row ? (json_decode($row['data'], true) ?: []) : [];
+    $mergedData = is_array($data) ? array_merge($existingData, $data) : $data;
+
     // Update data
     $stmt = $pdo->prepare("UPDATE users SET data = :data, updated_at = NOW() WHERE phone = :phone");
     $stmt->execute([
-        ':data'  => json_encode($data, JSON_UNESCAPED_UNICODE),
+        ':data'  => json_encode($mergedData, JSON_UNESCAPED_UNICODE),
         ':phone' => $phone
     ]);
 
     echo json_encode([
         'success'    => true,
         'message'    => 'Data saved successfully',
-        'backupData' => is_array($data) ? ($data['backupData'] ?? $data) : $data,
-        'study_logs' => is_array($data) ? ($data['study_logs'] ?? []) : [],
-        'rooms'      => is_array($data) ? ($data['rooms'] ?? []) : []
+        'backupData' => is_array($mergedData) ? ($mergedData['backupData'] ?? $mergedData) : $mergedData,
+        'study_logs' => is_array($mergedData) ? ($mergedData['study_logs'] ?? []) : [],
+        'rooms'      => is_array($mergedData) ? ($mergedData['rooms'] ?? []) : []
     ]);
 }
