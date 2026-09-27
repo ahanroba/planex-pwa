@@ -286,11 +286,13 @@ window.handleSaveProfileSubmit = async function() {
   }
 
   try {
-    // 1. Save in LEADERBOARD_STORAGE_KEYS safely
+    // 1. Save in ALL possible storage keys safely BEFORE sync
     try {
       localStorage.setItem(LEADERBOARD_STORAGE_KEYS.NICKNAME, newName);
       localStorage.setItem(LEADERBOARD_STORAGE_KEYS.TARGET, newTarget);
       localStorage.setItem('planex_user_nickname', newName);
+      localStorage.setItem('planex_nickname', newName);
+      localStorage.setItem('planex_leaderboard_nickname', newName);
       if (newAvatar) {
         localStorage.setItem('planex_user_avatar', newAvatar);
       }

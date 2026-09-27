@@ -147,14 +147,47 @@ export const personalSyncService = {
     const activeAvatar = overrideAvatar || storedAvatar || profile.avatar || profile.avatar_url || profile.photo || authUser?.avatar_url || authUser?.avatar || authUser?.photo_url || '';
 
     if (backupData && typeof backupData === 'object') {
+      // OVERWRITE root level keys
       backupData.planex_user_nickname = activeName;
+      backupData.planex_nickname = activeName;
+      backupData.planex_leaderboard_nickname = activeName;
       backupData.planex_user_avatar = activeAvatar;
+      
+      // Delete any conflicting legacy keys that might resurrect
+      delete backupData['planex_user_profile.name'];
+      delete backupData['planex_user_profile.nickname'];
+      delete backupData['planex_user_profile.avatar'];
+
       if (!backupData.planex_user_profile) backupData.planex_user_profile = profile;
       if (backupData.planex_user_profile && typeof backupData.planex_user_profile === 'object') {
         backupData.planex_user_profile.name = activeName;
         backupData.planex_user_profile.nickname = activeName;
         backupData.planex_user_profile.avatar = activeAvatar;
         backupData.planex_user_profile.avatar_url = activeAvatar;
+      }
+
+      // Purge ghost data in serialized auth objects if they exist in backupData
+      if (backupData.planex_auth_user) {
+        try {
+          let authData = typeof backupData.planex_auth_user === 'string' ? JSON.parse(backupData.planex_auth_user) : backupData.planex_auth_user;
+          authData.name = activeName;
+          authData.full_name = activeName;
+          authData.nickname = activeName;
+          authData.avatar_url = activeAvatar;
+          authData.avatar = activeAvatar;
+          backupData.planex_auth_user = typeof backupData.planex_auth_user === 'string' ? JSON.stringify(authData) : authData;
+        } catch(e){}
+      }
+      if (backupData.planex_user_account) {
+        try {
+          let accData = typeof backupData.planex_user_account === 'string' ? JSON.parse(backupData.planex_user_account) : backupData.planex_user_account;
+          accData.name = activeName;
+          accData.full_name = activeName;
+          accData.nickname = activeName;
+          accData.avatar_url = activeAvatar;
+          accData.avatar = activeAvatar;
+          backupData.planex_user_account = typeof backupData.planex_user_account === 'string' ? JSON.stringify(accData) : accData;
+        } catch(e){}
       }
     }
 
@@ -287,8 +320,10 @@ export const personalSyncService = {
           }
 
           if (targetAvatar) {
+            const cacheBuster = targetAvatar.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`;
+            const finalAvatarUrl = targetAvatar.startsWith('http') ? `${targetAvatar}${cacheBuster}` : targetAvatar;
             document.querySelectorAll('#btn-header-user-account img, #main-header-avatar, #main-avatar-preview, .user-avatar-img').forEach(imgEl => {
-              if (imgEl && imgEl.tagName === 'IMG' && imgEl.src !== targetAvatar) imgEl.src = targetAvatar;
+              if (imgEl && imgEl.tagName === 'IMG' && imgEl.src !== finalAvatarUrl) imgEl.src = finalAvatarUrl;
             });
           }
 
@@ -508,8 +543,10 @@ export const personalSyncService = {
           }
 
           if (effectiveAvatar) {
+            const cacheBuster = effectiveAvatar.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`;
+            const finalAvatarUrl = effectiveAvatar.startsWith('http') ? `${effectiveAvatar}${cacheBuster}` : effectiveAvatar;
             document.querySelectorAll('#btn-header-user-account img, #main-header-avatar, #main-avatar-preview, .user-avatar-img').forEach(imgEl => {
-              if (imgEl && imgEl.tagName === 'IMG' && imgEl.src !== effectiveAvatar) imgEl.src = effectiveAvatar;
+              if (imgEl && imgEl.tagName === 'IMG' && imgEl.src !== finalAvatarUrl) imgEl.src = finalAvatarUrl;
             });
           }
 
