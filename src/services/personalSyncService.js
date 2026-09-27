@@ -229,6 +229,8 @@ export const personalSyncService = {
 
         // CRITICAL: Force Dashboard and charts to re-render to reflect new synced data
         if (typeof window !== 'undefined') {
+          if (typeof window.updateHeaderDOM === 'function') window.updateHeaderDOM();
+          window.dispatchEvent(new CustomEvent('profileUpdated'));
           window.dispatchEvent(new CustomEvent('study-logs-updated'));
           window.dispatchEvent(new CustomEvent('sessions-updated'));
           window.dispatchEvent(new CustomEvent('activity-saved', { detail: { sync: true } }));
@@ -380,6 +382,8 @@ export const personalSyncService = {
 
         // CRITICAL: Force Dashboard and charts to re-render
         if (typeof window !== 'undefined') {
+          // Immediately patch header DOM with the latest name/avatar before full re-render
+          if (typeof window.updateHeaderDOM === 'function') window.updateHeaderDOM();
           window.dispatchEvent(new CustomEvent('profileUpdated'));
           window.dispatchEvent(new CustomEvent('auth-changed'));
           window.dispatchEvent(new CustomEvent('study-logs-updated'));

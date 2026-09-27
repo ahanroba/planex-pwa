@@ -299,6 +299,12 @@ if (typeof window !== 'undefined') {
         localStorage.setItem('planex_auth_user', JSON.stringify(authPayload));
         localStorage.setItem('planex_user_account', JSON.stringify(authPayload));
 
+        // Store nickname explicitly so Header.js picks it up as primary display name
+        if (name && name !== 'کاربر پلنکس' && name !== 'کاربر مهمان') {
+          localStorage.setItem('planex_user_nickname', name);
+          localStorage.setItem('planex_leaderboard_nickname', name);
+        }
+
         if (Array.isArray(data.study_logs) && data.study_logs.length > 0) {
           if (window.db && typeof window.db.saveStudyLogs === 'function') {
             window.db.saveStudyLogs(data.study_logs);
@@ -365,6 +371,9 @@ if (typeof window !== 'undefined') {
         if (window.db) {
           window.db._breakdownMemoMap = {};
         }
+
+        // Immediately patch header DOM with the latest name/avatar
+        if (typeof window.updateHeaderDOM === 'function') window.updateHeaderDOM();
 
         window.dispatchEvent(new CustomEvent('auth-changed', { detail: authPayload }));
         window.dispatchEvent(new CustomEvent('profileUpdated'));

@@ -13,18 +13,79 @@ function getLivePresenceCount() {
   return base + jitter;
 }
 
+// Direct DOM patching for header name & avatar — guarantees instant UI update
+// even if renderApp() hasn't re-run yet or reads stale cached data.
+function updateHeaderDOM() {
+  try {
+    let authUser = null;
+    try { authUser = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || 'null'); } catch(_){}
+    let userProfile = null;
+    try { userProfile = JSON.parse(localStorage.getItem('planex_user_profile') || 'null'); } catch(_){}
+
+    const storedAvatar = localStorage.getItem('planex_user_avatar') || '';
+    const storedNickname = localStorage.getItem('planex_user_nickname') || localStorage.getItem('planex_leaderboard_nickname') || '';
+
+    const avatar = storedAvatar || userProfile?.avatar || userProfile?.avatar_url || userProfile?.photo || userProfile?.photoUrl || authUser?.avatar_url || authUser?.photo_url || '';
+    const rawName = storedNickname || userProfile?.nickname || authUser?.full_name || authUser?.name || authUser?.first_name || '';
+    // Only use userProfile.name if it is NOT the hardcoded default
+    const profileName = (userProfile?.name && userProfile.name !== 'دانش\u200Cآموز پرتلاش') ? userProfile.name : '';
+    const name = rawName || profileName || '';
+
+    const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.phone || authUser.phone_number)));
+    const displayName = name || (hasUser ? 'کاربر' : 'ورود');
+
+    // Patch the header button's display name
+    const headerBtn = document.getElementById('btn-header-user-account');
+    if (headerBtn) {
+      const nameSpan = headerBtn.querySelector('span:last-child');
+      if (nameSpan) nameSpan.textContent = displayName;
+
+      // Patch avatar image or swap to image if previously showing default icon
+      const avatarImg = headerBtn.querySelector('img');
+      if (avatar) {
+        if (avatarImg) {
+          avatarImg.src = avatar;
+        } else {
+          // Replace the 👤 placeholder span with an actual img element
+          const placeholder = headerBtn.querySelector('span:first-child');
+          if (placeholder && placeholder.textContent.includes('👤')) {
+            const img = document.createElement('img');
+            img.src = avatar;
+            img.style.cssText = 'width: 22px; height: 22px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1; border: 1px solid rgba(16, 185, 129, 0.5);';
+            img.onerror = function() { this.onerror = null; this.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=planex'; };
+            placeholder.replaceWith(img);
+          }
+        }
+      }
+
+      // Update border color based on login state
+      headerBtn.style.borderColor = hasUser ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)';
+      headerBtn.style.color = hasUser ? '#34d399' : '#a1a1aa';
+    }
+  } catch(e) {
+    console.warn('[Header] updateHeaderDOM error:', e);
+  }
+}
+
+// Expose globally so other modules can call it directly
+if (typeof window !== 'undefined') window.updateHeaderDOM = updateHeaderDOM;
+
 // Global profile update listener for instant header & app sync without page refresh
 if (typeof window !== 'undefined' && !window._headerProfileListenerAttached) {
   window._headerProfileListenerAttached = true;
-  const triggerAppRender = () => {
+  const triggerHeaderUpdate = () => {
+    // 1. Immediately patch header DOM with latest localStorage values
+    updateHeaderDOM();
+    // 2. Then trigger full app re-render for other components
     if (typeof window.renderApp === 'function') {
       window.renderApp();
     }
   };
-  window.addEventListener('profileUpdated', triggerAppRender);
+  window.addEventListener('profileUpdated', triggerHeaderUpdate);
+  window.addEventListener('auth-changed', triggerHeaderUpdate);
   window.addEventListener('storage', (e) => {
     if (e.key === 'planex_user_avatar' || e.key === 'planex_user_profile' || e.key === 'planex_auth_user' || e.key === 'planex_user_nickname') {
-      triggerAppRender();
+      triggerHeaderUpdate();
     }
   });
 }
@@ -47,7 +108,10 @@ export function renderHeader(stateProp = null) {
   const storedNickname = localStorage.getItem('planex_user_nickname') || localStorage.getItem('planex_leaderboard_nickname') || localStorage.getItem('planex_nickname') || '';
 
   const avatar = storedAvatar || userProfile?.avatar || userProfile?.avatar_url || userProfile?.photo || userProfile?.photoUrl || authUser?.avatar_url || authUser?.photo_url || '';
-  const name = storedNickname || userProfile?.name || userProfile?.nickname || authUser?.full_name || authUser?.name || authUser?.first_name || '';
+  // Skip the hardcoded default "دانش‌آموز پرتلاش" — it should never override real synced data
+  const profileName = (userProfile?.name && userProfile.name !== 'دانش\u200Cآموز پرتلاش') ? userProfile.name : '';
+  const profileNickname = userProfile?.nickname || '';
+  const name = storedNickname || profileName || profileNickname || authUser?.full_name || authUser?.name || authUser?.first_name || '';
 
   const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.email || authUser.phone || authUser.phone_number)));
   const displayName = name || (hasUser ? 'کاربر' : 'ورود');
