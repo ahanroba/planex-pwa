@@ -1021,7 +1021,7 @@ class DatabaseEngine {
   // Cycle habit day status for 31-day monthly matrix: 0=empty, 1=done, 2=not-done
   cycleHabitDay(habitId, monthKey, day) {
     const habits = this.getHabits();
-    const habit = habits.find(h => h.id == habitId);
+    const habit = habits.find(h => h.id == habitId || String(h.id) === String(habitId));
     if (habit) {
       if (!habit.completedDays) habit.completedDays = {};
       if (!habit.completedDays[monthKey]) habit.completedDays[monthKey] = {};
@@ -1038,7 +1038,7 @@ class DatabaseEngine {
 
   deleteHabit(habitId) {
     let habits = this.getHabits();
-    habits = habits.filter(h => h.id != habitId);
+    habits = habits.filter(h => h.id != habitId && String(h.id) !== String(habitId));
     localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
   }
 
@@ -1089,19 +1089,33 @@ class DatabaseEngine {
 
   toggleDailyPlan(weekId, planId) {
     const allPlans = JSON.parse(localStorage.getItem(STORAGE_KEYS.DAILY_PLANS) || '{}');
+    let plan = null;
     if (allPlans[weekId]) {
-      const plan = allPlans[weekId].find(p => p.id == planId);
-      if (plan) plan.isDone = !plan.isDone;
-      localStorage.setItem(STORAGE_KEYS.DAILY_PLANS, JSON.stringify(allPlans));
+      plan = allPlans[weekId].find(p => p.id == planId || String(p.id) === String(planId));
     }
+    if (!plan) {
+      for (const wId of Object.keys(allPlans)) {
+        plan = allPlans[wId].find(p => p.id == planId || String(p.id) === String(planId));
+        if (plan) break;
+      }
+    }
+    if (plan) {
+      plan.isDone = !plan.isDone;
+      localStorage.setItem(STORAGE_KEYS.DAILY_PLANS, JSON.stringify(allPlans));
+      return true;
+    }
+    return false;
   }
 
   deleteDailyPlan(weekId, planId) {
     const allPlans = JSON.parse(localStorage.getItem(STORAGE_KEYS.DAILY_PLANS) || '{}');
     if (allPlans[weekId]) {
-      allPlans[weekId] = allPlans[weekId].filter(p => p.id != planId);
-      localStorage.setItem(STORAGE_KEYS.DAILY_PLANS, JSON.stringify(allPlans));
+      allPlans[weekId] = allPlans[weekId].filter(p => p.id != planId && String(p.id) !== String(planId));
     }
+    for (const wId of Object.keys(allPlans)) {
+      allPlans[wId] = allPlans[wId].filter(p => p.id != planId && String(p.id) !== String(planId));
+    }
+    localStorage.setItem(STORAGE_KEYS.DAILY_PLANS, JSON.stringify(allPlans));
   }
 
   getWeeklyGoals(weekId) {
@@ -1118,19 +1132,33 @@ class DatabaseEngine {
 
   toggleWeeklyGoal(weekId, goalId) {
     const allGoals = JSON.parse(localStorage.getItem(STORAGE_KEYS.WEEKLY_GOALS) || '{}');
+    let goal = null;
     if (allGoals[weekId]) {
-      const g = allGoals[weekId].find(item => item.id == goalId);
-      if (g) g.isDone = !g.isDone;
-      localStorage.setItem(STORAGE_KEYS.WEEKLY_GOALS, JSON.stringify(allGoals));
+      goal = allGoals[weekId].find(item => item.id == goalId || String(item.id) === String(goalId));
     }
+    if (!goal) {
+      for (const wId of Object.keys(allGoals)) {
+        goal = allGoals[wId].find(item => item.id == goalId || String(item.id) === String(goalId));
+        if (goal) break;
+      }
+    }
+    if (goal) {
+      goal.isDone = !goal.isDone;
+      localStorage.setItem(STORAGE_KEYS.WEEKLY_GOALS, JSON.stringify(allGoals));
+      return true;
+    }
+    return false;
   }
 
   deleteWeeklyGoal(weekId, goalId) {
     const allGoals = JSON.parse(localStorage.getItem(STORAGE_KEYS.WEEKLY_GOALS) || '{}');
     if (allGoals[weekId]) {
-      allGoals[weekId] = allGoals[weekId].filter(g => g.id != goalId);
-      localStorage.setItem(STORAGE_KEYS.WEEKLY_GOALS, JSON.stringify(allGoals));
+      allGoals[weekId] = allGoals[weekId].filter(g => g.id != goalId && String(g.id) !== String(goalId));
     }
+    for (const wId of Object.keys(allGoals)) {
+      allGoals[wId] = allGoals[wId].filter(g => g.id != goalId && String(g.id) !== String(goalId));
+    }
+    localStorage.setItem(STORAGE_KEYS.WEEKLY_GOALS, JSON.stringify(allGoals));
   }
 
   // Study & Test Targets
@@ -1151,6 +1179,10 @@ class DatabaseEngine {
 
   setStudyTargets(targets) {
     localStorage.setItem(STORAGE_KEYS.STUDY_TARGETS, JSON.stringify(targets));
+  }
+
+  saveStudyTargets(targets) {
+    this.setStudyTargets(targets);
   }
 
   // Energy / Gratitude / Countdown

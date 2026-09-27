@@ -85,35 +85,79 @@ window.triggerCompletionBurst = (event) => {
 };
 
 // Ensure global handlers for routines exist
-if (!window.handleHabitDayClick) {
-  window.handleHabitDayClick = (habitId, day, event = null) => {
-    const habits = db.getHabits();
-    const monthKey = `${currentYear}_${currentMonth}`;
-    const habit = habits.find(h => h.id == habitId || String(h.id) === String(habitId));
-    const previousStatus = habit?.completedDays?.[monthKey]?.[day] || 0;
+window.handleHabitDayClick = (habitId, day, event = null) => {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+  const habits = db.getHabits();
+  const monthKey = `${currentYear}_${currentMonth}`;
+  const habit = habits.find(h => h.id == habitId || String(h.id) === String(habitId));
+  const previousStatus = habit?.completedDays?.[monthKey]?.[day] || 0;
 
-    db.cycleHabitDay(habitId, monthKey, day);
+  db.cycleHabitDay(habitId, monthKey, day);
 
-    if (previousStatus === 0 && window.triggerCompletionBurst) {
-      window.triggerCompletionBurst(event);
-    }
-    window.renderApp();
-  };
-}
+  if (previousStatus === 0 && window.triggerCompletionBurst) {
+    window.triggerCompletionBurst(event);
+  }
+  if (window.renderApp) window.renderApp();
+};
 
-if (!window.handleChangeMonth) {
-  window.handleChangeMonth = (m) => {
-    currentMonth = parseInt(m);
-    window.renderApp();
-  };
-}
+window.toggleTodayHabit = (habitId, event = null) => {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+  const [tY, tM, tD] = db.getTodayJalali();
+  const todayMonthKey = `${tY}_${tM}`;
+  const habits = db.getHabits();
+  const habit = habits.find(h => h.id == habitId || String(h.id) === String(habitId));
+  const currentStatus = habit?.completedDays?.[todayMonthKey]?.[tD] || 0;
 
-if (!window.handleChangeYear) {
-  window.handleChangeYear = (y) => {
-    currentYear = parseInt(y);
-    window.renderApp();
-  };
-}
+  db.cycleHabitDay(habitId, todayMonthKey, tD);
+
+  if (currentStatus === 0 && window.triggerCompletionBurst) {
+    window.triggerCompletionBurst(event);
+  }
+  if (window.renderApp) window.renderApp();
+};
+
+window.toggleRoutineChecklistItem = (id, event = null) => {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+  const list = db.getRoutineChecklist() || [];
+  const item = list.find(i => i.id == id || String(i.id) === String(id));
+  const willBeDone = item ? !item.completed : true;
+
+  db.toggleRoutineChecklistItem(id);
+
+  if (willBeDone && window.triggerCompletionBurst) {
+    window.triggerCompletionBurst(event);
+  }
+  if (window.renderApp) window.renderApp();
+};
+
+window.addRoutineChecklistItem = () => {
+  const input = document.getElementById('input-routine-checklist-text');
+  if (!input || !input.value.trim()) return;
+  db.addRoutineChecklistItem(input.value.trim());
+  input.value = '';
+  if (window.renderApp) window.renderApp();
+};
+
+window.deleteRoutineChecklistItem = (id) => {
+  db.deleteRoutineChecklistItem(id);
+  if (window.renderApp) window.renderApp();
+};
+
+window.handleChangeMonth = (m) => {
+  currentMonth = parseInt(m);
+  if (window.renderApp) window.renderApp();
+};
+
+window.handleChangeYear = (y) => {
+  currentYear = parseInt(y);
+  if (window.renderApp) window.renderApp();
+};
 
 window.openAddHabitModal = () => {
   window.habitModalEditingId = null;
@@ -490,6 +534,50 @@ export function renderRoutinesView(options = {}) {
         <div style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.35); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08);">
           <div style="height: 100%; width: ${todayHabitsPct}%; background: linear-gradient(90deg, #10b981 0%, #38bdf8 100%); border-radius: 6px; transition: width 0.6s ease; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);"></div>
         </div>
+
+        <!-- Today's Habits Quick-Toggle List -->
+        ${habits.length > 0 ? `
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0;">⚡ ثبت سریع عادات امروز (${toPersianDigits(todayD)} ${PERSIAN_MONTHS[todayM - 1]}):</span>
+              <span style="font-size: 0.72rem; color: #94a3b8;">با یک کلیک علامت بزنید</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              ${habits.map(habit => {
+                const status = habit.completedDays?.[currentMonthKey]?.[todayD] || 0;
+                let bg = 'rgba(255, 255, 255, 0.05)';
+                let border = 'rgba(255, 255, 255, 0.1)';
+                let color = '#cbd5e1';
+                let icon = '○';
+                let statusText = 'ثبت نشده';
+
+                if (status === 1) {
+                  bg = 'rgba(16, 185, 129, 0.22)';
+                  border = 'rgba(16, 185, 129, 0.6)';
+                  color = '#34d399';
+                  icon = '✓';
+                  statusText = 'انجام شد';
+                } else if (status === 2) {
+                  bg = 'rgba(239, 68, 68, 0.22)';
+                  border = 'rgba(239, 68, 68, 0.6)';
+                  color = '#f87171';
+                  icon = '✕';
+                  statusText = 'انجام نشد';
+                }
+
+                return `
+                  <button type="button" onclick="window.toggleTodayHabit('${habit.id}', event)"
+                    style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 12px; background: ${bg}; border: 1px solid ${border}; color: ${color}; cursor: pointer; transition: all 0.2s ease; font-family: inherit; font-size: 0.8rem; font-weight: 700;"
+                    title="کلیک برای تغییر وضعیت روتین امروز (انجام شد / انجام نشد / ریست)">
+                    <span style="font-size: 0.95rem;">${habit.emoji || '✨'}</span>
+                    <span>${habit.title}</span>
+                    <span style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 1px 6px; font-size: 0.72rem; font-family: 'Outfit'; font-weight: 800;">${icon} ${statusText}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
 
       <!-- 🎯 ACCORDION 1: Motivational Routine-Building & Consultation Card -->
@@ -723,8 +811,8 @@ export function renderRoutinesView(options = {}) {
         </div>
 
         <div style="display: flex; gap: 8px; margin-bottom: 14px;">
-          <input type="text" id="input-routine-checklist-text" class="form-input" placeholder="عنوان نکته یا چک‌لیست جدید (مثلا: بررسی هفتگی کارنامه آزمون کانون)" style="flex: 1;" />
-          <button id="btn-add-routine-checklist" class="btn-primary" style="width: auto; padding: 0 16px;">+ افزودن نکته</button>
+          <input type="text" id="input-routine-checklist-text" onkeydown="if(event.key === 'Enter') window.addRoutineChecklistItem()" class="form-input" placeholder="عنوان نکته یا چک‌لیست جدید (مثلا: بررسی هفتگی کارنامه آزمون کانون)" style="flex: 1;" />
+          <button id="btn-add-routine-checklist" onclick="window.addRoutineChecklistItem()" class="btn-primary" style="width: auto; padding: 0 16px;">+ افزودن نکته</button>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -732,10 +820,10 @@ export function renderRoutinesView(options = {}) {
           ${routineChecklist.map(item => `
             <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
               <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: ${item.completed ? 'var(--text-muted)' : 'white'}; text-decoration: ${item.completed ? 'line-through' : 'none'}; flex: 1;">
-                <input type="checkbox" class="chk-routine-item" data-id="${item.id}" ${item.completed ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #10b981;" />
+                <input type="checkbox" class="chk-routine-item" onclick="window.toggleRoutineChecklistItem('${item.id}', event)" data-id="${item.id}" ${item.completed ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #10b981; cursor: pointer;" />
                 <span style="font-size: 0.9rem; font-weight: 500;">${item.text}</span>
               </label>
-              <button class="btn-delete-routine-item" data-id="${item.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">🗑️</button>
+              <button class="btn-delete-routine-item" onclick="window.deleteRoutineChecklistItem('${item.id}')" data-id="${item.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">🗑️</button>
             </div>
           `).join('')}
         </div>

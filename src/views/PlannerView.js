@@ -22,27 +22,56 @@ window.setPlannerNewTaskPriority = (q) => {
   if (window.renderApp) window.renderApp();
 };
 
+window.selectPlannerDay = (idx) => {
+  const current = (typeof window.appState !== 'undefined' && window.appState) ? window.appState : null;
+  if (current) {
+    current.selectedDayIndex = idx;
+  }
+  if (window.renderApp) window.renderApp();
+};
+
 /** افزودن تسک مستقیماً داخل یک خانه ماتریس */
 window.addPlannerTaskToQuadrant = (quadrantId) => {
   const input = document.getElementById(`input-quadrant-task-${quadrantId}`);
   if (!input || !input.value.trim()) return;
   const currentWeek = db.getCurrentWeek();
+  const weekId = currentWeek ? currentWeek.id : 1;
   const dayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
     ? window.appState.selectedDayIndex
     : (new Date().getDay() + 1) % 7;
-  db.addDailyPlan(currentWeek.id, dayIndex, input.value.trim(), quadrantId);
+  db.addDailyPlan(weekId, dayIndex, input.value.trim(), quadrantId);
   input.value = '';
   if (window.renderApp) window.renderApp();
 };
 
-/** تیک انجام/عدم انجام کار داخل خانه ماتریس */
-window.togglePlannerTask = (planId, event = null) => {
+/** افزودن تسک روزانه از فرم اصلی برنامه‌ریزی */
+window.addPlannerDailyTask = () => {
+  const input = document.getElementById('input-daily-plan');
+  if (!input || !input.value.trim()) return;
+  const prioritySelect = document.getElementById('select-daily-plan-priority');
+  const priority = prioritySelect ? prioritySelect.value : (window.plannerNewTaskPriority || DEFAULT_PRIORITY);
   const currentWeek = db.getCurrentWeek();
-  const dailyPlans = db.getDailyPlans(currentWeek.id);
+  const weekId = currentWeek ? currentWeek.id : 1;
+  const dayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
+    ? window.appState.selectedDayIndex
+    : (new Date().getDay() + 1) % 7;
+  db.addDailyPlan(weekId, dayIndex, input.value.trim(), priority);
+  input.value = '';
+  if (window.renderApp) window.renderApp();
+};
+
+/** تیک انجام/عدم انجام کار روزانه */
+window.togglePlannerTask = (planId, event = null) => {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+  const currentWeek = db.getCurrentWeek();
+  const weekId = currentWeek ? currentWeek.id : 1;
+  const dailyPlans = db.getDailyPlans(weekId);
   const plan = dailyPlans.find(p => p.id == planId || String(p.id) === String(planId));
   const willBeDone = plan ? !plan.isDone : true;
 
-  db.toggleDailyPlan(currentWeek.id, planId);
+  db.toggleDailyPlan(weekId, planId);
 
   if (willBeDone && window.triggerCompletionBurst) {
     window.triggerCompletionBurst(event);
@@ -52,14 +81,100 @@ window.togglePlannerTask = (planId, event = null) => {
 
 window.deletePlannerTask = (planId) => {
   const currentWeek = db.getCurrentWeek();
-  db.deleteDailyPlan(currentWeek.id, planId);
+  const weekId = currentWeek ? currentWeek.id : 1;
+  db.deleteDailyPlan(weekId, planId);
   if (window.renderApp) window.renderApp();
 };
 
 /** جابه‌جایی تسک بین چهار خانه ماتریس */
 window.movePlannerTaskPriority = (planId, quadrantId) => {
   const currentWeek = db.getCurrentWeek();
-  db.setDailyPlanPriority(currentWeek.id, planId, quadrantId);
+  const weekId = currentWeek ? currentWeek.id : 1;
+  db.setDailyPlanPriority(weekId, planId, quadrantId);
+  if (window.renderApp) window.renderApp();
+};
+
+/** مدیریت اهداف هفتگی (Weekly Goals) */
+window.toggleWeeklyGoal = (goalId, event = null) => {
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation();
+  }
+  const currentWeek = db.getCurrentWeek();
+  const weekId = currentWeek ? currentWeek.id : 1;
+  const goals = db.getWeeklyGoals(weekId);
+  const goal = goals.find(g => g.id == goalId || String(g.id) === String(goalId));
+  const willBeDone = goal ? !goal.isDone : true;
+
+  db.toggleWeeklyGoal(weekId, goalId);
+
+  if (willBeDone && window.triggerCompletionBurst) {
+    window.triggerCompletionBurst(event);
+  }
+  if (window.renderApp) window.renderApp();
+};
+
+window.addWeeklyGoal = () => {
+  const input = document.getElementById('input-weekly-goal');
+  if (!input || !input.value.trim()) return;
+  const currentWeek = db.getCurrentWeek();
+  const weekId = currentWeek ? currentWeek.id : 1;
+  db.addWeeklyGoal(weekId, input.value.trim());
+  input.value = '';
+  if (window.renderApp) window.renderApp();
+};
+
+window.deleteWeeklyGoal = (goalId) => {
+  const currentWeek = db.getCurrentWeek();
+  const weekId = currentWeek ? currentWeek.id : 1;
+  db.deleteWeeklyGoal(weekId, goalId);
+  if (window.renderApp) window.renderApp();
+};
+
+window.applyPresetWeeklyGoals = () => {
+  const currentWeek = db.getCurrentWeek();
+  const weekId = currentWeek ? currentWeek.id : 1;
+  const presets = [
+    'مرور خلاصه نکات درس‌های هدف',
+    'حل ۲۰۰ تست آزمون جامع',
+    'تحلیل و یادداشت نکات آزمون',
+    'مرور لغات و فرمول‌ها با لایتنر'
+  ];
+  presets.forEach(p => db.addWeeklyGoal(weekId, p));
+  if (window.renderApp) window.renderApp();
+};
+
+/** مدیریت روزشمار و اهداف مطالعه */
+window.addPlannerCountdownEvent = () => {
+  const title = document.getElementById('input-event-title')?.value.trim();
+  const jd = parseInt(document.getElementById('input-event-day')?.value);
+  const jm = parseInt(document.getElementById('input-event-month')?.value);
+  const jy = parseInt(document.getElementById('input-event-year')?.value);
+  if (!title || isNaN(jd) || isNaN(jm) || isNaN(jy)) {
+    alert('لطفاً عنوان و تاریخ رویداد را کامل وارد کنید.');
+    return;
+  }
+  db.addCountdownEvent(title, jy, jm, jd);
+  if (window.renderApp) window.renderApp();
+};
+
+window.deletePlannerCountdownEvent = (id) => {
+  db.deleteCountdownEvent(id);
+  if (window.renderApp) window.renderApp();
+};
+
+window.savePlannerTargets = () => {
+  const dailyHours = parseFloat(document.getElementById('target-daily-hours')?.value) || 8;
+  const dailyTests = parseInt(document.getElementById('target-daily-tests')?.value) || 150;
+  const weeklyHours = parseFloat(document.getElementById('target-weekly-hours')?.value) || 56;
+  const weeklyTests = parseInt(document.getElementById('target-weekly-tests')?.value) || 1000;
+  db.setStudyTargets({
+    dailyStudyGoalHours: dailyHours,
+    weeklyStudyGoalHours: weeklyHours,
+    dailyTestGoalCount: dailyTests,
+    weeklyTestGoalCount: weeklyTests
+  });
+  if (window.showToast) window.showToast('✅ اهداف با موفقیت ذخیره شدند', 'success', 2500);
+  else alert('✅ اهداف با موفقیت ذخیره شدند');
   if (window.renderApp) window.renderApp();
 };
 
@@ -246,7 +361,7 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
                 <input type="number" id="input-event-day" class="form-input" placeholder="روز" style="flex: 1; min-width: 60px; text-align: center; font-family: 'Outfit';" min="1" max="31" />
                 <input type="number" id="input-event-month" class="form-input" placeholder="ماه" style="flex: 1; min-width: 60px; text-align: center; font-family: 'Outfit';" min="1" max="12" />
                 <input type="number" id="input-event-year" class="form-input" placeholder="سال" style="flex: 1; min-width: 70px; text-align: center; font-family: 'Outfit';" value="1405" />
-                <button id="btn-add-countdown-event" class="btn-primary" style="width: auto; padding: 0 16px; background: #7c3aed;">+ افزودن رویداد</button>
+                <button id="btn-add-countdown-event" onclick="window.addPlannerCountdownEvent()" class="btn-primary" style="width: auto; padding: 0 16px; background: #7c3aed;">+ افزودن رویداد</button>
               </div>
 
               <!-- List of Countdowns -->
@@ -262,7 +377,7 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
                       <span style="background: #16171d; color: #a1a1aa; border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; font-family: 'Outfit';">
                         ⏳ روزشمار فعال
                       </span>
-                      <button class="btn-delete-countdown-item" data-id="${ev.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">🗑️</button>
+                      <button class="btn-delete-countdown-item" onclick="window.deletePlannerCountdownEvent('${ev.id}')" data-id="${ev.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">🗑️</button>
                     </div>
                   </div>
                 `).join('')}
@@ -302,7 +417,7 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
                 </div>
               </div>
 
-              <button id="btn-save-targets" class="btn-primary" style="margin-top: 6px; background: #7c3aed;">ذخیره اهداف جدید</button>
+              <button id="btn-save-targets" onclick="window.savePlannerTargets()" class="btn-primary" style="margin-top: 6px; background: #7c3aed;">ذخیره اهداف جدید</button>
             </div>
           ` : ''}
         </div>
@@ -326,7 +441,7 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
               </div>
 
               <div style="display: flex; gap: 8px;">
-                <button id="btn-apply-preset-routine" class="btn-header-action" style="font-size: 0.78rem; background: #1f2029; color: #a1a1aa; border: 1px solid rgba(255, 255, 255, 0.08);">
+                <button id="btn-apply-preset-routine" onclick="window.applyPresetWeeklyGoals()" class="btn-header-action" style="font-size: 0.78rem; background: #1f2029; color: #a1a1aa; border: 1px solid rgba(255, 255, 255, 0.08);">
                   ⚡ افزودن روتین و اهداف پیشنهادی
                 </button>
               </div>
@@ -334,8 +449,8 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
 
             <!-- Add Weekly Goal Input -->
             <div style="display: flex; gap: 8px; margin-bottom: 14px;">
-              <input type="text" id="input-weekly-goal" class="form-input" placeholder="عنوان هدف هفتگی (مثلاً: تمام کردن فصل ۳ زیست دهم)..." />
-              <button id="btn-add-weekly-goal" class="btn-primary" style="width: auto; padding: 0 20px; white-space: nowrap; background: #7c3aed;">افزودن</button>
+              <input type="text" id="input-weekly-goal" onkeydown="if(event.key === 'Enter') window.addWeeklyGoal()" class="form-input" placeholder="عنوان هدف هفتگی (مثلاً: تمام کردن فصل ۳ زیست دهم)..." />
+              <button id="btn-add-weekly-goal" onclick="window.addWeeklyGoal()" class="btn-primary" style="width: auto; padding: 0 20px; white-space: nowrap; background: #7c3aed;">افزودن</button>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -343,10 +458,10 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
               ${weeklyGoals.map(g => `
                 <div style="display: flex; align-items: center; justify-content: space-between; background: #1f2029; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
                   <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1;">
-                    <input type="checkbox" class="chk-toggle-weekly-goal" data-id="${g.id}" ${g.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #7c3aed;" />
-                    <span style="font-size: 0.92rem; ${g.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${g.text}</span>
+                    <input type="checkbox" class="chk-toggle-weekly-goal" onclick="window.toggleWeeklyGoal('${g.id}', event)" data-id="${g.id}" ${g.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #7c3aed; cursor: pointer;" />
+                    <span style="font-size: 0.92rem; ${g.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(g.text)}</span>
                   </label>
-                  <button class="btn-delete-weekly-goal" data-id="${g.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">✕</button>
+                  <button class="btn-delete-weekly-goal" onclick="window.deleteWeeklyGoal('${g.id}')" data-id="${g.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">✕</button>
                 </div>
               `).join('')}
             </div>
@@ -425,7 +540,7 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
             <!-- Day Selector Pills -->
             <div class="day-selector" style="margin-bottom: 14px;">
               ${DAY_NAMES.map((name, idx) => `
-                <button class="day-pill planner-day-pill ${idx === selectedDayIndex ? 'active' : ''}" data-day="${idx}">
+                <button class="day-pill planner-day-pill ${idx === selectedDayIndex ? 'active' : ''}" data-day="${idx}" onclick="window.selectPlannerDay(${idx})">
                   ${name}
                 </button>
               `).join('')}
@@ -433,14 +548,14 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
 
             <!-- Add Daily Plan Input + Priority Picker -->
             <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-              <input type="text" id="input-daily-plan" class="form-input" placeholder="عنوان کار روز ${DAY_NAMES[selectedDayIndex]}..." style="flex: 2; min-width: 190px;" />
+              <input type="text" id="input-daily-plan" onkeydown="if(event.key === 'Enter') window.addPlannerDailyTask()" class="form-input" placeholder="عنوان کار روز ${DAY_NAMES[selectedDayIndex]}..." style="flex: 2; min-width: 190px;" />
               <select id="select-daily-plan-priority" class="form-input" onchange="window.setPlannerNewTaskPriority(this.value)"
                 title="اولویت این کار در ماتریس آیزنهاور" style="flex: 1; min-width: 190px; cursor: pointer;">
                 ${EISENHOWER_QUADRANTS.map(q => `
                   <option value="${q.id}" ${newTaskPriority === q.id ? 'selected' : ''}>${q.emoji} ${q.id}: ${q.title}</option>
                 `).join('')}
               </select>
-              <button id="btn-add-daily-plan" class="btn-primary" style="width: auto; padding: 0 20px; white-space: nowrap;">افزودن به ${DAY_NAMES[selectedDayIndex]}</button>
+              <button id="btn-add-daily-plan" onclick="window.addPlannerDailyTask()" class="btn-primary" style="width: auto; padding: 0 20px; white-space: nowrap;">افزودن به ${DAY_NAMES[selectedDayIndex]}</button>
             </div>
 
             <!-- فیلتر ربع‌ها -->
@@ -515,14 +630,14 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
                   return `
                   <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: ${q.softBg}; padding: 10px 14px; border-radius: 12px; border: 1px solid ${q.borderColor};">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;">
-                      <input type="checkbox" class="chk-toggle-daily-plan" onclick="window.togglePlannerTask('${p.id}', event)" data-id="${p.id}" ${p.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: ${q.color}; flex-shrink: 0;" />
+                      <input type="checkbox" class="chk-toggle-daily-plan" onclick="window.togglePlannerTask('${p.id}', event)" data-id="${p.id}" ${p.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: ${q.color}; flex-shrink: 0; cursor: pointer;" />
                       <span style="font-size: 0.92rem; word-break: break-word; ${p.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(p.text)}</span>
                     </label>
                     <span style="background: rgba(15,23,42,0.5); border: 1px solid ${q.borderColor}; color: ${q.color}; padding: 3px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 900; white-space: nowrap;" title="${q.subtitle}">
                       ${q.emoji} ${q.title}
                     </span>
                     ${renderPriorityMoveSelect(p)}
-                    <button class="btn-delete-daily-plan" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; flex-shrink: 0;">✕</button>
+                    <button class="btn-delete-daily-plan" onclick="window.deletePlannerTask('${p.id}')" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; flex-shrink: 0;">✕</button>
                   </div>`;
                 }).join('')}
             </div>
