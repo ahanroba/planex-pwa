@@ -179,11 +179,32 @@ function handleGet(PDO $pdo): void
         // Decode the JSON data field
         $storedData = json_decode($user['data'], true) ?: [];
 
-        $userName = $storedData['name'] 
-            ?? ($storedData['backupData']['planex_user_nickname'] ?? null)
-            ?? ($storedData['backupData']['planex_user_profile']['name'] ?? null)
-            ?? ($storedData['backupData']['planex_user_profile']['nickname'] ?? null)
-            ?? 'کاربر پلنکس';
+        // 2. Force Save & Return (Backend): Filter out stale placeholders ('x', 'دانش‌آموز پرتلاش') if a valid custom name exists
+        $userName = null;
+        $nameCandidates = [
+            $storedData['name'] ?? null,
+            $storedData['nickname'] ?? null,
+            $storedData['backupData']['planex_user_nickname'] ?? null,
+            $storedData['backupData']['planex_user_profile']['name'] ?? null,
+            $storedData['backupData']['planex_user_profile']['nickname'] ?? null,
+        ];
+        foreach ($nameCandidates as $cand) {
+            if (!empty($cand) && $cand !== 'x' && $cand !== 'دانش آموز پرتلاش' && $cand !== 'دانش‌آموز پرتلاش') {
+                $userName = $cand;
+                break;
+            }
+        }
+        if (!$userName) {
+            foreach ($nameCandidates as $cand) {
+                if (!empty($cand)) {
+                    $userName = $cand;
+                    break;
+                }
+            }
+        }
+        if (!$userName) {
+            $userName = 'کاربر پلنکس';
+        }
 
         $userAvatar = $storedData['avatar_url'] 
             ?? ($storedData['avatar'] ?? null)
@@ -250,25 +271,86 @@ function handleSave(PDO $pdo, array $input): void
         return;
     }
 
+    // 2. Force Save & Return: Explicitly extract name and avatar from incoming JSON
+    $incomingName = $input['name'] 
+        ?? ($input['nickname'] ?? null)
+        ?? ($input['planex_user_nickname'] ?? null)
+        ?? ($input['data']['name'] ?? null) 
+        ?? ($input['data']['nickname'] ?? null)
+        ?? ($input['backupData']['planex_user_nickname'] ?? null) 
+        ?? ($input['data']['backupData']['planex_user_nickname'] ?? null);
+
+    $incomingAvatar = $input['avatar'] 
+        ?? ($input['avatar_url'] ?? null)
+        ?? ($input['photo_url'] ?? null)
+        ?? ($input['planex_user_avatar'] ?? null)
+        ?? ($input['data']['avatar'] ?? null)
+        ?? ($input['data']['avatar_url'] ?? null)
+        ?? ($input['backupData']['planex_user_avatar'] ?? null);
+
     // Merge incoming data with existing stored data (don't overwrite the whole record)
     $stmt2 = $pdo->prepare("SELECT data FROM users WHERE phone = :phone LIMIT 1");
     $stmt2->execute([':phone' => $phone]);
     $row = $stmt2->fetch();
     $existingData = $row ? (json_decode($row['data'], true) ?: []) : [];
     $mergedData = is_array($data) ? array_merge($existingData, $data) : $data;
+    if (!is_array($mergedData)) {
+        $mergedData = [];
+    }
 
-    // Update data
+    // Forcefully update $mergedData['name'] and $mergedData['backupData']['planex_user_nickname']
+    if (!empty($incomingName)) {
+        $mergedData['name'] = $incomingName;
+        $mergedData['nickname'] = $incomingName;
+        if (!isset($mergedData['backupData']) || !is_array($mergedData['backupData'])) {
+            $mergedData['backupData'] = [];
+        }
+        $mergedData['backupData']['planex_user_nickname'] = $incomingName;
+        if (isset($mergedData['backupData']['planex_user_profile']) && is_array($mergedData['backupData']['planex_user_profile'])) {
+            $mergedData['backupData']['planex_user_profile']['name'] = $incomingName;
+            $mergedData['backupData']['planex_user_profile']['nickname'] = $incomingName;
+        }
+    }
+
+    if (!empty($incomingAvatar)) {
+        $mergedData['avatar'] = $incomingAvatar;
+        $mergedData['avatar_url'] = $incomingAvatar;
+        if (!isset($mergedData['backupData']) || !is_array($mergedData['backupData'])) {
+            $mergedData['backupData'] = [];
+        }
+        $mergedData['backupData']['planex_user_avatar'] = $incomingAvatar;
+        if (isset($mergedData['backupData']['planex_user_profile']) && is_array($mergedData['backupData']['planex_user_profile'])) {
+            $mergedData['backupData']['planex_user_profile']['avatar'] = $incomingAvatar;
+            $mergedData['backupData']['planex_user_profile']['avatar_url'] = $incomingAvatar;
+        }
+    }
+
+    // Save to DB
     $stmt = $pdo->prepare("UPDATE users SET data = :data, updated_at = NOW() WHERE phone = :phone");
     $stmt->execute([
         ':data'  => json_encode($mergedData, JSON_UNESCAPED_UNICODE),
         ':phone' => $phone
     ]);
 
+    $savedName = $mergedData['name'] ?? ($mergedData['backupData']['planex_user_nickname'] ?? null) ?? 'کاربر پلنکس';
+    $savedAvatar = $mergedData['avatar_url'] ?? ($mergedData['avatar'] ?? null) ?? ($mergedData['backupData']['planex_user_avatar'] ?? null) ?? '';
+
+    // Explicitly return name and avatar in JSON response
     echo json_encode([
         'success'    => true,
         'message'    => 'Data saved successfully',
-        'backupData' => is_array($mergedData) ? ($mergedData['backupData'] ?? $mergedData) : $mergedData,
-        'study_logs' => is_array($mergedData) ? ($mergedData['study_logs'] ?? []) : [],
-        'rooms'      => is_array($mergedData) ? ($mergedData['rooms'] ?? []) : []
+        'name'       => $savedName,
+        'avatar'     => $savedAvatar,
+        'avatar_url' => $savedAvatar,
+        'user'       => [
+            'id'         => (int) $user['id'],
+            'phone'      => $phone,
+            'name'       => $savedName,
+            'avatar'     => $savedAvatar,
+            'avatar_url' => $savedAvatar
+        ],
+        'backupData' => $mergedData['backupData'] ?? $mergedData,
+        'study_logs' => $mergedData['study_logs'] ?? [],
+        'rooms'      => $mergedData['rooms'] ?? []
     ]);
 }

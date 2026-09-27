@@ -127,13 +127,20 @@ export const personalSyncService = {
       studyLogs = [];
     }
 
+    // 1. Force Payload: Explicitly grab absolute latest name & avatar from localStorage right before sending
+    const rawNickname = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_nickname') || localStorage.getItem('planex_leaderboard_nickname') || '') : '');
+    const activeName = rawNickname || profile.name || profile.nickname || authUser?.full_name || authUser?.name || 'کاربر پلنکس';
+
     const storedAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
     const activeAvatar = storedAvatar || profile.avatar || profile.avatar_url || profile.photo || authUser?.avatar_url || authUser?.avatar || authUser?.photo_url || '';
 
-    if (activeAvatar && backupData && typeof backupData === 'object') {
+    if (backupData && typeof backupData === 'object') {
+      backupData.planex_user_nickname = activeName;
       backupData.planex_user_avatar = activeAvatar;
       if (!backupData.planex_user_profile) backupData.planex_user_profile = profile;
       if (backupData.planex_user_profile && typeof backupData.planex_user_profile === 'object') {
+        backupData.planex_user_profile.name = activeName;
+        backupData.planex_user_profile.nickname = activeName;
         backupData.planex_user_profile.avatar = activeAvatar;
         backupData.planex_user_profile.avatar_url = activeAvatar;
       }
@@ -146,7 +153,9 @@ export const personalSyncService = {
       rooms: joinedRooms,
       backupData: backupData,
       appState: backupData,
-      name: profile.name || profile.nickname || authUser?.name || 'کاربر پلنکس',
+      name: activeName,
+      nickname: activeName,
+      planex_user_nickname: activeName,
       avatar: activeAvatar,
       avatar_url: activeAvatar,
       photo_url: activeAvatar,
@@ -155,11 +164,14 @@ export const personalSyncService = {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
+      // 4. Kill API Cache: Append _t timestamp parameter & set no-store
+      const res = await fetch(`${API_BASE_URL}/api/sync.php?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         },
         body: JSON.stringify({ action: 'save', ...payload })
       });
@@ -171,14 +183,37 @@ export const personalSyncService = {
       } catch (e) {}
 
       if (res.ok && data && data.success) {
-        // Restore backupData returned from server first
         if (data.backupData && typeof data.backupData === 'object') {
           this.importLocalState(data.backupData);
         }
 
-        const returnedAvatar = data.backupData?.planex_user_avatar || (typeof data.backupData?.planex_user_profile === 'object' ? data.backupData.planex_user_profile?.avatar : null) || data.user?.avatar_url || data.user?.avatar;
-        const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
-        const targetAvatar = (returnedAvatar && !returnedAvatar.includes('dicebear.com')) ? returnedAvatar : (currentAvatar || returnedAvatar);
+        // Extract returned name & avatar from server response
+        const returnedName = data.name || data.user?.name || data.backupData?.planex_user_nickname || activeName;
+        const returnedAvatar = data.avatar_url || data.avatar || data.user?.avatar_url || data.user?.avatar || data.backupData?.planex_user_avatar || activeAvatar;
+        const targetAvatar = (returnedAvatar && !returnedAvatar.includes('dicebear.com')) ? returnedAvatar : (activeAvatar || returnedAvatar);
+
+        // Force overwrite localStorage keys
+        if (returnedName) {
+          try {
+            localStorage.setItem('planex_user_nickname', returnedName);
+            localStorage.setItem('planex_leaderboard_nickname', returnedName);
+            localStorage.setItem('planex_nickname', returnedName);
+
+            let userAccount = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
+            userAccount.name = returnedName;
+            userAccount.full_name = returnedName;
+            userAccount.nickname = returnedName;
+            localStorage.setItem('planex_auth_user', JSON.stringify(userAccount));
+            localStorage.setItem('planex_user_account', JSON.stringify(userAccount));
+
+            let p = (db && typeof db.getUserProfile === 'function') ? (db.getUserProfile() || {}) : {};
+            p.name = returnedName;
+            p.nickname = returnedName;
+            if (db && typeof db.setUserProfile === 'function') {
+              db.setUserProfile(p);
+            }
+          } catch(e) {}
+        }
 
         if (targetAvatar) {
           try {
@@ -190,21 +225,18 @@ export const personalSyncService = {
             localStorage.setItem('planex_auth_user', JSON.stringify(userAccount));
             localStorage.setItem('planex_user_account', JSON.stringify(userAccount));
 
-            let p = db.getUserProfile() || {};
+            let p = (db && typeof db.getUserProfile === 'function') ? (db.getUserProfile() || {}) : {};
             p.avatar = targetAvatar;
             p.avatar_url = targetAvatar;
             p.photo = targetAvatar;
             p.photoUrl = targetAvatar;
-            if (data.user && data.user.name) {
-              p.name = data.user.name;
-              p.nickname = data.user.name;
+            if (db && typeof db.setUserProfile === 'function') {
+              db.setUserProfile(p);
             }
-            db.setUserProfile(p);
           } catch(e) {}
         }
         db.markPersonalSyncSuccess();
 
-        // Merge rooms returned from server
         if (Array.isArray(data.rooms) && data.rooms.length > 0) {
           localStorage.setItem('planex_my_groups', JSON.stringify(data.rooms));
           localStorage.setItem('planex_my_rooms', JSON.stringify(data.rooms));
@@ -213,7 +245,6 @@ export const personalSyncService = {
           }
         }
 
-        // Merge study logs returned from server into both planex_study_logs and planex_recent_activity_sessions
         if (Array.isArray(data.study_logs) && data.study_logs.length > 0) {
           if (db && typeof db.saveStudyLogs === 'function') {
             db.saveStudyLogs(data.study_logs);
@@ -227,10 +258,27 @@ export const personalSyncService = {
           db._breakdownMemoMap = {};
         }
 
-        // CRITICAL: Force Dashboard and charts to re-render to reflect new synced data
+        // 3. Force UI Update: updateHeaderDOM + direct DOM element patch
         if (typeof window !== 'undefined') {
           if (typeof window.updateHeaderDOM === 'function') window.updateHeaderDOM();
+
+          if (returnedName) {
+            document.querySelectorAll('#btn-header-user-account span:last-child, .user-nickname-display, #profile-display-name-val, .profile-name-text').forEach(el => {
+              if (el.tagName === 'INPUT') el.value = returnedName;
+              else el.innerText = returnedName;
+            });
+            const profileInput = document.getElementById('profile-display-name');
+            if (profileInput) profileInput.value = returnedName;
+          }
+
+          if (targetAvatar) {
+            document.querySelectorAll('#btn-header-user-account img, #main-header-avatar, #main-avatar-preview, .user-avatar-img').forEach(imgEl => {
+              if (imgEl && imgEl.tagName === 'IMG') imgEl.src = targetAvatar;
+            });
+          }
+
           window.dispatchEvent(new CustomEvent('profileUpdated'));
+          window.dispatchEvent(new CustomEvent('auth-changed'));
           window.dispatchEvent(new CustomEvent('study-logs-updated'));
           window.dispatchEvent(new CustomEvent('sessions-updated'));
           window.dispatchEvent(new CustomEvent('activity-saved', { detail: { sync: true } }));
@@ -278,9 +326,13 @@ export const personalSyncService = {
     }
 
     try {
+      // 4. Kill API Cache: Append _t timestamp parameter & set no-store
       const res = await fetch(`${API_BASE_URL}/api/sync.php?action=get&phone=${encodeURIComponent(phone)}&_t=${Date.now()}`, {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
 
       const rawText = await res.text();
@@ -290,11 +342,7 @@ export const personalSyncService = {
       } catch (e) {}
 
       if (res.ok && json && json.success) {
-        if (json.backupData && typeof json.backupData === 'object') {
-          this.importLocalState(json.backupData);
-        }
-
-        // 1. Extract and update user NAME across all storage keys & DB
+        // Extract pulled name & avatar from server response
         const pulledName = json.user?.name 
           || json.name 
           || json.backupData?.planex_user_nickname 
@@ -302,14 +350,47 @@ export const personalSyncService = {
           || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.nickname : null)
           || null;
 
+        const pulledAvatar = json.user?.avatar_url 
+          || json.user?.avatar 
+          || json.user?.photo_url 
+          || json.avatar_url 
+          || json.avatar 
+          || json.backupData?.planex_user_avatar 
+          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.avatar : null) 
+          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.avatar_url : null) 
+          || null;
+
+        const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
+        const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com')) ? pulledAvatar : (pulledAvatar || currentAvatar);
+
+        // Pre-patch backupData so importLocalState does not pollute localStorage with stale values
+        if (json.backupData && typeof json.backupData === 'object') {
+          if (pulledName && pulledName !== 'x' && pulledName !== 'دانش آموز پرتلاش' && pulledName !== 'دانش‌آموز پرتلاش') {
+            json.backupData.planex_user_nickname = pulledName;
+            if (!json.backupData.planex_user_profile) json.backupData.planex_user_profile = {};
+            json.backupData.planex_user_profile.name = pulledName;
+            json.backupData.planex_user_profile.nickname = pulledName;
+          }
+          if (targetAvatar) {
+            json.backupData.planex_user_avatar = targetAvatar;
+            if (!json.backupData.planex_user_profile) json.backupData.planex_user_profile = {};
+            json.backupData.planex_user_profile.avatar = targetAvatar;
+            json.backupData.planex_user_profile.avatar_url = targetAvatar;
+          }
+          this.importLocalState(json.backupData);
+        }
+
+        // 3. Force UI Update: Overwrite all name & avatar localStorage keys immediately with server's response
         if (pulledName && pulledName !== 'کاربر مهمان') {
           try {
             localStorage.setItem('planex_user_nickname', pulledName);
             localStorage.setItem('planex_leaderboard_nickname', pulledName);
+            localStorage.setItem('planex_nickname', pulledName);
             
             let userAuth = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
             userAuth.name = pulledName;
             userAuth.full_name = pulledName;
+            userAuth.nickname = pulledName;
             localStorage.setItem('planex_auth_user', JSON.stringify(userAuth));
             localStorage.setItem('planex_user_account', JSON.stringify(userAuth));
 
@@ -323,20 +404,6 @@ export const personalSyncService = {
             console.warn('[PersonalSync] Error updating pulled name:', e);
           }
         }
-
-        // 2. Extract and update user AVATAR across all storage keys & DB
-        const pulledAvatar = json.user?.avatar_url 
-          || json.user?.avatar 
-          || json.user?.photo_url 
-          || json.avatar_url 
-          || json.avatar 
-          || json.backupData?.planex_user_avatar 
-          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.avatar : null) 
-          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.avatar_url : null) 
-          || null;
-
-        const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
-        const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com')) ? pulledAvatar : (currentAvatar || pulledAvatar);
 
         if (targetAvatar) {
           try {
@@ -360,6 +427,7 @@ export const personalSyncService = {
             console.warn('[PersonalSync] Error updating pulled avatar:', e);
           }
         }
+
         if (Array.isArray(json.rooms) && json.rooms.length > 0) {
           localStorage.setItem('planex_my_groups', JSON.stringify(json.rooms));
           localStorage.setItem('planex_my_rooms', JSON.stringify(json.rooms));
@@ -380,10 +448,28 @@ export const personalSyncService = {
         }
         db.markPersonalSyncSuccess();
 
-        // CRITICAL: Force Dashboard and charts to re-render
+        // 3. Force UI Update: updateHeaderDOM + direct DOM element selection
         if (typeof window !== 'undefined') {
-          // Immediately patch header DOM with the latest name/avatar before full re-render
           if (typeof window.updateHeaderDOM === 'function') window.updateHeaderDOM();
+
+          const effectiveName = pulledName || localStorage.getItem('planex_user_nickname') || '';
+          const effectiveAvatar = targetAvatar || localStorage.getItem('planex_user_avatar') || '';
+
+          if (effectiveName) {
+            document.querySelectorAll('#btn-header-user-account span:last-child, .user-nickname-display, #profile-display-name-val, .profile-name-text').forEach(el => {
+              if (el.tagName === 'INPUT') el.value = effectiveName;
+              else el.innerText = effectiveName;
+            });
+            const profileInput = document.getElementById('profile-display-name');
+            if (profileInput) profileInput.value = effectiveName;
+          }
+
+          if (effectiveAvatar) {
+            document.querySelectorAll('#btn-header-user-account img, #main-header-avatar, #main-avatar-preview, .user-avatar-img').forEach(imgEl => {
+              if (imgEl && imgEl.tagName === 'IMG') imgEl.src = effectiveAvatar;
+            });
+          }
+
           window.dispatchEvent(new CustomEvent('profileUpdated'));
           window.dispatchEvent(new CustomEvent('auth-changed'));
           window.dispatchEvent(new CustomEvent('study-logs-updated'));
