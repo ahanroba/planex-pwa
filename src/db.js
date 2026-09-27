@@ -2576,6 +2576,10 @@ class DatabaseEngine {
       localStorage.setItem('planex_my_groups', JSON.stringify(uniqueList));
       localStorage.setItem('planex_my_rooms', JSON.stringify(uniqueList));
 
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('rooms-updated'));
+      }
+
       // Also sync active code
       const activeCode = this.getActiveGroupCode();
       if (!activeCode || !uniqueMap.has(activeCode)) {

@@ -616,14 +616,14 @@ let _smartSyncInterval = null;
 let _actionPushDebounceTimeout = null;
 
 /**
- * 1. Focus-driven Sync:
- * Runs pullFromCloud() silently when tab becomes visible or receives focus.
- * Debounced to at most once per 10 seconds to avoid spamming server on rapid tab switching.
+ * 1. Focus-driven & Load-driven Sync:
+ * Runs pullFromCloud() when app opens, reloads, receives focus, tab becomes visible, or reconnects online.
+ * Throttled to at most once per 2 seconds (unless forced) to prevent rapid redundant calls.
  */
-export function handleFocusDrivenSync() {
+export function handleFocusDrivenSync(force = false) {
   if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
   const now = Date.now();
-  if (now - _lastFocusPullTime < 10000) return;
+  if (!force && now - _lastFocusPullTime < 2000) return;
   _lastFocusPullTime = now;
 
   if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pullFromCloud === 'function') {
@@ -653,10 +653,10 @@ export function startSmartSyncInterval() {
 
 /**
  * 3. Action-driven Sync:
- * Immediately triggers pushToCloud() (debounced by 300ms) when user completes an action
- * (e.g. task added/toggled, pomodoro finished, profile saved).
+ * Automatically triggers pushToCloud() (debounced by default 150ms) when user completes an action
+ * (e.g. room created/joined, profile saved, study session completed).
  */
-export function triggerActionDrivenPush(delayMs = 300) {
+export function triggerActionDrivenPush(delayMs = 150) {
   if (typeof window === 'undefined') return;
   if (_actionPushDebounceTimeout) clearTimeout(_actionPushDebounceTimeout);
 
@@ -671,18 +671,60 @@ export function triggerActionDrivenPush(delayMs = 300) {
 }
 
 if (typeof window !== 'undefined') {
-  // 1. Focus-driven Event Listeners
+  // 1. Initial Load & Focus/Visibility Event Listeners for Instant Auto-Pull
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(() => handleFocusDrivenSync(true), 100);
+  } else {
+    window.addEventListener('DOMContentLoaded', () => handleFocusDrivenSync(true));
+    window.addEventListener('load', () => handleFocusDrivenSync(true));
+  }
+
   window.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') handleFocusDrivenSync();
+    if (document.visibilityState === 'visible') handleFocusDrivenSync(true);
   });
-  window.addEventListener('focus', handleFocusDrivenSync);
+  window.addEventListener('focus', () => handleFocusDrivenSync(true));
+  window.addEventListener('online', () => handleFocusDrivenSync(true));
 
   // 2. Start 60-Second Interval Sync
   startSmartSyncInterval();
 
-  // 3. Listen for activity saving (pomodoro finish / manual log)
-  window.addEventListener('activity-saved', () => {
-    triggerActionDrivenPush(300);
+  // 3. Comprehensive Auto-Push Event Listeners for State Changes:
+  // - Profile saves
+  // - Study timer completion & log creation
+  // - Room / Group creation, joining, modification
+  const autoPushEvents = [
+    'activity-saved',
+    'study-logs-updated',
+    'sessions-updated',
+    'pomodoro-completed',
+    'profileUpdated',
+    'auth-changed',
+    'rooms-updated',
+    'groups-updated',
+    'room-created',
+    'room-joined',
+    'room-modified'
+  ];
+
+  autoPushEvents.forEach(evtName => {
+    window.addEventListener(evtName, () => {
+      triggerActionDrivenPush(150);
+    });
+  });
+
+  // Listen for storage changes across tabs/windows
+  window.addEventListener('storage', (e) => {
+    if (!e.key) return;
+    if (
+      e.key === 'planex_user_nickname' ||
+      e.key === 'planex_user_avatar' ||
+      e.key === 'planex_my_groups' ||
+      e.key === 'planex_my_rooms' ||
+      e.key === 'planex_study_logs' ||
+      e.key === 'planex_recent_activity_sessions'
+    ) {
+      triggerActionDrivenPush(200);
+    }
   });
 
   window.personalSyncService = personalSyncService;
