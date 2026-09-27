@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planex-v-force-12345-' + Date.now();
+const CACHE_NAME = 'planex-v-force-12346-' + Date.now();
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

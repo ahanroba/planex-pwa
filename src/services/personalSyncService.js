@@ -1,7 +1,7 @@
 // Personal Cloud Sync Service for PlanEx Web
 // Enables seamless full-data, study logs, and study rooms synchronization based on Phone Number
 
-import { db } from '../db.js';
+import { db, applyVerifiedUserIdentity, isPlaceholderProfileName } from '../db.js';
 import { API_BASE_URL } from '../config.js';
 
 export function normalizePhone(rawPhone) {
@@ -29,6 +29,64 @@ export const personalSyncService = {
    */
   getOrCreateSyncToken() {
     return db.getOrCreatePersonalSyncToken();
+  },
+
+  /**
+   * Concurrency bookkeeping: the last server-assigned document version we have
+   * hydrated locally. Sent with every push so sync.php can reject stale writes
+   * from a device that missed an intermediate merge.
+   */
+  _getBaseVersion() {
+    try {
+      return parseInt(localStorage.getItem('planex_sync_base_version') || '0', 10) || 0;
+    } catch (e) {
+      return 0;
+    }
+  },
+
+  _setBaseVersion(v) {
+    try {
+      if (v !== null && v !== undefined && !isNaN(parseInt(v, 10))) {
+        localStorage.setItem('planex_sync_base_version', String(parseInt(v, 10)));
+      }
+    } catch (e) {}
+  },
+
+  /**
+   * Client-side union-merge for arrays of records (study logs / rooms).
+   * Mirrors the server's dedupe-by-identity strategy so a post-push pull can
+   * fold server reality into localStorage without ever dropping local records.
+   */
+  _mergeRecordArrays(existingArr, incomingArr) {
+    const toArr = (a) => (Array.isArray(a) ? a : []);
+    const identity = (rec) => {
+      if (!rec || typeof rec !== 'object') return 's:' + String(rec);
+      for (const k of ['id', 'uuid', '_id', 'sessionId', 'session_id', 'logId', 'roomCode', 'code']) {
+        if (rec[k] !== undefined && rec[k] !== null && String(rec[k]) !== '') {
+          return 'k:' + k + ':' + String(rec[k]).toLowerCase();
+        }
+      }
+      let sig = '';
+      for (const f of ['date', 'dateStr', 'startTime', 'start', 'timestamp', 'subject', 'duration', 'minutes']) {
+        if (rec[f] !== undefined && rec[f] !== null) sig += f + '=' + String(rec[f]) + ';';
+      }
+      return sig ? 'c:' + sig : 'h:' + JSON.stringify(rec);
+    };
+    const tsOf = (rec) => {
+      if (!rec || typeof rec !== 'object') return 0;
+      const t = rec.updatedAt ?? rec.updated_at ?? rec.timestamp ?? rec.savedAt;
+      const n = Number(t);
+      if (!isNaN(n) && n > 0) return n < 1e11 ? n * 1000 : n;
+      return 0;
+    };
+    const map = new Map();
+    toArr(existingArr).forEach(r => map.set(identity(r), r));
+    toArr(incomingArr).forEach(r => {
+      const key = identity(r);
+      const prev = map.get(key);
+      if (!prev || tsOf(r) >= tsOf(prev)) map.set(key, r);
+    });
+    return Array.from(map.values());
   },
 
   /**
@@ -130,12 +188,39 @@ export const personalSyncService = {
     const storedAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
     const activeAvatar = storedAvatar || profile.avatar || profile.avatar_url || profile.photo || authUser?.avatar_url || authUser?.avatar || authUser?.photo_url || '';
 
-    if (activeAvatar && backupData && typeof backupData === 'object') {
-      backupData.planex_user_avatar = activeAvatar;
-      if (!backupData.planex_user_profile) backupData.planex_user_profile = profile;
-      if (backupData.planex_user_profile && typeof backupData.planex_user_profile === 'object') {
-        backupData.planex_user_profile.avatar = activeAvatar;
-        backupData.planex_user_profile.avatar_url = activeAvatar;
+    // ── IDENTITY GUARD: force the outgoing top-level name/avatar to the freshest
+    // verified identity. Priority: planex_identity_verified_* (set by the profile
+    // editor / login / pull) > fresh db.getUserProfile() fields > auth record,
+    // and NEVER a placeholder like "دانش‌آموز پرتلاش" or "کاربر پلنکس".
+    let payloadName = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+    if (!payloadName || isPlaceholderProfileName(payloadName)) {
+      payloadName = profile.name || profile.nickname || authUser?.name || authUser?.full_name || '';
+    }
+    if (isPlaceholderProfileName(payloadName)) payloadName = '';
+
+    let payloadAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_avatar') || '') : '');
+    if (!payloadAvatar) payloadAvatar = activeAvatar;
+
+    if (backupData && typeof backupData === 'object') {
+      if (payloadName) {
+        backupData.planex_user_nickname = payloadName;
+        backupData.planex_leaderboard_nickname = payloadName;
+        if (!backupData.planex_user_profile || typeof backupData.planex_user_profile !== 'object') {
+          backupData.planex_user_profile = { ...(profile || {}) };
+        }
+        backupData.planex_user_profile.name = payloadName;
+        backupData.planex_user_profile.nickname = payloadName;
+        if (authUser && typeof authUser === 'object') {
+          backupData.planex_auth_user = { ...authUser, name: payloadName, full_name: payloadName };
+        }
+      }
+      if (payloadAvatar) {
+        backupData.planex_user_avatar = payloadAvatar;
+        if (!backupData.planex_user_profile || typeof backupData.planex_user_profile !== 'object') {
+          backupData.planex_user_profile = { ...(profile || {}) };
+        }
+        backupData.planex_user_profile.avatar = payloadAvatar;
+        backupData.planex_user_profile.avatar_url = payloadAvatar;
       }
     }
 
@@ -146,15 +231,36 @@ export const personalSyncService = {
       rooms: joinedRooms,
       backupData: backupData,
       appState: backupData,
-      name: profile.name || profile.nickname || authUser?.name || 'کاربر پلنکس',
-      avatar: activeAvatar,
-      avatar_url: activeAvatar,
-      photo_url: activeAvatar,
-      planex_user_avatar: activeAvatar,
-      updatedAt: Date.now()
+      name: payloadName || 'کاربر پلنکس',
+      avatar: payloadAvatar,
+      avatar_url: payloadAvatar,
+      photo_url: payloadAvatar,
+      planex_user_avatar: payloadAvatar,
+      updatedAt: Date.now(),
+      // Concurrency: the document version this local state was derived from.
+      // sync.php uses it (plus updatedAt) to reject stale overwrites.
+      _version: this._getBaseVersion()
     };
 
     try {
+      // Re-read the verified identity at send time (it may have been updated by
+      // EditProfileModal / login while this function was being prepared) so the
+      // wire payload strictly contains the user's actual input.
+      const liveVerifiedName = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+      if (liveVerifiedName && !isPlaceholderProfileName(liveVerifiedName)) {
+        payload.name = liveVerifiedName;
+        if (payload.backupData && typeof payload.backupData === 'object') {
+          payload.backupData.planex_user_nickname = liveVerifiedName;
+        }
+      }
+      const liveVerifiedAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_avatar') || '') : '');
+      if (liveVerifiedAvatar) {
+        payload.avatar = liveVerifiedAvatar;
+        payload.avatar_url = liveVerifiedAvatar;
+        payload.photo_url = liveVerifiedAvatar;
+        payload.planex_user_avatar = liveVerifiedAvatar;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
         method: 'POST',
         headers: {
@@ -171,10 +277,21 @@ export const personalSyncService = {
       } catch (e) {}
 
       if (res.ok && data && data.success) {
+        // Server echo of the identity we just pushed — re-commit it as the
+        // verified identity AFTER restoring backupData so a stale server blob
+        // can never downgrade the freshly saved name/avatar.
+        const echoedName = payloadName || (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+        const echoedAvatar = payloadAvatar;
+
         // Restore backupData returned from server first
         if (data.backupData && typeof data.backupData === 'object') {
           this.importLocalState(data.backupData);
         }
+
+        applyVerifiedUserIdentity({
+          name: (echoedName && !isPlaceholderProfileName(echoedName)) ? echoedName : undefined,
+          avatar: echoedAvatar || undefined
+        });
 
         const returnedAvatar = data.backupData?.planex_user_avatar || (typeof data.backupData?.planex_user_profile === 'object' ? data.backupData.planex_user_profile?.avatar : null) || data.user?.avatar_url || data.user?.avatar;
         const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
@@ -195,37 +312,74 @@ export const personalSyncService = {
             p.avatar_url = targetAvatar;
             p.photo = targetAvatar;
             p.photoUrl = targetAvatar;
-            if (data.user && data.user.name) {
-              p.name = data.user.name;
-              p.nickname = data.user.name;
+            // Prefer the freshest verified identity over any (possibly stale) server echo
+            const latestVerifiedName = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+            const serverName = (data.user && data.user.name && !isPlaceholderProfileName(data.user.name)) ? data.user.name : '';
+            const finalPushName = (echoedName && !isPlaceholderProfileName(echoedName)) ? echoedName : (latestVerifiedName || serverName);
+            if (finalPushName) {
+              p.name = finalPushName;
+              p.nickname = finalPushName;
             }
             db.setUserProfile(p);
           } catch(e) {}
         }
         db.markPersonalSyncSuccess();
 
-        // Merge rooms returned from server
-        if (Array.isArray(data.rooms) && data.rooms.length > 0) {
-          localStorage.setItem('planex_my_groups', JSON.stringify(data.rooms));
-          localStorage.setItem('planex_my_rooms', JSON.stringify(data.rooms));
-          if (db && typeof db.setUserGroups === 'function') {
-            db.setUserGroups(data.rooms);
+        // Merge rooms returned from server (union — never lose locally-created rooms)
+        if (Array.isArray(data.rooms)) {
+          let localRooms = [];
+          try { localRooms = JSON.parse(localStorage.getItem('planex_my_groups') || '[]'); } catch (e) { localRooms = []; }
+          const mergedRooms = this._mergeRecordArrays(localRooms, data.rooms);
+          if (mergedRooms.length > 0) {
+            localStorage.setItem('planex_my_groups', JSON.stringify(mergedRooms));
+            localStorage.setItem('planex_my_rooms', JSON.stringify(mergedRooms));
+            if (db && typeof db.setUserGroups === 'function') {
+              db.setUserGroups(mergedRooms);
+            }
           }
         }
 
-        // Merge study logs returned from server into both planex_study_logs and planex_recent_activity_sessions
-        if (Array.isArray(data.study_logs) && data.study_logs.length > 0) {
-          if (db && typeof db.saveStudyLogs === 'function') {
-            db.saveStudyLogs(data.study_logs);
-          } else {
-            localStorage.setItem('planex_study_logs', JSON.stringify(data.study_logs));
-            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(data.study_logs));
+        // Merge study logs returned from server into both planex_study_logs and
+        // planex_recent_activity_sessions (union-merge so Device A's new logs
+        // that the server folded in via deep merge are never dropped locally).
+        if (Array.isArray(data.study_logs)) {
+          let localLogs = [];
+          let localRecent = [];
+          try { localLogs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]'); } catch (e) { localLogs = []; }
+          try { localRecent = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]'); } catch (e) { localRecent = []; }
+          const mergedLogs = this._mergeRecordArrays(this._mergeRecordArrays(localLogs, localRecent), data.study_logs);
+          if (mergedLogs.length > 0) {
+            if (db && typeof db.saveStudyLogs === 'function') {
+              db.saveStudyLogs(mergedLogs);
+            } else {
+              localStorage.setItem('planex_study_logs', JSON.stringify(mergedLogs));
+              localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(mergedLogs));
+            }
           }
         }
 
         if (db) {
           db._breakdownMemoMap = {};
         }
+
+        // ── READ-MY-WRITES: immediately pull the newly MERGED server reality ──
+        // The server deep-merged our push with every other device's data. Pulling
+        // right now folds that merged truth back into localStorage so this device
+        // is instantly consistent with the cloud (Device A's study logs appear on
+        // Device B and vice versa). Identity Guard + verified-name logic inside
+        // pullFromCloud ensure our just-pushed name/avatar survive the restore.
+        try {
+          await this.pullFromCloud(phone);
+        } catch (pullErr) {
+          console.warn('[PersonalSync] Post-push reconciliation pull deferred:', pullErr);
+        }
+
+        // Re-assert the identity we pushed, AFTER the reconciliation pull, so no
+        // stale server echo can downgrade the freshest local edit.
+        applyVerifiedUserIdentity({
+          name: (echoedName && !isPlaceholderProfileName(echoedName)) ? echoedName : undefined,
+          avatar: echoedAvatar || undefined
+        });
 
         // CRITICAL: Force Dashboard and charts to re-render to reflect new synced data
         if (typeof window !== 'undefined') {
@@ -302,7 +456,7 @@ export const personalSyncService = {
           || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.nickname : null)
           || null;
 
-        if (pulledName && pulledName !== 'کاربر مهمان') {
+        if (pulledName && !isPlaceholderProfileName(pulledName)) {
           try {
             localStorage.setItem('planex_user_nickname', pulledName);
             localStorage.setItem('planex_leaderboard_nickname', pulledName);
@@ -336,7 +490,10 @@ export const personalSyncService = {
           || null;
 
         const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
-        const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com')) ? pulledAvatar : (currentAvatar || pulledAvatar);
+        const verifiedAvatarLocal = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_avatar') || '') : '');
+        const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com'))
+          ? pulledAvatar
+          : (verifiedAvatarLocal || currentAvatar || pulledAvatar);
 
         if (targetAvatar) {
           try {
@@ -360,6 +517,13 @@ export const personalSyncService = {
             console.warn('[PersonalSync] Error updating pulled avatar:', e);
           }
         }
+
+        // ── IDENTITY GUARD: commit the pulled identity as verified so subsequent
+        // backup restores / re-renders can never fall back to the placeholder.
+        applyVerifiedUserIdentity({
+          name: (pulledName && !isPlaceholderProfileName(pulledName)) ? pulledName : null,
+          avatar: targetAvatar || null
+        });
         if (Array.isArray(json.rooms) && json.rooms.length > 0) {
           localStorage.setItem('planex_my_groups', JSON.stringify(json.rooms));
           localStorage.setItem('planex_my_rooms', JSON.stringify(json.rooms));
@@ -368,17 +532,23 @@ export const personalSyncService = {
           }
         }
         if (Array.isArray(json.study_logs) && json.study_logs.length > 0) {
+          let localLogs = [];
+          try { localLogs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]'); } catch (e) { localLogs = []; }
+          const mergedPulledLogs = this._mergeRecordArrays(localLogs, json.study_logs);
           if (db && typeof db.saveStudyLogs === 'function') {
-            db.saveStudyLogs(json.study_logs);
+            db.saveStudyLogs(mergedPulledLogs);
           } else {
-            localStorage.setItem('planex_study_logs', JSON.stringify(json.study_logs));
-            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(json.study_logs));
+            localStorage.setItem('planex_study_logs', JSON.stringify(mergedPulledLogs));
+            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(mergedPulledLogs));
           }
         }
         if (db) {
           db._breakdownMemoMap = {};
         }
         db.markPersonalSyncSuccess();
+
+        // Track the server document version we just hydrated for concurrency checks.
+        this._setBaseVersion(json._version);
 
         // CRITICAL: Force Dashboard and charts to re-render
         if (typeof window !== 'undefined') {

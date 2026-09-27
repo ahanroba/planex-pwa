@@ -33,6 +33,90 @@ const STORAGE_KEYS = {
 
 import { ACTIVITY_PALETTE_24, DEFAULT_CATEGORIES, DEFAULT_NON_STUDY_CATEGORIES, formatStudyTime, getNextActivityColor, isStudyCategory } from './constants.js';
 
+// ─── Canonical Default Profile Identity ───
+// Single source of truth for the placeholder name. IMPORTANT: this string must be
+// built with String.fromCharCode so every module compares against the EXACT same
+// codepoints (with a real U+200C ZWNJ). Previously Header.js compared against a
+// literal 'دانش\u200Cآموز پرتلاش' (backslash-u escape inside single quotes = never
+// equal to the stored value), so the default-name guard silently failed and the
+// header kept showing the placeholder even after a successful cloud pull.
+export const DEFAULT_PROFILE_NAME = `دانش${String.fromCharCode(0x200C)}آموز پرتلاش`;
+// Placeholder names that must NEVER win over real synced data in any UI component.
+const PLACEHOLDER_NAMES = new Set([DEFAULT_PROFILE_NAME, 'داوطلب پرتلاش', 'کاربر پلنکس', 'کاربر مهمان']);
+
+export function isPlaceholderProfileName(name) {
+  if (!name || typeof name !== 'string') return true;
+  const trimmed = name.trim();
+  if (!trimmed) return true;
+  // Normalize ZWNJ variants before comparing so look-alike strings are caught too
+  const normalized = trimmed.replace(/[\u200C\u200D\u0640\s]+/g, '\u200C');
+  for (const placeholder of PLACEHOLDER_NAMES) {
+    if (placeholder.replace(/[\u200C\u200D\u0640\s]+/g, '\u200C') === normalized) return true;
+  }
+  return false;
+}
+
+/**
+ * THE SINGLE TRUTH-SOURCE HYDRATION FUNCTION.
+ * Permanently commits a real (server-synced or user-edited) identity across ALL
+ * localStorage keys used by every UI surface (Header, LoginModal, DailyRingWidget,
+ * leaderboardService, EditProfileModal...) AND marks it as verified so that later
+ * importAllDataJSON() restores of stale backups can never blast it away.
+ */
+export function applyVerifiedUserIdentity({ name, avatar } = {}) {
+  const cleanName = (typeof name === 'string') ? name.trim() : '';
+  const cleanAvatar = (typeof avatar === 'string') ? avatar.trim() : '';
+  if (!cleanName && !cleanAvatar) return false;
+
+  try {
+    if (cleanName && !isPlaceholderProfileName(cleanName)) {
+      localStorage.setItem('planex_user_nickname', cleanName);
+      localStorage.setItem('planex_leaderboard_nickname', cleanName);
+      localStorage.setItem('planex_identity_verified_name', cleanName);
+    }
+    if (cleanAvatar) {
+      localStorage.setItem('planex_user_avatar', cleanAvatar);
+      localStorage.setItem('planex_identity_verified_avatar', cleanAvatar);
+    }
+
+    // Merge into planex_auth_user / planex_user_account without clobbering phone/password fields
+    ['planex_auth_user', 'planex_user_account'].forEach(key => {
+      let acct = {};
+      try { acct = JSON.parse(localStorage.getItem(key) || '{}'); } catch (_) {}
+      if (!acct || typeof acct !== 'object') acct = {};
+      if (cleanName && !isPlaceholderProfileName(cleanName)) {
+        acct.name = cleanName;
+        acct.full_name = cleanName;
+      }
+      if (cleanAvatar) {
+        acct.avatar = cleanAvatar;
+        acct.avatar_url = cleanAvatar;
+        acct.photo_url = cleanAvatar;
+      }
+      localStorage.setItem(key, JSON.stringify(acct));
+    });
+
+    // Merge into the db USER_PROFILE store (spread-merge keeps major/targetField/etc.)
+    let prof = {};
+    try { prof = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILE) || '{}'); } catch (_) {}
+    if (!prof || typeof prof !== 'object') prof = {};
+    if (cleanName && !isPlaceholderProfileName(cleanName)) {
+      prof.name = cleanName;
+      prof.nickname = cleanName;
+    }
+    if (cleanAvatar) {
+      prof.avatar = cleanAvatar;
+      prof.avatar_url = cleanAvatar;
+      prof.photo = cleanAvatar;
+      prof.photoUrl = cleanAvatar;
+    }
+    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(prof));
+    return true;
+  } catch (e) {
+    console.warn('[db] applyVerifiedUserIdentity failed:', e);
+    return false;
+  }
+}
 
 const DEFAULT_SUBJECTS = [
   "زیست‌شناسی", "ریاضیات", "فیزیک", "شیمی", "ادبیات", "زبان انگلیسی", "دین و زندگی", "زمین‌شناسی"
@@ -94,12 +178,46 @@ class DatabaseEngine {
           }
         }
 
+        // ── IDENTITY GUARD (fix for the stuck "دانش‌آموز پرتلاش" header bug) ──
+        // A restored/pulled backup must NEVER downgrade a verified real identity
+        // back to the hardcoded placeholder. If the incoming value is a placeholder
+        // (or empty) while we hold a verified name/avatar, skip it and re-commit
+        // the verified identity after the loop instead.
+        const verifiedName = localStorage.getItem('planex_identity_verified_name');
+        const verifiedAvatar = localStorage.getItem('planex_identity_verified_avatar');
+        if (verifiedName && (key === 'planex_user_nickname' || key === 'planex_leaderboard_nickname')) {
+          const incoming = String(val ?? '').trim();
+          if (!incoming || isPlaceholderProfileName(incoming)) return;
+        }
+        if (verifiedName && key === STORAGE_KEYS.USER_PROFILE) {
+          let incomingProf = val;
+          if (typeof incomingProf === 'string') { try { incomingProf = JSON.parse(incomingProf); } catch (_) { incomingProf = null; } }
+          const inName = incomingProf && typeof incomingProf.name === 'string' ? incomingProf.name.trim() : '';
+          if (!inName || isPlaceholderProfileName(inName)) {
+            // Backup carries no real name — keep our verified one on disk
+            return;
+          }
+        }
+        if (verifiedAvatar && key === 'planex_user_avatar') {
+          const incoming = String(val ?? '').trim();
+          if (!incoming) return;
+        }
+
         if (typeof val === 'object') {
           localStorage.setItem(key, JSON.stringify(val));
         } else {
           localStorage.setItem(key, String(val));
         }
       });
+
+      // Re-assert verified identity AFTER the restore loop so any stale profile/auth
+      // blobs written above cannot leave the UI hydrated with placeholder values.
+      if (localStorage.getItem('planex_identity_verified_name') || localStorage.getItem('planex_identity_verified_avatar')) {
+        applyVerifiedUserIdentity({
+          name: localStorage.getItem('planex_identity_verified_name'),
+          avatar: localStorage.getItem('planex_identity_verified_avatar')
+        });
+      }
 
       // Ensure avatar is explicitly restored across all profile and auth stores
       try {

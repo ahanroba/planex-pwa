@@ -2630,7 +2630,7 @@ window.triggerPwaInstall = async () => {
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js?v=force-12345').then(registration => {
+    navigator.serviceWorker.register('/sw.js?v=force-12346').then(registration => {
       window.swRegistration = registration;
       
       // Check for updates on every page load
