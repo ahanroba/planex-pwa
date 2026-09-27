@@ -32,6 +32,64 @@ export const personalSyncService = {
   },
 
   /**
+   * Concurrency bookkeeping: the last server-assigned document version we have
+   * hydrated locally. Sent with every push so sync.php can reject stale writes
+   * from a device that missed an intermediate merge.
+   */
+  _getBaseVersion() {
+    try {
+      return parseInt(localStorage.getItem('planex_sync_base_version') || '0', 10) || 0;
+    } catch (e) {
+      return 0;
+    }
+  },
+
+  _setBaseVersion(v) {
+    try {
+      if (v !== null && v !== undefined && !isNaN(parseInt(v, 10))) {
+        localStorage.setItem('planex_sync_base_version', String(parseInt(v, 10)));
+      }
+    } catch (e) {}
+  },
+
+  /**
+   * Client-side union-merge for arrays of records (study logs / rooms).
+   * Mirrors the server's dedupe-by-identity strategy so a post-push pull can
+   * fold server reality into localStorage without ever dropping local records.
+   */
+  _mergeRecordArrays(existingArr, incomingArr) {
+    const toArr = (a) => (Array.isArray(a) ? a : []);
+    const identity = (rec) => {
+      if (!rec || typeof rec !== 'object') return 's:' + String(rec);
+      for (const k of ['id', 'uuid', '_id', 'sessionId', 'session_id', 'logId', 'roomCode', 'code']) {
+        if (rec[k] !== undefined && rec[k] !== null && String(rec[k]) !== '') {
+          return 'k:' + k + ':' + String(rec[k]).toLowerCase();
+        }
+      }
+      let sig = '';
+      for (const f of ['date', 'dateStr', 'startTime', 'start', 'timestamp', 'subject', 'duration', 'minutes']) {
+        if (rec[f] !== undefined && rec[f] !== null) sig += f + '=' + String(rec[f]) + ';';
+      }
+      return sig ? 'c:' + sig : 'h:' + JSON.stringify(rec);
+    };
+    const tsOf = (rec) => {
+      if (!rec || typeof rec !== 'object') return 0;
+      const t = rec.updatedAt ?? rec.updated_at ?? rec.timestamp ?? rec.savedAt;
+      const n = Number(t);
+      if (!isNaN(n) && n > 0) return n < 1e11 ? n * 1000 : n;
+      return 0;
+    };
+    const map = new Map();
+    toArr(existingArr).forEach(r => map.set(identity(r), r));
+    toArr(incomingArr).forEach(r => {
+      const key = identity(r);
+      const prev = map.get(key);
+      if (!prev || tsOf(r) >= tsOf(prev)) map.set(key, r);
+    });
+    return Array.from(map.values());
+  },
+
+  /**
    * Sets custom sync token
    */
   setSyncToken(token) {
@@ -178,7 +236,10 @@ export const personalSyncService = {
       avatar_url: payloadAvatar,
       photo_url: payloadAvatar,
       planex_user_avatar: payloadAvatar,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      // Concurrency: the document version this local state was derived from.
+      // sync.php uses it (plus updatedAt) to reject stale overwrites.
+      _version: this._getBaseVersion()
     };
 
     try {
@@ -264,28 +325,61 @@ export const personalSyncService = {
         }
         db.markPersonalSyncSuccess();
 
-        // Merge rooms returned from server
-        if (Array.isArray(data.rooms) && data.rooms.length > 0) {
-          localStorage.setItem('planex_my_groups', JSON.stringify(data.rooms));
-          localStorage.setItem('planex_my_rooms', JSON.stringify(data.rooms));
-          if (db && typeof db.setUserGroups === 'function') {
-            db.setUserGroups(data.rooms);
+        // Merge rooms returned from server (union — never lose locally-created rooms)
+        if (Array.isArray(data.rooms)) {
+          let localRooms = [];
+          try { localRooms = JSON.parse(localStorage.getItem('planex_my_groups') || '[]'); } catch (e) { localRooms = []; }
+          const mergedRooms = this._mergeRecordArrays(localRooms, data.rooms);
+          if (mergedRooms.length > 0) {
+            localStorage.setItem('planex_my_groups', JSON.stringify(mergedRooms));
+            localStorage.setItem('planex_my_rooms', JSON.stringify(mergedRooms));
+            if (db && typeof db.setUserGroups === 'function') {
+              db.setUserGroups(mergedRooms);
+            }
           }
         }
 
-        // Merge study logs returned from server into both planex_study_logs and planex_recent_activity_sessions
-        if (Array.isArray(data.study_logs) && data.study_logs.length > 0) {
-          if (db && typeof db.saveStudyLogs === 'function') {
-            db.saveStudyLogs(data.study_logs);
-          } else {
-            localStorage.setItem('planex_study_logs', JSON.stringify(data.study_logs));
-            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(data.study_logs));
+        // Merge study logs returned from server into both planex_study_logs and
+        // planex_recent_activity_sessions (union-merge so Device A's new logs
+        // that the server folded in via deep merge are never dropped locally).
+        if (Array.isArray(data.study_logs)) {
+          let localLogs = [];
+          let localRecent = [];
+          try { localLogs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]'); } catch (e) { localLogs = []; }
+          try { localRecent = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]'); } catch (e) { localRecent = []; }
+          const mergedLogs = this._mergeRecordArrays(this._mergeRecordArrays(localLogs, localRecent), data.study_logs);
+          if (mergedLogs.length > 0) {
+            if (db && typeof db.saveStudyLogs === 'function') {
+              db.saveStudyLogs(mergedLogs);
+            } else {
+              localStorage.setItem('planex_study_logs', JSON.stringify(mergedLogs));
+              localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(mergedLogs));
+            }
           }
         }
 
         if (db) {
           db._breakdownMemoMap = {};
         }
+
+        // ── READ-MY-WRITES: immediately pull the newly MERGED server reality ──
+        // The server deep-merged our push with every other device's data. Pulling
+        // right now folds that merged truth back into localStorage so this device
+        // is instantly consistent with the cloud (Device A's study logs appear on
+        // Device B and vice versa). Identity Guard + verified-name logic inside
+        // pullFromCloud ensure our just-pushed name/avatar survive the restore.
+        try {
+          await this.pullFromCloud(phone);
+        } catch (pullErr) {
+          console.warn('[PersonalSync] Post-push reconciliation pull deferred:', pullErr);
+        }
+
+        // Re-assert the identity we pushed, AFTER the reconciliation pull, so no
+        // stale server echo can downgrade the freshest local edit.
+        applyVerifiedUserIdentity({
+          name: (echoedName && !isPlaceholderProfileName(echoedName)) ? echoedName : undefined,
+          avatar: echoedAvatar || undefined
+        });
 
         // CRITICAL: Force Dashboard and charts to re-render to reflect new synced data
         if (typeof window !== 'undefined') {
@@ -438,17 +532,23 @@ export const personalSyncService = {
           }
         }
         if (Array.isArray(json.study_logs) && json.study_logs.length > 0) {
+          let localLogs = [];
+          try { localLogs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]'); } catch (e) { localLogs = []; }
+          const mergedPulledLogs = this._mergeRecordArrays(localLogs, json.study_logs);
           if (db && typeof db.saveStudyLogs === 'function') {
-            db.saveStudyLogs(json.study_logs);
+            db.saveStudyLogs(mergedPulledLogs);
           } else {
-            localStorage.setItem('planex_study_logs', JSON.stringify(json.study_logs));
-            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(json.study_logs));
+            localStorage.setItem('planex_study_logs', JSON.stringify(mergedPulledLogs));
+            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(mergedPulledLogs));
           }
         }
         if (db) {
           db._breakdownMemoMap = {};
         }
         db.markPersonalSyncSuccess();
+
+        // Track the server document version we just hydrated for concurrency checks.
+        this._setBaseVersion(json._version);
 
         // CRITICAL: Force Dashboard and charts to re-render
         if (typeof window !== 'undefined') {
