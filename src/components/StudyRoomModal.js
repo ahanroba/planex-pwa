@@ -1,5 +1,6 @@
 import { db } from '../db.js';
 import { formatStudyTime } from '../constants.js';
+import { API_BASE_URL } from '../config.js';
 
 // Global Announcement Editor Handler
 if (!window.handleEditRoomAnnouncement) {
@@ -66,9 +67,10 @@ if (!window.handleJoinRoomClick) {
 
     const token = localStorage.getItem('planex_jwt_token');
     if (token && token !== 'undefined' && token !== 'null') {
-      fetch(`/api/v1/rooms/${roomId}/join`, {
+      fetch(`${API_BASE_URL}/api/rooms/join.php`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId, room_id: roomId })
       }).catch(err => console.warn('Room join API sync:', err));
     }
 
@@ -96,9 +98,10 @@ if (!window.handleLeaveRoomClick) {
 
     const token = localStorage.getItem('planex_jwt_token');
     if (token && token !== 'undefined' && token !== 'null') {
-      fetch(`/api/v1/rooms/${roomId}/leave`, {
+      fetch(`${API_BASE_URL}/api/rooms/leave.php`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId, room_id: roomId })
       }).catch(err => console.warn('Room leave API sync:', err));
     }
 

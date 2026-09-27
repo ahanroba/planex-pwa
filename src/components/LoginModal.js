@@ -2,6 +2,7 @@
 import { db } from '../db.js';
 import { personalSyncService } from '../services/personalSyncService.js';
 import { leaderboardService } from '../services/leaderboardService.js';
+import { API_BASE_URL } from '../config.js';
 
 export function normalizePhone(rawPhone) {
   if (!rawPhone) return '';
@@ -219,7 +220,7 @@ if (typeof window !== 'undefined') {
         backupData.planex_user_avatar = storedAvatar;
       }
 
-      const res = await fetch('/api/sync', {
+      const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -342,6 +342,24 @@ window.openCreateGroupModal = (defaultTab = 'create') => {
 };
 window.openCreateRoomModal = window.openCreateGroupModal;
 
+window.joinStudyRoom = (roomId, roomName = null) => {
+  const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
+  if (!targetState) return;
+  const finalName = roomName || (roomId ? `سالن مطالعه ${roomId}` : 'سالن مطالعه');
+  targetState.currentRoom = {
+    id: roomId,
+    code: roomId,
+    name: finalName,
+    title: finalName
+  };
+  targetState.activeModal = 'studyRoom';
+  if (typeof renderApp === 'function') {
+    renderApp();
+  } else if (typeof window.renderApp === 'function') {
+    window.renderApp();
+  }
+};
+
 window.switchCreateRoomModalTab = (tab = 'create') => {
   window.createRoomModalActiveTab = tab;
   const tabCreate = document.getElementById('modal-tab-create-room');

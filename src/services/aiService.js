@@ -1,4 +1,5 @@
 // PlanEx AI Universal Assistant Service (سرویس ارتباط با هوش مصنوعی پلنکس)
+import { API_BASE_URL } from '../config.js';
 
 const STORAGE_KEY = 'planex_ai_chat_history';
 
@@ -131,7 +132,7 @@ class AiService {
     const authHeaders = this.getAuthHeaders();
 
     try {
-      let res = await fetch('https://planexapp.ir/api/ai/chat', {
+      let res = await fetch(`${API_BASE_URL}/api/ai/chat.php`, {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({
@@ -142,7 +143,7 @@ class AiService {
       });
 
       if (!res.ok) {
-        const res2 = await fetch('https://planexapp.ir/api/v1/ai/chat', {
+        const res2 = await fetch(`${API_BASE_URL}/api/v1/ai/chat.php`, {
           method: 'POST',
           headers: authHeaders,
           body: JSON.stringify({
@@ -153,18 +154,6 @@ class AiService {
         }).catch(() => null);
         if (res2 && res2.ok) {
           res = res2;
-        } else {
-          // Fallback to relative reverse-proxy route
-          const res3 = await fetch('/api/ai/chat', {
-            method: 'POST',
-            headers: authHeaders,
-            body: JSON.stringify({
-              message: trimmedMsg,
-              history: cleanHistory,
-              context
-            })
-          }).catch(() => null);
-          if (res3 && res3.ok) res = res3;
         }
       }
 

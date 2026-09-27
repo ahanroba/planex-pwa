@@ -1,4 +1,5 @@
 import { db } from '../db.js';
+import { API_BASE_URL } from '../config.js';
 
 const [todayY, todayM] = db.getTodayJalali();
 let currentYear = todayY;
@@ -241,7 +242,7 @@ window.fetchPublicRoutines = async () => {
   try {
     const token = localStorage.getItem('planex_jwt_token');
     if (!token) return;
-    const res = await fetch('/api/v1/routines/public', {
+    const res = await fetch(`${API_BASE_URL}/api/routines/public.php`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
@@ -267,7 +268,7 @@ window.copyPublicRoutine = async (routineId) => {
       alert('لطفاً ابتدا وارد حساب کاربری خود شوید.');
       return;
     }
-    const res = await fetch('' + `/api/v1/routines/${routineId}/copy`, {
+    const res = await fetch(`${API_BASE_URL}/api/routines/copy.php?id=${encodeURIComponent(routineId)}`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` }
     });

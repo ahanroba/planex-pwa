@@ -1,5 +1,81 @@
 import { db } from '../db.js';
 
+if (!window.closeJoinRoomOnboardingModal) {
+  window.closeJoinRoomOnboardingModal = () => {
+    const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
+    if (targetState) {
+      targetState.pendingJoinRoom = null;
+      targetState.activeModal = null;
+    }
+    if (window.appState) {
+      window.appState.pendingJoinRoom = null;
+      window.appState.activeModal = null;
+    }
+    if (typeof renderApp === 'function') {
+      renderApp();
+    } else if (typeof window.renderApp === 'function') {
+      window.renderApp();
+    }
+  };
+}
+
+if (!window.handleSubmitJoinRoomOnboarding) {
+  window.handleSubmitJoinRoomOnboarding = (roomId, roomName) => {
+    const nickname = document.getElementById('input-onboarding-nickname')?.value?.trim();
+    const major = document.getElementById('input-onboarding-major')?.value;
+    const target = document.getElementById('input-onboarding-target')?.value?.trim();
+
+    if (!nickname) {
+      alert('لطفاً نام یا نام مستعار خود را وارد کنید.');
+      return;
+    }
+
+    let profile = {};
+    try {
+      profile = (db && typeof db.getProfile === 'function') ? db.getProfile() : JSON.parse(localStorage.getItem('planex_user_profile') || '{}');
+    } catch (e) {
+      profile = {};
+    }
+    profile.name = nickname;
+    profile.nickname = nickname;
+    profile.major = major;
+    profile.field_of_study = major;
+    profile.target = target;
+    profile.goal = target;
+
+    if (db && typeof db.setProfile === 'function') {
+      db.setProfile(profile);
+    }
+    localStorage.setItem('planex_user_profile', JSON.stringify(profile));
+
+    try {
+      const acc = JSON.parse(localStorage.getItem('planex_user_account') || '{}');
+      acc.full_name = nickname;
+      localStorage.setItem('planex_user_account', JSON.stringify(acc));
+    } catch (e) {}
+
+    const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
+    if (targetState) {
+      targetState.pendingJoinRoom = null;
+      targetState.activeModal = null;
+    }
+    if (window.appState) {
+      window.appState.pendingJoinRoom = null;
+      window.appState.activeModal = null;
+    }
+
+    if (roomId && String(roomId).startsWith('PLX-') && typeof window.handleJoinGroupSubmit === 'function') {
+      window.handleJoinGroupSubmit(roomId);
+    } else if (typeof window.handleJoinRoomClick === 'function') {
+      window.handleJoinRoomClick(roomId, roomName);
+    } else if (typeof window.joinStudyRoom === 'function') {
+      window.joinStudyRoom(roomId, roomName);
+    } else if (typeof window.renderApp === 'function') {
+      window.renderApp();
+    }
+  };
+}
+
 export function renderJoinRoomOnboardingModal(pendingRoom = null) {
   const profile = (db && typeof db.getProfile === 'function') ? db.getProfile() : {};
   const userAcc = JSON.parse(localStorage.getItem('planex_user_account') || '{}');
@@ -26,7 +102,7 @@ export function renderJoinRoomOnboardingModal(pendingRoom = null) {
               اطلاعات پروفایل مطالعاتی شما برای نمایش به اعضای گروه
             </span>
           </div>
-          <button type="button" id="btn-close-join-onboarding" class="btn-icon" style="background: #1f2029; border: 1px solid rgba(255,255,255,0.08); color: #a1a1aa; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">✕</button>
+          <button type="button" id="btn-close-join-onboarding" onclick="window.closeJoinRoomOnboardingModal()" class="btn-icon" style="background: #1f2029; border: 1px solid rgba(255,255,255,0.08); color: #a1a1aa; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">✕</button>
         </div>
 
         <form id="form-join-room-onboarding" onsubmit="event.preventDefault(); window.handleSubmitJoinRoomOnboarding('${roomId}', '${roomName}');" style="display: flex; flex-direction: column; gap: 12px;">

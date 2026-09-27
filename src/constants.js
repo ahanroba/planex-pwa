@@ -1,4 +1,5 @@
 // Central Constants & 24-Color High-Contrast Activity Palette for PlanEx
+export { API_BASE_URL } from './config.js';
 
 export const ACTIVITY_PALETTE_24 = [
   '#EF4444', // ۱. قرمز تند

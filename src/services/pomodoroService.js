@@ -1,5 +1,6 @@
 // Pomodoro Live Active Users Tracking Service
 // Event-driven, low-bandwidth service: Realistic Hourly Baseline + Real Active Online Users
+import { API_BASE_URL } from '../config.js';
 
 export const pomodoroService = {
   isSessionActive: false,
@@ -114,7 +115,7 @@ export const pomodoroService = {
     const userId = this.getUserId();
 
     try {
-      const res = await fetch('/api/pomodoro/active', {
+      const res = await fetch(`${API_BASE_URL}/api/pomodoro/active.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -154,7 +155,7 @@ export const pomodoroService = {
     const userId = this.getUserId();
 
     try {
-      const res = await fetch('/api/pomodoro/active', {
+      const res = await fetch(`${API_BASE_URL}/api/pomodoro/active.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -189,7 +190,7 @@ export const pomodoroService = {
    */
   async fetchActiveCount() {
     try {
-      const res = await fetch('/api/pomodoro/active');
+      const res = await fetch(`${API_BASE_URL}/api/pomodoro/active.php`);
       const rawText = await res.text();
       let data = null;
       try {

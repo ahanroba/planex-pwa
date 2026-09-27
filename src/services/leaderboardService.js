@@ -4,6 +4,7 @@
 
 import { db } from '../db.js';
 import { isStudyCategory } from '../constants.js';
+import { API_BASE_URL } from '../config.js';
 
 export const LEADERBOARD_STORAGE_KEYS = {
   USER_ID: 'planex_leaderboard_user_id',
@@ -188,13 +189,13 @@ export const leaderboardService = {
     };
 
     try {
-      let res = await fetch('/api/sync-code', {
+      let res = await fetch(`${API_BASE_URL}/api/sync-code.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       if (!res.ok) {
-        res = await fetch('/api/v1/sync-code', {
+        res = await fetch(`${API_BASE_URL}/api/v1/sync-code.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -231,12 +232,12 @@ export const leaderboardService = {
     const safeCode = inputCode.trim().toUpperCase();
 
     try {
-      let res = await fetch(`/api/sync-code?code=${safeCode}`);
+      let res = await fetch(`${API_BASE_URL}/api/sync-code.php?code=${safeCode}`);
       if (!res.ok) {
-        res = await fetch(`/api/v1/sync-code?code=${safeCode}`);
+        res = await fetch(`${API_BASE_URL}/api/v1/sync-code.php?code=${safeCode}`);
       }
       if (!res.ok) {
-        res = await fetch(`/api/leaderboard?sync_code=${safeCode}`);
+        res = await fetch(`${API_BASE_URL}/api/leaderboard.php?sync_code=${safeCode}`);
       }
 
       const rawText = await res.text();
@@ -489,7 +490,7 @@ export const leaderboardService = {
 
     try {
       await Promise.allSettled([
-        fetch('/api/rooms/leave', {
+        fetch(`${API_BASE_URL}/api/rooms/leave.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -498,7 +499,7 @@ export const leaderboardService = {
             phone: profile.phone
           })
         }),
-        fetch('/api/leaderboard', {
+        fetch(`${API_BASE_URL}/api/leaderboard.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -547,7 +548,7 @@ export const leaderboardService = {
     const profile = this.getUserProfile();
 
     try {
-      await fetch('/api/rooms/delete', {
+      await fetch(`${API_BASE_URL}/api/rooms/delete.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -609,7 +610,7 @@ export const leaderboardService = {
         params.set('_t', Date.now().toString());
       }
 
-      const res = await fetch(`/api/rooms/my-rooms?${params.toString()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/rooms/my-rooms.php?${params.toString()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' }
       });
@@ -668,7 +669,7 @@ export const leaderboardService = {
    */
   async fetchPublicRooms() {
     try {
-      const res = await fetch('/api/rooms/public');
+      const res = await fetch(`${API_BASE_URL}/api/rooms/public.php`);
       const data = await res.json();
       if (data && data.success && Array.isArray(data.rooms)) {
         return data.rooms;
@@ -687,7 +688,7 @@ export const leaderboardService = {
     if (!code) return [];
     try {
       const profile = this.getUserProfile();
-      const res = await fetch(`/api/rooms/requests?room_code=${encodeURIComponent(code)}&user_id=${encodeURIComponent(profile.userId)}`);
+      const res = await fetch(`${API_BASE_URL}/api/rooms/requests.php?room_code=${encodeURIComponent(code)}&user_id=${encodeURIComponent(profile.userId)}`);
       const data = await res.json();
       if (data && data.success && Array.isArray(data.requests)) {
         return data.requests;
@@ -705,7 +706,7 @@ export const leaderboardService = {
     const code = groupCode || this.getActiveGroupCode();
     const profile = this.getUserProfile();
     try {
-      const res = await fetch('/api/rooms/requests', {
+      const res = await fetch(`${API_BASE_URL}/api/rooms/requests.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -799,7 +800,7 @@ export const leaderboardService = {
   async toggleGroupPrivacy(groupCode, newIsPrivate) {
     const code = groupCode || this.getActiveGroupCode();
     try {
-      const res = await fetch('/api/rooms/toggle-type', {
+      const res = await fetch(`${API_BASE_URL}/api/rooms/toggle-type.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -864,7 +865,7 @@ export const leaderboardService = {
     }
 
     try {
-      await fetch('/api/rooms/create', {
+      await fetch(`${API_BASE_URL}/api/rooms/create.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -969,7 +970,7 @@ export const leaderboardService = {
 
     let backendRes = null;
     try {
-      const res = await fetch('/api/rooms/join', {
+      const res = await fetch(`${API_BASE_URL}/api/rooms/join.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1630,7 +1631,7 @@ export const leaderboardService = {
         lastHeartbeat: isRealStudy ? now : 0
       };
 
-      const endpoints = ['/api/leaderboard', '/api/v1/leaderboard'];
+      const endpoints = [`${API_BASE_URL}/api/leaderboard.php`, `${API_BASE_URL}/api/v1/leaderboard.php`];
       for (const endpoint of endpoints) {
         try {
           const res = await fetch(endpoint, {
@@ -1736,7 +1737,7 @@ export const leaderboardService = {
       updatedAt: Date.now()
     };
 
-    const endpoints = ['/api/leaderboard', '/api/v1/leaderboard'];
+    const endpoints = [`${API_BASE_URL}/api/leaderboard.php`, `${API_BASE_URL}/api/v1/leaderboard.php`];
     for (const endpoint of endpoints) {
       try {
         const res = await fetch(endpoint, {
@@ -1834,7 +1835,7 @@ export const leaderboardService = {
 
     try {
       const cacheBuster = force ? `&_t=${Date.now()}` : '';
-      let res = await fetch(`/api/leaderboard?groupCode=${groupCode}&date=${targetDate}${cacheBuster}`, {
+      let res = await fetch(`${API_BASE_URL}/api/leaderboard.php?groupCode=${groupCode}&date=${targetDate}${cacheBuster}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
@@ -1842,7 +1843,7 @@ export const leaderboardService = {
         }
       });
       if (!res.ok) {
-        res = await fetch(`/api/v1/leaderboard?groupCode=${groupCode}&date=${targetDate}${cacheBuster}`, {
+        res = await fetch(`${API_BASE_URL}/api/v1/leaderboard.php?groupCode=${groupCode}&date=${targetDate}${cacheBuster}`, {
           cache: 'no-store',
           headers: {
             'Cache-Control': 'no-cache',
@@ -2346,7 +2347,7 @@ export const leaderboardService = {
     };
 
     try {
-      const res = await fetch('/api/earlybird', {
+      const res = await fetch(`${API_BASE_URL}/api/earlybird.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2366,7 +2367,7 @@ export const leaderboardService = {
 
       if (!res.ok || !data || data.success === false) {
         const serverMsg = (data && (data.message || data.error)) || (rawText || '').slice(0, 160) || 'پاسخ نامعتبر سرور';
-        const errorDetail = `POST /api/earlybird → HTTP ${res.status}: ${serverMsg}`;
+        const errorDetail = `POST /api/earlybird.php → HTTP ${res.status}: ${serverMsg}`;
         console.error('[EarlyBird] ثبت روی سرور ناموفق بود —', errorDetail);
         return {
           success: false,
@@ -2396,7 +2397,7 @@ export const leaderboardService = {
         message: data.message || 'سحرخیزی شما ثبت شد ☀️'
       };
     } catch (err) {
-      const errorDetail = `POST /api/earlybird → خطای شبکه: ${err.message}`;
+      const errorDetail = `POST /api/earlybird.php → خطای شبکه: ${err.message}`;
       console.error('[EarlyBird] ثبت روی سرور ناموفق بود —', errorDetail);
       return {
         success: false,
@@ -2414,7 +2415,7 @@ export const leaderboardService = {
   async fetchEarlyBirds(date = null) {
     const targetDate = date || this.getTodayDateStr();
     try {
-      const res = await fetch(`/api/earlybird?date=${targetDate}&_t=${Date.now()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/earlybird.php?date=${targetDate}&_t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
       });

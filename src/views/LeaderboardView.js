@@ -6,6 +6,7 @@ import { leaderboardService } from '../services/leaderboardService.js';
 import { formatStudyTime } from '../constants.js';
 import { db } from '../db.js';
 import { renderEditProfileModal } from '../components/EditProfileModal.js';
+import { API_BASE_URL } from '../config.js';
 
 // Safe Module-Level HTML Escaper and Number Formatter
 const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -373,7 +374,7 @@ window.handleDeleteGroupAction = async (specificCode = null) => {
     localStorage.removeItem(`planex_group_cache_${activeCode}`);
     localStorage.removeItem(`planex_group_roster_${activeCode}`);
 
-    fetch('/api/rooms/delete', {
+    fetch(`${API_BASE_URL}/api/rooms/delete.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

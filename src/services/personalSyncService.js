@@ -2,6 +2,7 @@
 // Enables seamless full-data, study logs, and study rooms synchronization based on Phone Number
 
 import { db } from '../db.js';
+import { API_BASE_URL } from '../config.js';
 
 export function normalizePhone(rawPhone) {
   if (!rawPhone) return '';
@@ -154,7 +155,7 @@ export const personalSyncService = {
     };
 
     try {
-      const res = await fetch('/api/sync', {
+      const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -275,7 +276,7 @@ export const personalSyncService = {
     }
 
     try {
-      const res = await fetch(`/api/sync?phone=${encodeURIComponent(phone)}&_t=${Date.now()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/sync.php?phone=${encodeURIComponent(phone)}&_t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' }
       });
