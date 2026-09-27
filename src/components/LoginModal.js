@@ -224,6 +224,7 @@ if (typeof window !== 'undefined') {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'login',
           phone: phone,
           password: password,
           study_logs: studyLogs,

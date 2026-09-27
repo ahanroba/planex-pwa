@@ -15,8 +15,20 @@ if ($method === 'POST') {
 $action = '';
 if ($method === 'GET') {
     $action = $_GET['action'] ?? '';
+    // Fallback: if no action but phone param exists, assume 'get'
+    if (empty($action) && !empty($_GET['phone'])) {
+        $action = 'get';
+    }
 } elseif ($method === 'POST') {
     $action = $input['action'] ?? '';
+    // Fallback: infer action from POST payload structure
+    if (empty($action) && !empty($input['phone'])) {
+        if (isset($input['data']) || isset($input['backupData']) || isset($input['appState'])) {
+            $action = 'save';
+        } else {
+            $action = 'login';
+        }
+    }
 }
 
 // ─── Route Actions ───
@@ -58,6 +70,7 @@ switch ($action) {
 function handleLogin(PDO $pdo, array $input): void
 {
     $phone = trim($input['phone'] ?? '');
+    $password = trim($input['password'] ?? '');
 
     if (empty($phone)) {
         http_response_code(400);
@@ -71,29 +84,74 @@ function handleLogin(PDO $pdo, array $input): void
     $user = $stmt->fetch();
 
     if ($user) {
+        // Decode existing stored data
+        $storedData = json_decode($user['data'], true) ?: [];
+
+        // If client sent backup data, merge and update
+        $incomingData = [];
+        if (!empty($input['backupData'])) $incomingData['backupData'] = $input['backupData'];
+        if (!empty($input['study_logs'])) $incomingData['study_logs'] = $input['study_logs'];
+        if (!empty($input['rooms'])) $incomingData['rooms'] = $input['rooms'];
+        if (!empty($input['name'])) $incomingData['name'] = $input['name'];
+        if (!empty($input['avatar'])) $incomingData['avatar'] = $input['avatar'];
+        if (!empty($input['avatar_url'])) $incomingData['avatar_url'] = $input['avatar_url'];
+
+        if (!empty($incomingData)) {
+            $mergedData = array_merge($storedData, $incomingData);
+            $stmt = $pdo->prepare("UPDATE users SET data = :data, updated_at = NOW() WHERE phone = :phone");
+            $stmt->execute([
+                ':data'  => json_encode($mergedData, JSON_UNESCAPED_UNICODE),
+                ':phone' => $phone
+            ]);
+            $storedData = $mergedData;
+        }
+
+        $userName = $storedData['name'] ?? $input['name'] ?? 'کاربر پلنکس';
+        $userAvatar = $storedData['avatar_url'] ?? $storedData['avatar'] ?? $input['avatar_url'] ?? '';
+
         echo json_encode([
-            'success' => true,
-            'message' => 'Login successful',
-            'user'    => $user
+            'success'    => true,
+            'message'    => 'Login successful',
+            'user'       => [
+                'id'         => (int) $user['id'],
+                'phone'      => $user['phone'],
+                'name'       => $userName,
+                'avatar_url' => $userAvatar
+            ],
+            'backupData' => $storedData['backupData'] ?? null,
+            'study_logs' => $storedData['study_logs'] ?? [],
+            'rooms'      => $storedData['rooms'] ?? []
         ]);
     } else {
-        // Register new user
+        // Register new user with incoming data
+        $newData = [];
+        if (!empty($input['backupData'])) $newData['backupData'] = $input['backupData'];
+        if (!empty($input['study_logs'])) $newData['study_logs'] = $input['study_logs'];
+        if (!empty($input['rooms'])) $newData['rooms'] = $input['rooms'];
+        if (!empty($input['name'])) $newData['name'] = $input['name'];
+        if (!empty($input['avatar'])) $newData['avatar'] = $input['avatar'];
+        if (!empty($input['avatar_url'])) $newData['avatar_url'] = $input['avatar_url'];
+
         $stmt = $pdo->prepare("INSERT INTO users (phone, data, created_at, updated_at) VALUES (:phone, :data, NOW(), NOW())");
         $stmt->execute([
             ':phone' => $phone,
-            ':data'  => json_encode(null)
+            ':data'  => json_encode($newData, JSON_UNESCAPED_UNICODE)
         ]);
 
         $newId = $pdo->lastInsertId();
 
         echo json_encode([
-            'success' => true,
-            'message' => 'User registered successfully',
-            'user'    => [
-                'id'    => (int) $newId,
-                'phone' => $phone,
-                'data'  => null
-            ]
+            'success'    => true,
+            'message'    => 'User registered successfully',
+            'user'       => [
+                'id'         => (int) $newId,
+                'phone'      => $phone,
+                'name'       => $input['name'] ?? 'کاربر پلنکس',
+                'avatar_url' => $input['avatar_url'] ?? ''
+            ],
+            'backupData' => $newData['backupData'] ?? null,
+            'study_logs' => $newData['study_logs'] ?? [],
+            'rooms'      => $newData['rooms'] ?? []
         ]);
     }
 }
@@ -119,11 +177,22 @@ function handleGet(PDO $pdo): void
 
     if ($user) {
         // Decode the JSON data field
-        $user['data'] = json_decode($user['data'], true);
+        $storedData = json_decode($user['data'], true) ?: [];
+
+        $userName = $storedData['name'] ?? 'کاربر پلنکس';
+        $userAvatar = $storedData['avatar_url'] ?? $storedData['avatar'] ?? '';
 
         echo json_encode([
-            'success' => true,
-            'user'    => $user
+            'success'    => true,
+            'user'       => [
+                'id'         => (int) $user['id'],
+                'phone'      => $user['phone'],
+                'name'       => $userName,
+                'avatar_url' => $userAvatar
+            ],
+            'backupData' => $storedData['backupData'] ?? null,
+            'study_logs' => $storedData['study_logs'] ?? [],
+            'rooms'      => $storedData['rooms'] ?? []
         ]);
     } else {
         http_response_code(404);
@@ -139,7 +208,16 @@ function handleGet(PDO $pdo): void
 function handleSave(PDO $pdo, array $input): void
 {
     $phone = trim($input['phone'] ?? '');
+    // Support both explicit 'data' field and full payload (backupData, study_logs, rooms, etc.)
     $data  = $input['data'] ?? null;
+    if ($data === null) {
+        // If no explicit 'data' field, wrap the entire payload as data
+        $payload = $input;
+        unset($payload['action'], $payload['phone']);
+        if (!empty($payload)) {
+            $data = $payload;
+        }
+    }
 
     if (empty($phone)) {
         http_response_code(400);
@@ -166,7 +244,10 @@ function handleSave(PDO $pdo, array $input): void
     ]);
 
     echo json_encode([
-        'success' => true,
-        'message' => 'Data saved successfully'
+        'success'    => true,
+        'message'    => 'Data saved successfully',
+        'backupData' => is_array($data) ? ($data['backupData'] ?? $data) : $data,
+        'study_logs' => is_array($data) ? ($data['study_logs'] ?? []) : [],
+        'rooms'      => is_array($data) ? ($data['rooms'] ?? []) : []
     ]);
 }

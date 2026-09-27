@@ -12,10 +12,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // ─── Database Configuration ───
-$db_host = '';  // e.g. 'localhost'
-$db_name = '';  // e.g. 'planexap_Planexapp'
-$db_user = '';  // e.g. 'planexap_dbuser'
-$db_pass = '';  // e.g. ',{X,rM(Oap7&M$]N'
+$db_host = 'localhost';  
+$db_name = 'planexap_Planexapp'; 
+$db_user = 'planexap_dbuser';
+$db_pass = ',{X,rM(Oap7&M$]N';
 $db_charset = 'utf8mb4';
 
 // ─── PDO Connection ───

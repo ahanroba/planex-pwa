@@ -161,7 +161,7 @@ export const personalSyncService = {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ action: 'save', ...payload })
       });
 
       const rawText = await res.text();
@@ -276,7 +276,7 @@ export const personalSyncService = {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/sync.php?phone=${encodeURIComponent(phone)}&_t=${Date.now()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/sync.php?action=get&phone=${encodeURIComponent(phone)}&_t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' }
       });
