@@ -179,15 +179,29 @@ function handleGet(PDO $pdo): void
         // Decode the JSON data field
         $storedData = json_decode($user['data'], true) ?: [];
 
-        $userName = $storedData['name'] ?? 'کاربر پلنکس';
-        $userAvatar = $storedData['avatar_url'] ?? $storedData['avatar'] ?? '';
+        $userName = $storedData['name'] 
+            ?? ($storedData['backupData']['planex_user_nickname'] ?? null)
+            ?? ($storedData['backupData']['planex_user_profile']['name'] ?? null)
+            ?? ($storedData['backupData']['planex_user_profile']['nickname'] ?? null)
+            ?? 'کاربر پلنکس';
+
+        $userAvatar = $storedData['avatar_url'] 
+            ?? ($storedData['avatar'] ?? null)
+            ?? ($storedData['backupData']['planex_user_avatar'] ?? null)
+            ?? ($storedData['backupData']['planex_user_profile']['avatar'] ?? null)
+            ?? ($storedData['backupData']['planex_user_profile']['avatar_url'] ?? null)
+            ?? '';
 
         echo json_encode([
             'success'    => true,
+            'name'       => $userName,
+            'avatar'     => $userAvatar,
+            'avatar_url' => $userAvatar,
             'user'       => [
                 'id'         => (int) $user['id'],
                 'phone'      => $user['phone'],
                 'name'       => $userName,
+                'avatar'     => $userAvatar,
                 'avatar_url' => $userAvatar
             ],
             'backupData' => $storedData['backupData'] ?? null,

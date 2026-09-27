@@ -292,7 +292,47 @@ export const personalSyncService = {
           this.importLocalState(json.backupData);
         }
 
-        const pulledAvatar = json.backupData?.planex_user_avatar || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.avatar : null) || json.user?.avatar_url || json.user?.avatar || json.user?.photo_url || null;
+        // 1. Extract and update user NAME across all storage keys & DB
+        const pulledName = json.user?.name 
+          || json.name 
+          || json.backupData?.planex_user_nickname 
+          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.name : null)
+          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.nickname : null)
+          || null;
+
+        if (pulledName && pulledName !== 'کاربر مهمان') {
+          try {
+            localStorage.setItem('planex_user_nickname', pulledName);
+            localStorage.setItem('planex_leaderboard_nickname', pulledName);
+            
+            let userAuth = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
+            userAuth.name = pulledName;
+            userAuth.full_name = pulledName;
+            localStorage.setItem('planex_auth_user', JSON.stringify(userAuth));
+            localStorage.setItem('planex_user_account', JSON.stringify(userAuth));
+
+            let p = (db && typeof db.getUserProfile === 'function') ? (db.getUserProfile() || {}) : {};
+            p.name = pulledName;
+            p.nickname = pulledName;
+            if (db && typeof db.setUserProfile === 'function') {
+              db.setUserProfile(p);
+            }
+          } catch(e) {
+            console.warn('[PersonalSync] Error updating pulled name:', e);
+          }
+        }
+
+        // 2. Extract and update user AVATAR across all storage keys & DB
+        const pulledAvatar = json.user?.avatar_url 
+          || json.user?.avatar 
+          || json.user?.photo_url 
+          || json.avatar_url 
+          || json.avatar 
+          || json.backupData?.planex_user_avatar 
+          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.avatar : null) 
+          || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.avatar_url : null) 
+          || null;
+
         const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
         const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com')) ? pulledAvatar : (currentAvatar || pulledAvatar);
 
@@ -306,17 +346,17 @@ export const personalSyncService = {
             localStorage.setItem('planex_auth_user', JSON.stringify(userAccount));
             localStorage.setItem('planex_user_account', JSON.stringify(userAccount));
 
-            let p = db.getUserProfile() || {};
+            let p = (db && typeof db.getUserProfile === 'function') ? (db.getUserProfile() || {}) : {};
             p.avatar = targetAvatar;
             p.avatar_url = targetAvatar;
             p.photo = targetAvatar;
             p.photoUrl = targetAvatar;
-            if (json.user && json.user.name) {
-              p.name = json.user.name;
-              p.nickname = json.user.name;
+            if (db && typeof db.setUserProfile === 'function') {
+              db.setUserProfile(p);
             }
-            db.setUserProfile(p);
-          } catch(e) {}
+          } catch(e) {
+            console.warn('[PersonalSync] Error updating pulled avatar:', e);
+          }
         }
         if (Array.isArray(json.rooms) && json.rooms.length > 0) {
           localStorage.setItem('planex_my_groups', JSON.stringify(json.rooms));
