@@ -90,7 +90,7 @@ export const personalSyncService = {
   /**
    * Pushes complete personal data to Cloudflare backend under the user's Mobile Phone
    */
-  async pushToCloud(customPhone = null) {
+  async pushToCloud(customPhone = null, overrideName = null, overrideAvatar = null) {
     let authUser = null;
     try {
       authUser = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || 'null');
@@ -127,12 +127,24 @@ export const personalSyncService = {
       studyLogs = [];
     }
 
+    if (overrideName) {
+      try {
+        localStorage.setItem('planex_user_nickname', overrideName);
+        localStorage.setItem('planex_leaderboard_nickname', overrideName);
+      } catch(e){}
+    }
+    if (overrideAvatar) {
+      try {
+        localStorage.setItem('planex_user_avatar', overrideAvatar);
+      } catch(e){}
+    }
+
     // 1. Force Payload: Explicitly grab absolute latest name & avatar from localStorage right before sending
     const rawNickname = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_nickname') || localStorage.getItem('planex_leaderboard_nickname') || '') : '');
-    const activeName = rawNickname || profile.name || profile.nickname || authUser?.full_name || authUser?.name || 'کاربر پلنکس';
+    const activeName = overrideName || rawNickname || profile.name || profile.nickname || authUser?.full_name || authUser?.name || 'کاربر پلنکس';
 
     const storedAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
-    const activeAvatar = storedAvatar || profile.avatar || profile.avatar_url || profile.photo || authUser?.avatar_url || authUser?.avatar || authUser?.photo_url || '';
+    const activeAvatar = overrideAvatar || storedAvatar || profile.avatar || profile.avatar_url || profile.photo || authUser?.avatar_url || authUser?.avatar || authUser?.photo_url || '';
 
     if (backupData && typeof backupData === 'object') {
       backupData.planex_user_nickname = activeName;
@@ -264,16 +276,19 @@ export const personalSyncService = {
 
           if (returnedName) {
             document.querySelectorAll('#btn-header-user-account span:last-child, .user-nickname-display, #profile-display-name-val, .profile-name-text').forEach(el => {
-              if (el.tagName === 'INPUT') el.value = returnedName;
-              else el.innerText = returnedName;
+              if (el.tagName === 'INPUT') {
+                if (el.value !== returnedName) el.value = returnedName;
+              } else {
+                if (el.innerText !== returnedName) el.innerText = returnedName;
+              }
             });
             const profileInput = document.getElementById('profile-display-name');
-            if (profileInput) profileInput.value = returnedName;
+            if (profileInput && profileInput.value !== returnedName) profileInput.value = returnedName;
           }
 
           if (targetAvatar) {
             document.querySelectorAll('#btn-header-user-account img, #main-header-avatar, #main-avatar-preview, .user-avatar-img').forEach(imgEl => {
-              if (imgEl && imgEl.tagName === 'IMG') imgEl.src = targetAvatar;
+              if (imgEl && imgEl.tagName === 'IMG' && imgEl.src !== targetAvatar) imgEl.src = targetAvatar;
             });
           }
 
@@ -302,6 +317,8 @@ export const personalSyncService = {
         };
       }
     } catch (err) {
+      console.error('[Sync Error]', err.name, err.message);
+      alert(`Sync Error: ${err.message}`);
       return {
         success: false,
         message: 'خطا در ارتباط با سرور: ' + err.message
@@ -457,16 +474,19 @@ export const personalSyncService = {
 
           if (effectiveName) {
             document.querySelectorAll('#btn-header-user-account span:last-child, .user-nickname-display, #profile-display-name-val, .profile-name-text').forEach(el => {
-              if (el.tagName === 'INPUT') el.value = effectiveName;
-              else el.innerText = effectiveName;
+              if (el.tagName === 'INPUT') {
+                if (el.value !== effectiveName) el.value = effectiveName;
+              } else {
+                if (el.innerText !== effectiveName) el.innerText = effectiveName;
+              }
             });
             const profileInput = document.getElementById('profile-display-name');
-            if (profileInput) profileInput.value = effectiveName;
+            if (profileInput && profileInput.value !== effectiveName) profileInput.value = effectiveName;
           }
 
           if (effectiveAvatar) {
             document.querySelectorAll('#btn-header-user-account img, #main-header-avatar, #main-avatar-preview, .user-avatar-img').forEach(imgEl => {
-              if (imgEl && imgEl.tagName === 'IMG') imgEl.src = effectiveAvatar;
+              if (imgEl && imgEl.tagName === 'IMG' && imgEl.src !== effectiveAvatar) imgEl.src = effectiveAvatar;
             });
           }
 
@@ -495,6 +515,8 @@ export const personalSyncService = {
         };
       }
     } catch (err) {
+      console.error('[Sync Error]', err.name, err.message);
+      alert(`Sync Error: ${err.message}`);
       return {
         success: false,
         message: 'خطا در بازیابی اطلاعات: ' + err.message
@@ -621,7 +643,19 @@ let _actionPushDebounceTimeout = null;
  * Throttled to at most once per 2 seconds (unless forced) to prevent rapid redundant calls.
  */
 export function handleFocusDrivenSync(force = false) {
-  if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+  if (typeof document !== 'undefined') {
+    if (document.visibilityState !== 'visible') return;
+
+    // Pause sync if user is editing their profile or typing
+    const activeElement = document.activeElement;
+    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+      return;
+    }
+    if (typeof window !== 'undefined' && window.appState && window.appState.activeModal === 'editProfile') {
+      return;
+    }
+  }
+
   const now = Date.now();
   if (!force && now - _lastFocusPullTime < 2000) return;
   _lastFocusPullTime = now;
@@ -643,6 +677,14 @@ export function startSmartSyncInterval() {
 
   _smartSyncInterval = setInterval(() => {
     if (window.navigator && !window.navigator.onLine) return;
+    
+    // Pause sync if user is editing their profile or typing
+    if (typeof document !== 'undefined') {
+      const activeElement = document.activeElement;
+      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) return;
+    }
+    if (typeof window !== 'undefined' && window.appState && window.appState.activeModal === 'editProfile') return;
+
     if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pullFromCloud === 'function') {
       personalSyncService.pullFromCloud().catch(err => {
         console.warn('[SmartSync] Interval-driven pull deferred:', err);

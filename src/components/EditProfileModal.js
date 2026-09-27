@@ -335,7 +335,7 @@ window.handleSaveProfileSubmit = async function() {
     // 5. Trigger Cloud Sync (push personal data including the new name)
     const pSync = window.personalSyncService;
     if (pSync && typeof pSync.pushToCloud === 'function') {
-      pSync.pushToCloud().catch(() => {});
+      pSync.pushToCloud(null, newName, newAvatar).catch(() => {});
     }
 
     // 6. Also sync leaderboard score if in a group
