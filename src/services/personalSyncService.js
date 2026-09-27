@@ -1,7 +1,7 @@
 // Personal Cloud Sync Service for PlanEx Web
 // Enables seamless full-data, study logs, and study rooms synchronization based on Phone Number
 
-import { db } from '../db.js';
+import { db, applyVerifiedUserIdentity, isPlaceholderProfileName } from '../db.js';
 import { API_BASE_URL } from '../config.js';
 
 export function normalizePhone(rawPhone) {
@@ -130,12 +130,39 @@ export const personalSyncService = {
     const storedAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
     const activeAvatar = storedAvatar || profile.avatar || profile.avatar_url || profile.photo || authUser?.avatar_url || authUser?.avatar || authUser?.photo_url || '';
 
-    if (activeAvatar && backupData && typeof backupData === 'object') {
-      backupData.planex_user_avatar = activeAvatar;
-      if (!backupData.planex_user_profile) backupData.planex_user_profile = profile;
-      if (backupData.planex_user_profile && typeof backupData.planex_user_profile === 'object') {
-        backupData.planex_user_profile.avatar = activeAvatar;
-        backupData.planex_user_profile.avatar_url = activeAvatar;
+    // ── IDENTITY GUARD: force the outgoing top-level name/avatar to the freshest
+    // verified identity. Priority: planex_identity_verified_* (set by the profile
+    // editor / login / pull) > fresh db.getUserProfile() fields > auth record,
+    // and NEVER a placeholder like "دانش‌آموز پرتلاش" or "کاربر پلنکس".
+    let payloadName = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+    if (!payloadName || isPlaceholderProfileName(payloadName)) {
+      payloadName = profile.name || profile.nickname || authUser?.name || authUser?.full_name || '';
+    }
+    if (isPlaceholderProfileName(payloadName)) payloadName = '';
+
+    let payloadAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_avatar') || '') : '');
+    if (!payloadAvatar) payloadAvatar = activeAvatar;
+
+    if (backupData && typeof backupData === 'object') {
+      if (payloadName) {
+        backupData.planex_user_nickname = payloadName;
+        backupData.planex_leaderboard_nickname = payloadName;
+        if (!backupData.planex_user_profile || typeof backupData.planex_user_profile !== 'object') {
+          backupData.planex_user_profile = { ...(profile || {}) };
+        }
+        backupData.planex_user_profile.name = payloadName;
+        backupData.planex_user_profile.nickname = payloadName;
+        if (authUser && typeof authUser === 'object') {
+          backupData.planex_auth_user = { ...authUser, name: payloadName, full_name: payloadName };
+        }
+      }
+      if (payloadAvatar) {
+        backupData.planex_user_avatar = payloadAvatar;
+        if (!backupData.planex_user_profile || typeof backupData.planex_user_profile !== 'object') {
+          backupData.planex_user_profile = { ...(profile || {}) };
+        }
+        backupData.planex_user_profile.avatar = payloadAvatar;
+        backupData.planex_user_profile.avatar_url = payloadAvatar;
       }
     }
 
@@ -146,15 +173,33 @@ export const personalSyncService = {
       rooms: joinedRooms,
       backupData: backupData,
       appState: backupData,
-      name: profile.name || profile.nickname || authUser?.name || 'کاربر پلنکس',
-      avatar: activeAvatar,
-      avatar_url: activeAvatar,
-      photo_url: activeAvatar,
-      planex_user_avatar: activeAvatar,
+      name: payloadName || 'کاربر پلنکس',
+      avatar: payloadAvatar,
+      avatar_url: payloadAvatar,
+      photo_url: payloadAvatar,
+      planex_user_avatar: payloadAvatar,
       updatedAt: Date.now()
     };
 
     try {
+      // Re-read the verified identity at send time (it may have been updated by
+      // EditProfileModal / login while this function was being prepared) so the
+      // wire payload strictly contains the user's actual input.
+      const liveVerifiedName = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+      if (liveVerifiedName && !isPlaceholderProfileName(liveVerifiedName)) {
+        payload.name = liveVerifiedName;
+        if (payload.backupData && typeof payload.backupData === 'object') {
+          payload.backupData.planex_user_nickname = liveVerifiedName;
+        }
+      }
+      const liveVerifiedAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_avatar') || '') : '');
+      if (liveVerifiedAvatar) {
+        payload.avatar = liveVerifiedAvatar;
+        payload.avatar_url = liveVerifiedAvatar;
+        payload.photo_url = liveVerifiedAvatar;
+        payload.planex_user_avatar = liveVerifiedAvatar;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
         method: 'POST',
         headers: {
@@ -171,10 +216,21 @@ export const personalSyncService = {
       } catch (e) {}
 
       if (res.ok && data && data.success) {
+        // Server echo of the identity we just pushed — re-commit it as the
+        // verified identity AFTER restoring backupData so a stale server blob
+        // can never downgrade the freshly saved name/avatar.
+        const echoedName = payloadName || (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+        const echoedAvatar = payloadAvatar;
+
         // Restore backupData returned from server first
         if (data.backupData && typeof data.backupData === 'object') {
           this.importLocalState(data.backupData);
         }
+
+        applyVerifiedUserIdentity({
+          name: (echoedName && !isPlaceholderProfileName(echoedName)) ? echoedName : undefined,
+          avatar: echoedAvatar || undefined
+        });
 
         const returnedAvatar = data.backupData?.planex_user_avatar || (typeof data.backupData?.planex_user_profile === 'object' ? data.backupData.planex_user_profile?.avatar : null) || data.user?.avatar_url || data.user?.avatar;
         const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
@@ -195,9 +251,13 @@ export const personalSyncService = {
             p.avatar_url = targetAvatar;
             p.photo = targetAvatar;
             p.photoUrl = targetAvatar;
-            if (data.user && data.user.name) {
-              p.name = data.user.name;
-              p.nickname = data.user.name;
+            // Prefer the freshest verified identity over any (possibly stale) server echo
+            const latestVerifiedName = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_name') || '') : '');
+            const serverName = (data.user && data.user.name && !isPlaceholderProfileName(data.user.name)) ? data.user.name : '';
+            const finalPushName = (echoedName && !isPlaceholderProfileName(echoedName)) ? echoedName : (latestVerifiedName || serverName);
+            if (finalPushName) {
+              p.name = finalPushName;
+              p.nickname = finalPushName;
             }
             db.setUserProfile(p);
           } catch(e) {}
@@ -302,7 +362,7 @@ export const personalSyncService = {
           || (typeof json.backupData?.planex_user_profile === 'object' ? json.backupData.planex_user_profile?.nickname : null)
           || null;
 
-        if (pulledName && pulledName !== 'کاربر مهمان') {
+        if (pulledName && !isPlaceholderProfileName(pulledName)) {
           try {
             localStorage.setItem('planex_user_nickname', pulledName);
             localStorage.setItem('planex_leaderboard_nickname', pulledName);
@@ -336,7 +396,10 @@ export const personalSyncService = {
           || null;
 
         const currentAvatar = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_user_avatar') || '') : '');
-        const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com')) ? pulledAvatar : (currentAvatar || pulledAvatar);
+        const verifiedAvatarLocal = (typeof localStorage !== 'undefined' ? (localStorage.getItem('planex_identity_verified_avatar') || '') : '');
+        const targetAvatar = (pulledAvatar && !pulledAvatar.includes('dicebear.com'))
+          ? pulledAvatar
+          : (verifiedAvatarLocal || currentAvatar || pulledAvatar);
 
         if (targetAvatar) {
           try {
@@ -360,6 +423,13 @@ export const personalSyncService = {
             console.warn('[PersonalSync] Error updating pulled avatar:', e);
           }
         }
+
+        // ── IDENTITY GUARD: commit the pulled identity as verified so subsequent
+        // backup restores / re-renders can never fall back to the placeholder.
+        applyVerifiedUserIdentity({
+          name: (pulledName && !isPlaceholderProfileName(pulledName)) ? pulledName : null,
+          avatar: targetAvatar || null
+        });
         if (Array.isArray(json.rooms) && json.rooms.length > 0) {
           localStorage.setItem('planex_my_groups', JSON.stringify(json.rooms));
           localStorage.setItem('planex_my_rooms', JSON.stringify(json.rooms));

@@ -98,6 +98,11 @@ function handleLogin(PDO $pdo, array $input): void
 
         if (!empty($incomingData)) {
             $mergedData = array_merge($storedData, $incomingData);
+            // IDENTITY GUARD: the freshest client-sent name/avatar must win and be
+            // persisted at the TOP LEVEL of the stored data column.
+            if (!empty($input['name']))       $mergedData['name']       = $input['name'];
+            if (!empty($input['avatar']))     $mergedData['avatar']     = $input['avatar'];
+            if (!empty($input['avatar_url'])) $mergedData['avatar_url'] = $input['avatar_url'];
             $stmt = $pdo->prepare("UPDATE users SET data = :data, updated_at = NOW() WHERE phone = :phone");
             $stmt->execute([
                 ':data'  => json_encode($mergedData, JSON_UNESCAPED_UNICODE),
@@ -256,6 +261,33 @@ function handleSave(PDO $pdo, array $input): void
     $row = $stmt2->fetch();
     $existingData = $row ? (json_decode($row['data'], true) ?: []) : [];
     $mergedData = is_array($data) ? array_merge($existingData, $data) : $data;
+    if (!is_array($mergedData)) $mergedData = [];
+
+    // IDENTITY GUARD: persist the top-level name/avatar from the incoming payload
+    // (and mirror them inside backupData) so handleGet always returns them.
+    $incName   = $input['name'] ?? ($data['name'] ?? null);
+    $incAvatar = $input['avatar_url'] ?? $input['avatar'] ?? (($data['avatar_url'] ?? null) ?: ($data['avatar'] ?? null));
+    if (!empty($incName))   $mergedData['name']   = $incName;
+    if (!empty($incAvatar)) {
+        $mergedData['avatar']     = $incAvatar;
+        $mergedData['avatar_url'] = $incAvatar;
+    }
+    if (is_array($mergedData['backupData'] ?? null)) {
+        if (!empty($incName)) {
+            $mergedData['backupData']['planex_user_nickname'] = $incName;
+            if (is_array($mergedData['backupData']['planex_user_profile'] ?? null)) {
+                $mergedData['backupData']['planex_user_profile']['name']     = $incName;
+                $mergedData['backupData']['planex_user_profile']['nickname'] = $incName;
+            }
+        }
+        if (!empty($incAvatar)) {
+            $mergedData['backupData']['planex_user_avatar'] = $incAvatar;
+            if (is_array($mergedData['backupData']['planex_user_profile'] ?? null)) {
+                $mergedData['backupData']['planex_user_profile']['avatar']     = $incAvatar;
+                $mergedData['backupData']['planex_user_profile']['avatar_url'] = $incAvatar;
+            }
+        }
+    }
 
     // Update data
     $stmt = $pdo->prepare("UPDATE users SET data = :data, updated_at = NOW() WHERE phone = :phone");
@@ -267,6 +299,11 @@ function handleSave(PDO $pdo, array $input): void
     echo json_encode([
         'success'    => true,
         'message'    => 'Data saved successfully',
+        'user'       => [
+            'phone'      => $phone,
+            'name'       => $mergedData['name'] ?? 'کاربر پلنکس',
+            'avatar_url' => $mergedData['avatar_url'] ?? ($mergedData['avatar'] ?? '')
+        ],
         'backupData' => is_array($mergedData) ? ($mergedData['backupData'] ?? $mergedData) : $mergedData,
         'study_logs' => is_array($mergedData) ? ($mergedData['study_logs'] ?? []) : [],
         'rooms'      => is_array($mergedData) ? ($mergedData['rooms'] ?? []) : []

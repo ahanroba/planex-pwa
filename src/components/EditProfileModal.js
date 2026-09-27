@@ -1,6 +1,6 @@
 // EditProfileModal.js — Tap-to-Edit User Profile Modal with Ready Cartoon Avatars, File Upload, and Telegram Auto-Sync
 import { leaderboardService, LEADERBOARD_STORAGE_KEYS } from '../services/leaderboardService.js';
-import { db } from '../db.js';
+import { db, applyVerifiedUserIdentity } from '../db.js';
 
 export function renderEditProfileModal() {
   const profile = (leaderboardService && typeof leaderboardService.getUserProfile === 'function')
@@ -332,10 +332,22 @@ window.handleSaveProfileSubmit = async function() {
       leaderboardService.saveUserProfile(newName, newTarget, newAvatar);
     }
 
-    // 5. Trigger Cloud Sync (push personal data including the new name)
+    // 4.5 IDENTITY GUARD: commit the freshly typed name/avatar as the verified
+    // identity BEFORE any push/pull can run, so every payload builder and every
+    // backup restore reads the user's actual input — never a stale variable or
+    // the placeholder default.
+    applyVerifiedUserIdentity({ name: newName, avatar: newAvatar || undefined });
+
+    // 5. Trigger Cloud Sync (push personal data including the new name).
+    // Await the push so the server has persisted the new name/avatar before we
+    // hydrate local state from its response; pass the phone explicitly when known.
     const pSync = window.personalSyncService;
     if (pSync && typeof pSync.pushToCloud === 'function') {
-      pSync.pushToCloud().catch(() => {});
+      try {
+        await pSync.pushToCloud();
+      } catch (syncErr) {
+        console.warn('[EditProfile] pushToCloud failed (saved locally):', syncErr);
+      }
     }
 
     // 6. Also sync leaderboard score if in a group
