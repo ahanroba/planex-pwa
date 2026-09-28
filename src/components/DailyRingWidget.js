@@ -838,7 +838,7 @@ export function renderDailyStoryCardModal(dateStr = null) {
             <!-- Left: PlanEx Branding -->
             <div style="text-align: left; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
               <div style="display: flex; align-items: center; gap: 5px;">
-                <img src="./header-logo-3d.png" style="width: 22px; height: 22px; border-radius: 6px;" onerror="this.style.display='none';" />
+                <img src="./logo-transparent.png" style="width: 22px; height: 22px; border-radius: 6px;" onerror="this.style.display='none';" />
                 <span style="font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1rem; background: linear-gradient(135deg, #38bdf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PlanEx</span>
               </div>
             </div>
@@ -1333,7 +1333,7 @@ export function renderDailyAnalysisModal(dateStr = null) {
 
             <div style="text-align: left; display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
               <div style="display: flex; align-items: center; gap: 5px;">
-                <img src="./header-logo-3d.png" style="width: 22px; height: 22px; border-radius: 6px;" onerror="this.style.display='none';" />
+                <img src="./logo-transparent.png" style="width: 22px; height: 22px; border-radius: 6px;" onerror="this.style.display='none';" />
                 <span style="font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.95rem; background: linear-gradient(135deg, #38bdf8, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PlanEx</span>
               </div>
             </div>

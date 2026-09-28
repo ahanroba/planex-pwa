@@ -474,8 +474,8 @@ function updateTimerNotification(seconds, isCountdown = false) {
 
     const notifOptions = {
       body: bodyText,
-      icon: '/icon-192-final.png',
-      badge: '/icon-192-final.png',
+      icon: '/logo-transparent.png',
+      badge: '/logo-transparent.png',
       tag: 'planex-timer',
       requireInteraction: true,
       silent: true,
@@ -549,8 +549,8 @@ function spawnPersistentTimerNotification(subject, phase, targetEndTime, isStopw
         const notifTitle = `⏱️ (${initialTimeStr}) - ${statusLabel}`;
         const notifOptions = {
           body: bodyText,
-          icon: '/icon-192-final.png',
-          badge: '/icon-192-final.png',
+          icon: '/logo-transparent.png',
+          badge: '/logo-transparent.png',
           tag: 'planex-timer',
           requireInteraction: true,
           silent: true,
@@ -776,7 +776,6 @@ window.planexStartFocusTimer = function(event, options = {}) {
       };
       if (typeof updateDocumentTitleTimer === 'function') updateDocumentTitleTimer(0, false);
       if (typeof spawnPersistentTimerNotification === 'function') spawnPersistentTimerNotification(subject, phase, null, true);
-    }
     } else {
       // Pomodoro (1) or Break (2)
       const durationSeconds = presetMins * 60;
@@ -841,7 +840,6 @@ window.planexStartFocusTimer = function(event, options = {}) {
       };
       if (typeof updateDocumentTitleTimer === 'function') updateDocumentTitleTimer(durationSeconds, true);
       if (typeof spawnPersistentTimerNotification === 'function') spawnPersistentTimerNotification(subject, phase, targetState.timerTargetEndTime, false);
-    }
     }
 
     // 5. Keep screen awake and start heartbeat

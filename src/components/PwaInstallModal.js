@@ -48,7 +48,7 @@ export function renderPwaInstallModal() {
         
         <!-- Icon Banner -->
         <div style="margin-bottom: 16px; display: flex; justify-content: center;">
-          <img src="./pwa-icon-flat.jpg" alt="PlanEx Logo" style="width: 86px; height: 86px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); object-fit: contain; background: #1f2029; padding: 4px;" />
+          <img src="./logo-transparent.png" alt="PlanEx Logo" style="width: 86px; height: 86px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); object-fit: contain; background: #1f2029; padding: 4px;" />
         </div>
 
         <h3 style="font-size: 1.25rem; font-weight: 800; color: #e4e4e7; margin-bottom: 6px;">
