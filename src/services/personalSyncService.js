@@ -427,6 +427,30 @@ export const personalSyncService = {
 
         // Pre-patch backupData so importLocalState does not pollute localStorage with stale values
         if (json.backupData && typeof json.backupData === 'object') {
+          // INTERCEPT: WIPE STALE EARLY BIRD DATA FROM PAYLOAD
+          const cleanEbStale = (payloadObj) => {
+            if (payloadObj && payloadObj.early_bird_daily_status) {
+              try {
+                const ebData = typeof payloadObj.early_bird_daily_status === 'string'
+                  ? JSON.parse(payloadObj.early_bird_daily_status)
+                  : payloadObj.early_bird_daily_status;
+                const todayStr = (window.leaderboardService && window.leaderboardService.getTodayDateStr) ? window.leaderboardService.getTodayDateStr() : new Date().toLocaleDateString('fa-IR');
+                if (ebData.date !== todayStr) {
+                  delete payloadObj.early_bird_daily_status;
+                  if (typeof window !== 'undefined') window._forceEbWipe = true;
+                }
+              } catch (e) {
+                delete payloadObj.early_bird_daily_status;
+                if (typeof window !== 'undefined') window._forceEbWipe = true;
+              }
+            }
+          };
+          
+          cleanEbStale(json.backupData);
+          if (json.appState && typeof json.appState === 'object') {
+            cleanEbStale(json.appState);
+          }
+
           if (pulledName && pulledName !== 'x' && pulledName !== 'دانش آموز پرتلاش' && pulledName !== 'دانش‌آموز پرتلاش') {
             json.backupData.planex_user_nickname = pulledName;
             if (!json.backupData.planex_user_profile) json.backupData.planex_user_profile = {};
@@ -569,6 +593,16 @@ export const personalSyncService = {
             if (typeof window.renderApp === 'function') {
               window.renderApp();
             }
+          }
+
+          if (typeof window !== 'undefined' && window._forceEbWipe) {
+            window._forceEbWipe = false;
+            // Force server wipe now that the local state is cleaned
+            setTimeout(() => {
+              if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pushToCloud === 'function') {
+                personalSyncService.pushToCloud();
+              }
+            }, 500);
           }
         }
 

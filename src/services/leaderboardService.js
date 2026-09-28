@@ -2276,9 +2276,15 @@ export const leaderboardService = {
           return ebStatus.time;
         } else {
           localStorage.removeItem('early_bird_daily_status');
+          // Force Server Wipe
+          if (typeof window !== 'undefined' && window.personalSyncService && typeof window.personalSyncService.pushToCloud === 'function') {
+            window.personalSyncService.pushToCloud();
+          }
         }
       }
-    } catch(e) {}
+    } catch(e) {
+      localStorage.removeItem('early_bird_daily_status');
+    }
 
     // Original auto-detect was buggy, so we skip it to rely on direct user check-in.
     // If the user hasn't explicitly checked in, we return null to allow them to check in today.

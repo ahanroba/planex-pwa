@@ -3,6 +3,7 @@ import { ACTIVITY_PALETTE_24, isStudyCategory, formatStudyTime } from '../consta
 import { leaderboardService } from '../services/leaderboardService.js';
 import { pomodoroService } from '../services/pomodoroService.js';
 import { renderDailyRingWidget } from '../components/DailyRingWidget.js';
+import { personalSyncService } from '../services/personalSyncService.js';
 
 // ── باشگاه سحرخیزان ☀️ — هندلر دکمه «من بیدارم!» (فقط با کلیک کاربر) ──
 if (typeof window !== 'undefined') {
@@ -28,6 +29,9 @@ if (typeof window !== 'undefined') {
       const todayStr = window.leaderboardService ? window.leaderboardService.getTodayDateStr() : new Date().toLocaleDateString('fa-IR');
       if (ebStatus.date !== todayStr) {
         localStorage.removeItem('early_bird_daily_status');
+        if (personalSyncService && typeof personalSyncService.pushToCloud === 'function') {
+          personalSyncService.pushToCloud();
+        }
       }
     }
   } catch (e) {}
