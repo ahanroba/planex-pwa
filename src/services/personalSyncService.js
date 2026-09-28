@@ -365,6 +365,14 @@ export const personalSyncService = {
    * Pulls and recovers full personal data, study logs and study rooms from Cloudflare backend using Phone Number
    */
   async pullFromCloud(inputPhone = null) {
+    if (typeof document !== 'undefined') {
+      const activeElement = document.activeElement;
+      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.hasAttribute('contenteditable') || activeElement.isContentEditable)) {
+        console.log('[PersonalSync] Aborted pullFromCloud: User is actively typing.');
+        return { success: false, message: 'همگام‌سازی موقتاً متوقف شد زیرا در حال تایپ هستید.' };
+      }
+    }
+
     let authUser = null;
     try {
       authUser = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || 'null');
@@ -710,7 +718,7 @@ export function handleFocusDrivenSync(force = false) {
 
     // Pause sync if user is editing their profile or typing
     const activeElement = document.activeElement;
-    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.hasAttribute('contenteditable') || activeElement.isContentEditable)) {
       return;
     }
     if (typeof window !== 'undefined' && window.appState && window.appState.activeModal === 'editProfile') {
@@ -743,7 +751,7 @@ export function startSmartSyncInterval() {
     // Pause sync if user is editing their profile or typing
     if (typeof document !== 'undefined') {
       const activeElement = document.activeElement;
-      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) return;
+      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.hasAttribute('contenteditable') || activeElement.isContentEditable)) return;
     }
     if (typeof window !== 'undefined' && window.appState && window.appState.activeModal === 'editProfile') return;
 
