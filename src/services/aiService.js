@@ -58,25 +58,56 @@ class AiService {
     return this.history;
   }
 
+  getAuthHeaders() {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    let token = null;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        token = localStorage.getItem('planex_jwt_token') ||
+                localStorage.getItem('planex_token') ||
+                localStorage.getItem('token');
+
+        if (token === 'null' || token === 'undefined') token = null;
+
+        if (!token) {
+          const authUser = JSON.parse(localStorage.getItem('planex_auth_user') || '{}');
+          if (authUser && authUser.token) token = authUser.token;
+        }
+
+        if (!token) {
+          const userAcc = JSON.parse(localStorage.getItem('planex_user_account') || '{}');
+          if (userAcc && userAcc.token) token = userAcc.token;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to retrieve auth token:', e);
+    }
+
+    // Telegram WebApp initData
+    let tgInitData = null;
+    try {
+      if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+        tgInitData = window.Telegram.WebApp.initData || null;
+      }
+    } catch (e) {}
+
+    const effectiveToken = token || tgInitData;
+    if (effectiveToken) {
+      headers['Authorization'] = `Bearer ${effectiveToken}`;
+    }
+
+    if (tgInitData) {
+      headers['X-Telegram-Init-Data'] = tgInitData;
+    }
+
+    return headers;
+  }
+
   async sendMessage(userMessage, context = {}) {
     if (!userMessage || !userMessage.trim() || this.isGenerating) return null;
-
-    let githubToken = localStorage.getItem('planex_github_token');
-    if (!githubToken) {
-      githubToken = window.prompt('لطفاً توکن گیتهاب خود را برای فعالسازی هوش مصنوعی وارد کنید (فقط یکبار):');
-      if (githubToken && githubToken.trim()) {
-        githubToken = githubToken.trim();
-        localStorage.setItem('planex_github_token', githubToken);
-      } else {
-        return {
-          id: 'bot-' + Date.now(),
-          role: 'assistant',
-          timestamp: Date.now(),
-          content: 'برای استفاده از هوش مصنوعی، توکن گیتهاب نیاز است.',
-          model: 'error'
-        };
-      }
-    }
 
     const trimmedMsg = userMessage.trim();
     const userMsgObj = {
@@ -92,52 +123,44 @@ class AiService {
 
     const cleanHistory = this.history
       .filter(m => m.id !== 'welcome-msg')
-      .slice(-15)
+      .slice(-10)
       .map(m => ({ role: m.role, content: m.content }));
 
     let botReply = '';
-    let usedModel = 'gpt-4o';
+    let usedModel = 'planex-ai';
+
+    const authHeaders = this.getAuthHeaders();
 
     try {
-      let res = await fetch(`https://models.inference.ai.azure.com/chat/completions`, {
+      let res = await fetch(`https://api.planexapp.ir/ai-worker`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${githubToken}`
-        },
+        headers: authHeaders,
         body: JSON.stringify({
-          messages: [
-            { 
-              role: 'system', 
-              content: 'شما دستیار هوشمند پلنکس (PlanEx AI) هستید. به سوالات کاربران با دقت، دوستانه و کامل پاسخ دهید. از مارک‌داون برای قالب‌بندی استفاده کنید.' 
-            },
-            ...cleanHistory
-          ],
-          model: 'gpt-4o'
+          message: trimmedMsg,
+          history: cleanHistory,
+          context
         })
       });
 
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error((data && data.error && data.error.message) ? data.error.message : `HTTP Status: ${res.status}`);
+        throw new Error((data && data.error) ? data.error : `HTTP Status: ${res.status}`);
       }
 
-      if (data && data.choices && data.choices.length > 0 && data.choices[0].message) {
-        botReply = data.choices[0].message.content;
+      if (data && data.reply) {
+        botReply = data.reply;
+        usedModel = data.model || usedModel;
+      } else if (data && data.response) {
+        botReply = data.response;
         usedModel = data.model || usedModel;
       } else {
-        const errDetail = data ? JSON.stringify(data) : `کد وضعیت HTTP: ${res.status}`;
+        const errDetail = (data && (data.error || data.message)) || `کد وضعیت HTTP: ${res ? res.status : 'نامشخص'}`;
         botReply = `⚠️ **خطا در دریافت پاسخ از هوش مصنوعی:**\n\n${errDetail}\n\n💡 لطفاً اتصال اینترنت خود را بررسی نمایید.`;
       }
     } catch (netErr) {
       console.error('AI fetch error:', netErr);
       botReply = `⚠️ **خطا در اتصال به سرور هوش مصنوعی:**\n\n${netErr.message || 'عدم دسترسی به سرور یا اینترنت'}\n\n💡 لطفاً اتصال اینترنت خود را بررسی نمایید.`;
-      
-      if (netErr.message.includes('401')) {
-        localStorage.removeItem('planex_github_token');
-        botReply += '\n\n(توکن شما نامعتبر بود و حذف شد. لطفاً دوباره پیام بدهید تا توکن صحیح را وارد نمایید.)';
-      }
     }
 
     const botMsgObj = {
