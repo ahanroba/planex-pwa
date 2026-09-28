@@ -2268,32 +2268,20 @@ export const leaderboardService = {
       }
     }
 
-    // Auto-detect if user logged any session today with start time between 05:00 and 07:00 (300 to 420 mins)
     try {
-      if (typeof db !== 'undefined') {
-        const todayJalali = db.getTodayJalaliString ? db.getTodayJalaliString() : null;
-        let sessions = (typeof db.getActivitiesByDate === 'function' && todayJalali ? db.getActivitiesByDate(todayJalali) : []) || [];
-        if (!Array.isArray(sessions) || sessions.length === 0) {
-          try {
-            const raw = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
-            sessions = Array.isArray(raw) ? raw : [];
-          } catch (_) {}
-        }
-        for (const s of sessions) {
-          const startMins = this.extractSessionStartMinutes(s);
-          if (startMins !== null && startMins >= EARLY_BIRD_WINDOW.START_MIN && startMins <= EARLY_BIRD_WINDOW.END_MIN) {
-            const h = String(Math.floor(startMins / 60)).padStart(2, '0');
-            const m = String(startMins % 60).padStart(2, '0');
-            const detectedTime = `${h}:${m}`;
-            history[todayStr] = detectedTime;
-            try {
-              localStorage.setItem(LEADERBOARD_STORAGE_KEYS.EARLY_BIRD_HISTORY, JSON.stringify(history));
-            } catch (_) {}
-            return detectedTime;
-          }
+      const ebStatusStr = localStorage.getItem('early_bird_daily_status');
+      if (ebStatusStr) {
+        const ebStatus = JSON.parse(ebStatusStr);
+        if (ebStatus.date === todayStr) {
+          return ebStatus.time;
+        } else {
+          localStorage.removeItem('early_bird_daily_status');
         }
       }
-    } catch (_) {}
+    } catch(e) {}
+
+    // Original auto-detect was buggy, so we skip it to rely on direct user check-in.
+    // If the user hasn't explicitly checked in, we return null to allow them to check in today.
 
     return null;
   },

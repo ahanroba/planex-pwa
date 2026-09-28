@@ -20,6 +20,20 @@ function showEarlyBirdToast(message, ok = true, subText = '') {
 }
 
 if (typeof window !== 'undefined') {
+  // Check and reset Early Birds Club status if it's a new day
+  try {
+    const ebStatusStr = localStorage.getItem('early_bird_daily_status');
+    if (ebStatusStr) {
+      const ebStatus = JSON.parse(ebStatusStr);
+      const todayStr = window.leaderboardService ? window.leaderboardService.getTodayDateStr() : new Date().toLocaleDateString('fa-IR');
+      if (ebStatus.date !== todayStr) {
+        localStorage.removeItem('early_bird_daily_status');
+      }
+    }
+  } catch (e) {}
+}
+
+if (typeof window !== 'undefined') {
   window.handleEarlyBirdCheckIn = async () => {
     if (window.isEarlyBirdSubmitting) return;
 
@@ -37,6 +51,12 @@ if (typeof window !== 'undefined') {
       const rankTxt = result.rank ? ` — رتبه بیداری #${result.rank}` : '';
       showEarlyBirdToast(`☀️ ${result.message}${rankTxt}`, true);
       if (Array.isArray(result.list)) window.lastEarlyBirdList = result.list;
+      
+      try {
+        const todayStr = leaderboardService.getTodayDateStr();
+        const wakeTime = leaderboardService.getIranNowHHMM();
+        localStorage.setItem('early_bird_daily_status', JSON.stringify({ date: todayStr, time: wakeTime }));
+      } catch (e) {}
     } else {
       showEarlyBirdToast(`❌ ${result.message}`, false, result.errorDetail || '');
     }
