@@ -355,7 +355,9 @@ export const personalSyncService = {
           if (window.dashboardChartInstances) window.dashboardChartInstances = null;
           if (typeof window.updateCharts === 'function') window.updateCharts();
           if (typeof window.renderApp === 'function') {
+            const savedScrollY = window.scrollY || 0;
             window.renderApp();
+            window.scrollTo(0, savedScrollY);
           }
         }
 
@@ -487,10 +489,32 @@ export const personalSyncService = {
           const cleanTimestamps = (obj) => {
             if (!obj || typeof obj !== 'object') return obj;
             const cloned = JSON.parse(JSON.stringify(obj));
-            delete cloned.updatedAt;
-            delete cloned.updated_at;
-            delete cloned.last_sync;
-            delete cloned.lastSync;
+            const volatileKeys = ['updatedAt', 'updated_at', 'last_sync', 'lastSync', 'timestamp', 'early_bird_daily_status'];
+            
+            const deepClean = (target) => {
+              if (Array.isArray(target)) {
+                target.forEach(item => deepClean(item));
+              } else if (target && typeof target === 'object') {
+                for (const key of volatileKeys) {
+                  if (key in target) delete target[key];
+                }
+                for (const key in target) {
+                  if (Object.prototype.hasOwnProperty.call(target, key)) {
+                    if (typeof target[key] === 'string' && (target[key].startsWith('{') || target[key].startsWith('['))) {
+                      try {
+                        const parsed = JSON.parse(target[key]);
+                        deepClean(parsed);
+                        target[key] = JSON.stringify(parsed);
+                      } catch (e) {}
+                    } else {
+                      deepClean(target[key]);
+                    }
+                  }
+                }
+              }
+            };
+            
+            deepClean(cloned);
             return cloned;
           };
           const oldBackupStr = JSON.stringify(cleanTimestamps(this.exportLocalState() || {}));
@@ -623,7 +647,9 @@ export const personalSyncService = {
             if (window.dashboardChartInstances) window.dashboardChartInstances = null;
             if (typeof window.updateCharts === 'function') window.updateCharts();
             if (typeof window.renderApp === 'function') {
+              const savedScrollY = window.scrollY || 0;
               window.renderApp();
+              window.scrollTo(0, savedScrollY);
             }
           }
 
