@@ -282,8 +282,8 @@ export function sendPomodoroNotification(timerType = 1) {
 
     const notifOptions = {
       body,
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      icon: '/icon-192-final.png',
+      badge: '/icon-192-final.png',
       vibrate: [200, 100, 200],
       tag: 'planex-pomodoro-finished',
       renotify: true

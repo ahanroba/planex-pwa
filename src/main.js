@@ -474,8 +474,8 @@ function updateTimerNotification(seconds, isCountdown = false) {
 
     const notifOptions = {
       body: bodyText,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
+      icon: '/icon-192-final.png',
+      badge: '/icon-192-final.png',
       tag: 'planex-timer',
       requireInteraction: true,
       silent: true,
@@ -549,8 +549,8 @@ function spawnPersistentTimerNotification(subject, phase, targetEndTime, isStopw
         const notifTitle = `⏱️ (${initialTimeStr}) - ${statusLabel}`;
         const notifOptions = {
           body: bodyText,
-          icon: '/icons/icon-192.png',
-          badge: '/icons/icon-192.png',
+          icon: '/icon-192-final.png',
+          badge: '/icon-192-final.png',
           tag: 'planex-timer',
           requireInteraction: true,
           silent: true,
