@@ -2229,29 +2229,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // ── E3. AI Assistant Modal & Widget Open Delegation ──
-    try {
-      const aiBtn = (e.target && e.target.closest) ? e.target.closest('#btn-toggle-ai-chat, #btn-open-ai-modal, .btn-ai-modal-trigger, [data-action="open-ai-modal"]') : null;
-      if (aiBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (typeof window.toggleAiModal === 'function') {
-          window.toggleAiModal();
-        } else if (typeof window.openAiModal === 'function') {
-          window.openAiModal();
-        }
-        return;
-      }
-      const closeAiBtn = (e.target && e.target.closest) ? e.target.closest('#btn-close-ai-chat, [data-action="close-ai-modal"]') : null;
-      if (closeAiBtn) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (typeof window.closeAiModal === 'function') {
-          window.closeAiModal();
-        }
-        return;
-      }
-    } catch (_) {}
+    
 
     // ── F. Live Focus Timer Start, Reset & Toggle Trigger ──
     try {
@@ -2529,8 +2507,8 @@ import { renderActivityModal } from './components/ActivityModal.js';
 import { renderConsultationModal } from './components/ConsultationModal.js';
 import { renderConsultationView } from './views/ConsultationView.js';
 import { initTokenClient, backupDataToDrive, restoreDataFromDrive } from './services/googleDriveService.js';
-import { renderAiChatWidget } from './components/AiChatWidget.js';
-import { aiService } from './services/aiService.js';
+
+
 
 const API_BASE_URL = '';
 
@@ -2838,132 +2816,7 @@ window.closeConsultationModal = () => {
   renderApp();
 };
 
-// ── Global Handlers for AI Assistant (هوش مصنوعی پلنکس | PlanEx AI) ──
-window.openAiModal = function() {
-  const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
-  if (targetState) {
-    targetState.isAiChatOpen = true;
-    if (targetState.activeModal === 'ai' || targetState.activeModal === 'aiModal' || targetState.activeModal === 'aiChat') {
-      targetState.activeModal = null;
-    }
-  }
-  if (window.appState) {
-    window.appState.isAiChatOpen = true;
-    if (window.appState.activeModal === 'ai' || window.appState.activeModal === 'aiModal' || window.appState.activeModal === 'aiChat') {
-      window.appState.activeModal = null;
-    }
-  }
-  if (typeof renderApp === 'function') {
-    renderApp();
-  }
-  setTimeout(() => {
-    const container = document.getElementById('ai-chat-messages-container');
-    if (container) container.scrollTop = container.scrollHeight;
-    const input = document.getElementById('input-ai-message');
-    if (input) input.focus();
-  }, 80);
-};
 
-window.closeAiModal = function() {
-  const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
-  if (targetState) {
-    targetState.isAiChatOpen = false;
-  }
-  if (window.appState) {
-    window.appState.isAiChatOpen = false;
-  }
-  if (typeof renderApp === 'function') {
-    renderApp();
-  }
-};
-
-window.toggleAiModal = function() {
-  const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
-  const current = targetState ? targetState.isAiChatOpen : (window.appState ? window.appState.isAiChatOpen : false);
-  if (current) {
-    window.closeAiModal();
-  } else {
-    window.openAiModal();
-  }
-};
-
-window.openAiChat = window.openAiModal;
-window.closeAiChat = window.closeAiModal;
-window.toggleAiChat = window.toggleAiModal;
-
-window.clearAiChatHistory = function() {
-  if (typeof aiService !== 'undefined' && typeof aiService.clearHistory === 'function') {
-    aiService.clearHistory();
-    if (typeof renderApp === 'function') renderApp();
-  }
-};
-
-window.sendAiChatMessage = async function(textToSend = null) {
-  const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
-  if (!targetState) return;
-  if (targetState.isAiTyping) return;
-
-  const input = document.getElementById('input-ai-message');
-  const message = (textToSend !== null ? textToSend : (input ? input.value : '')).trim();
-  if (!message) return;
-
-  if (typeof window !== 'undefined') window._aiChatDraft = '';
-
-  if (input) input.value = '';
-
-  let userProf = {};
-  try {
-    userProf = (db && typeof db.getUserProfile === 'function')
-      ? db.getUserProfile()
-      : JSON.parse(localStorage.getItem('planex_user_profile') || '{}');
-  } catch (_) {}
-
-  let todayRec = {};
-  try {
-    todayRec = (db && typeof db.getRecordedTimerToday === 'function')
-      ? db.getRecordedTimerToday()
-      : {};
-  } catch (_) {}
-
-  const userContext = {
-    name: userProf?.name || 'کاربر پلنکس',
-    studyMinutes: todayRec?.minutes || 0,
-    testCount: todayRec?.tests || 0
-  };
-
-  targetState.isAiTyping = true;
-  if (typeof renderApp === 'function') renderApp();
-
-  setTimeout(() => {
-    const container = document.getElementById('ai-chat-messages-container');
-    if (container) container.scrollTop = container.scrollHeight;
-  }, 40);
-
-  try {
-    if (typeof aiService !== 'undefined' && typeof aiService.sendMessage === 'function') {
-      await aiService.sendMessage(message, userContext);
-    }
-  } catch (err) {
-    console.error('Error sending message to AI service:', err);
-  } finally {
-    targetState.isAiTyping = false;
-    if (typeof renderApp === 'function') renderApp();
-    setTimeout(() => {
-      const container = document.getElementById('ai-chat-messages-container');
-      if (container) container.scrollTop = container.scrollHeight;
-      const inp = document.getElementById('input-ai-message');
-      if (inp) inp.focus();
-    }, 80);
-  }
-};
-
-window.triggerAiFlashcardMode = function() {
-  const input = document.getElementById('input-ai-message');
-  if (input) {
-    input.value = `لطفاً متن زیر را به فلش‌کارت‌های استاندارد (سؤال و پاسخ کوتاه) برای جعبه لایتنر تبدیل کن:\n\n`;
-    input.focus();
-  }
-};
 
 // Quick-Action handlers for the interactive 4-step study-cycle card on the dashboard.
 // No modal is opened or closed here — each action switches the view directly.
@@ -3336,9 +3189,6 @@ export function renderApp() {
       modalHTML = renderGPACalculatorModal();
     } else if (state.activeModal === 'examBox') {
       modalHTML = renderExamBoxModal();
-    } else if (state.activeModal === 'ai' || state.activeModal === 'aiModal' || state.activeModal === 'aiChat') {
-      state.isAiChatOpen = true;
-      state.activeModal = null;
     } else if (state.activeModal === 'syncGuide') {
       modalHTML = `
         <div class="modal-overlay" style="display: flex;">
@@ -3382,7 +3232,7 @@ export function renderApp() {
         ${viewHTML}
       </main>
       ${renderNavigation(state.activeTab)}
-      ${renderAiChatWidget(state.isAiChatOpen, state.isAiTyping)}
+
       <div id="modal-container">${modalHTML}</div>
     `;
 
@@ -4419,147 +4269,7 @@ function bindEvents() {
     }
   }
 
-  // --- 7. PlanEx AI Floating Chat Widget Event Binding ---
-  try {
-    const btnToggleAi = document.getElementById('btn-toggle-ai-chat');
-    if (btnToggleAi) {
-      btnToggleAi.onclick = (e) => {
-        e.stopPropagation();
-        window.toggleAiModal();
-      };
-    }
-
-    const btnCloseAi = document.getElementById('btn-close-ai-chat');
-    if (btnCloseAi) {
-      btnCloseAi.onclick = (e) => {
-        e.stopPropagation();
-        window.closeAiModal();
-      };
-    }
-
-    const btnClearAi = document.getElementById('btn-clear-ai-history');
-    if (btnClearAi) {
-      btnClearAi.onclick = (e) => {
-        e.stopPropagation();
-        if (confirm('آیا از پاک کردن تاریخچه گفتگوی هوش مصنوعی اطمینان دارید؟')) {
-          window.clearAiChatHistory();
-        }
-      };
-    }
-
-    const btnSendAi = document.getElementById('btn-send-ai-message');
-    const inputAi = document.getElementById('input-ai-message');
-    if (btnSendAi && inputAi) {
-      btnSendAi.onclick = (e) => {
-        e.preventDefault();
-        window.sendAiChatMessage();
-      };
-      inputAi.onkeydown = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          window.sendAiChatMessage();
-        }
-      };
-    }
-
-    const btnTriggerFlashcard = document.getElementById('btn-trigger-flashcard-mode');
-    if (btnTriggerFlashcard && inputAi) {
-      btnTriggerFlashcard.onclick = (e) => {
-        e.stopPropagation();
-        window.triggerAiFlashcardMode();
-      };
-    }
-
-    document.querySelectorAll('.btn-quick-prompt').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const p = btn.dataset.prompt;
-        if (p) window.sendAiChatMessage(p);
-      };
-    });
-
-    document.querySelectorAll('.btn-copy-ai-msg').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const text = btn.dataset.text;
-        if (text && navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(() => {
-            const orig = btn.textContent;
-            btn.textContent = '✓';
-            setTimeout(() => { btn.textContent = orig; }, 1500);
-          }).catch(() => {});
-        }
-      };
-    });
-
-    document.querySelectorAll('.btn-save-single-flashcard').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const q = btn.dataset.q;
-        const a = btn.dataset.a;
-        if (q && a) {
-          db.addFlashcard(q, a, 'هوش مصنوعی');
-          btn.textContent = '✅ به لایتنر اضافه شد';
-          btn.style.background = 'rgba(16, 185, 129, 0.25)';
-          btn.style.color = '#34d399';
-          btn.style.borderColor = '#10b981';
-          btn.disabled = true;
-          if (window.leitnerState) {
-            window.leitnerState.activeIndex = 0;
-            window.leitnerState.filterBox = 'all';
-          }
-          if (window.showToast) {
-            window.showToast('✅ فلش‌کارت با موفقیت به خانه اول جعبه لایتنر اضافه شد!', 'success', 3000);
-          } else {
-            alert('✅ فلش‌کارت با موفقیت به خانه اول جعبه لایتنر اضافه شد!');
-          }
-        }
-      };
-    });
-
-    document.querySelectorAll('.btn-save-all-flashcards').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        try {
-          const cardsRaw = btn.dataset.cards;
-          let cards = [];
-          if (cardsRaw) cards = JSON.parse(cardsRaw);
-          if (Array.isArray(cards) && cards.length > 0) {
-            const count = db.addFlashcards(cards, 'هوش مصنوعی');
-            btn.innerHTML = '✅ به جعبه لایتنر اضافه شد';
-            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-            btn.style.borderColor = '#34d399';
-            btn.style.color = '#ffffff';
-            btn.disabled = true;
-            if (window.leitnerState) {
-              window.leitnerState.activeIndex = 0;
-              window.leitnerState.filterBox = 'all';
-            }
-            if (window.showToast) {
-              window.showToast(`🎉 تعداد ${count} فلش‌کارت با موفقیت به خانه اول جعبه لایتنر اضافه شد!`, 'success', 3500);
-            } else {
-              alert(`🎉 تعداد ${count} فلش‌کارت با موفقیت به خانه اول جعبه لایتنر اضافه شد!`);
-            }
-          }
-        } catch (err) {
-          console.error('Error saving all flashcards:', err);
-        }
-      };
-    });
-
-    const btnAiFlashcardsTool = document.getElementById('btn-open-ai-flashcards-tool');
-    if (btnAiFlashcardsTool) {
-      btnAiFlashcardsTool.onclick = (e) => {
-        e.stopPropagation();
-        window.openAiModal();
-        setTimeout(() => {
-          window.triggerAiFlashcardMode();
-        }, 120);
-      };
-    }
-  } catch (aiErr) {
-    console.error('Error binding AI Chat widget events:', aiErr);
-  }
+  
 }
 
 // ==========================================================================

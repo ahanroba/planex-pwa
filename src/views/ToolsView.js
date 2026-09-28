@@ -1,4 +1,4 @@
-import { db } from '../db.js';
+﻿import { db } from '../db.js';
 import { renderCategoriesView } from './CategoriesView.js';
 import { personalSyncService } from '../services/personalSyncService.js';
 
@@ -308,7 +308,7 @@ function renderLeitnerBoxSection() {
             <div style="font-size: 0.75rem; color: #a1a1aa; font-weight: 700;">مدیریت فلش‌کارت‌ها و مرور روزانه:</div>
             <div style="display: flex; gap: 6px;">
               <button id="btn-toggle-add-flashcard-form" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); color: #e4e4e7; padding: 5px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; cursor: pointer;">➕ افزودن</button>
-              <button id="btn-open-ai-flashcards-tool" onclick="if(typeof window.openAiModal==='function'){ window.openAiModal(); }" style="background: #7c3aed; border: none; color: white; padding: 5px 12px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">⚡ AI</button>
+
             </div>
           </div>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px;">
