@@ -30,6 +30,26 @@ window.selectPlannerDay = (idx) => {
   if (window.renderApp) window.renderApp();
 };
 
+window.changeJalaliMonth = (offset) => {
+  const [todayY, todayM] = db.getTodayJalali();
+  let m = window.jalaliViewMonth !== undefined ? window.jalaliViewMonth : (todayM - 1);
+  let y = window.jalaliViewYear !== undefined ? window.jalaliViewYear : todayY;
+  
+  m += offset;
+  if (m < 0) {
+    m = 11;
+    y -= 1;
+  } else if (m > 11) {
+    m = 0;
+    y += 1;
+  }
+  
+  window.jalaliViewMonth = m;
+  window.jalaliViewYear = y;
+  
+  if (window.renderApp) window.renderApp();
+};
+
 /** افزودن تسک مستقیماً داخل یک خانه ماتریس */
 window.addPlannerTaskToQuadrant = (quadrantId) => {
   const input = document.getElementById(`input-quadrant-task-${quadrantId}`);
@@ -262,9 +282,9 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
             </div>
             
             <div style="display: flex; gap: 8px; align-items: center;">
-              <button id="btn-jalali-prev-month" class="btn-header-action" style="padding: 4px 10px; font-weight: bold; background: #1f2029; border: 1px solid rgba(255, 255, 255, 0.08); color: #a1a1aa;">◀ ماه قبل</button>
+              <button id="btn-jalali-prev-month" onclick="window.changeJalaliMonth(-1)" class="btn-header-action" style="padding: 4px 10px; font-weight: bold; background: #1f2029; border: 1px solid rgba(255, 255, 255, 0.08); color: #a1a1aa;">◀ ماه قبل</button>
               <span style="font-weight: 900; font-size: 0.95rem; color: #e4e4e7;">${monthsJalali[currentJalaliMonthIdx]} ${toPersianDigits(currentJalaliYear)}</span>
-              <button id="btn-jalali-next-month" class="btn-header-action" style="padding: 4px 10px; font-weight: bold; background: #1f2029; border: 1px solid rgba(255, 255, 255, 0.08); color: #a1a1aa;">ماه بعد ▶</button>
+              <button id="btn-jalali-next-month" onclick="window.changeJalaliMonth(1)" class="btn-header-action" style="padding: 4px 10px; font-weight: bold; background: #1f2029; border: 1px solid rgba(255, 255, 255, 0.08); color: #a1a1aa;">ماه بعد ▶</button>
             </div>
           </div>
 
