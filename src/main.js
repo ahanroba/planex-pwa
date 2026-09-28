@@ -764,15 +764,19 @@ window.planexStartFocusTimer = function(event, options = {}) {
         }
       };
 
-      targetState.stopwatchInterval = setInterval(stopwatchTick, 1000);
-      window._planexTimerInterval = targetState.stopwatchInterval;
-      if (typeof state !== 'undefined' && state) state.stopwatchInterval = targetState.stopwatchInterval;
-      if (typeof updateDocumentTitleTimer === 'function') {
-        updateDocumentTitleTimer(0, false);
-      }
-      if (typeof spawnPersistentTimerNotification === 'function') {
-        spawnPersistentTimerNotification(subject, phase, null, true);
-      }
+      // Use global indestructible timer
+      window.planexActiveTimer = {
+        isRunning: true,
+        timerType: 0,
+        startTime: Date.now(),
+        accumulatedTime: 0,
+        targetEndTime: null,
+        presetMins: presetMins,
+        intervalId: setInterval(window.planexGlobalTimerTick, 1000)
+      };
+      if (typeof updateDocumentTitleTimer === 'function') updateDocumentTitleTimer(0, false);
+      if (typeof spawnPersistentTimerNotification === 'function') spawnPersistentTimerNotification(subject, phase, null, true);
+    }
     } else {
       // Pomodoro (1) or Break (2)
       const durationSeconds = presetMins * 60;
@@ -825,15 +829,19 @@ window.planexStartFocusTimer = function(event, options = {}) {
         }
       };
 
-      targetState.pomodoroInterval = setInterval(pomodoroTick, 1000);
-      window._planexTimerInterval = targetState.pomodoroInterval;
-      if (typeof state !== 'undefined' && state) state.pomodoroInterval = targetState.pomodoroInterval;
-      if (typeof updateDocumentTitleTimer === 'function') {
-        updateDocumentTitleTimer(durationSeconds, true);
-      }
-      if (typeof spawnPersistentTimerNotification === 'function') {
-        spawnPersistentTimerNotification(subject, phase, targetState.timerTargetEndTime, false);
-      }
+      // Use global indestructible timer
+      window.planexActiveTimer = {
+        isRunning: true,
+        timerType: timerType,
+        startTime: Date.now(),
+        accumulatedTime: 0,
+        targetEndTime: targetState.timerTargetEndTime,
+        presetMins: presetMins,
+        intervalId: setInterval(window.planexGlobalTimerTick, 1000)
+      };
+      if (typeof updateDocumentTitleTimer === 'function') updateDocumentTitleTimer(durationSeconds, true);
+      if (typeof spawnPersistentTimerNotification === 'function') spawnPersistentTimerNotification(subject, phase, targetState.timerTargetEndTime, false);
+    }
     }
 
     // 5. Keep screen awake and start heartbeat
@@ -3025,7 +3033,62 @@ function renderArticlesViewSafe() {
 }
 
 // Global Main UI Render Pipeline
+
+window.planexActiveTimer = {
+  isRunning: false,
+  timerType: 1, // 0: stopwatch, 1: pomodoro, 2: break
+  startTime: null,
+  accumulatedTime: 0,
+  targetEndTime: null,
+  presetMins: 25,
+  intervalId: null
+};
+
+window.planexGlobalTimerTick = function() {
+  if (!window.planexActiveTimer || !window.planexActiveTimer.isRunning) return;
+  const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
+  if (!targetState) return;
+
+  const timer = window.planexActiveTimer;
+  if (timer.timerType === 0) { // Stopwatch
+    targetState.stopwatchTime = Math.floor((Date.now() - timer.startTime) / 1000) + timer.accumulatedTime;
+    if (typeof updateDocumentTitleTimer === 'function') updateDocumentTitleTimer(targetState.stopwatchTime, false);
+    if (typeof updateTimerNotification === 'function') updateTimerNotification(targetState.stopwatchTime, false);
+  } else { // Pomodoro / Break
+    const remSecs = Math.ceil((timer.targetEndTime - Date.now()) / 1000);
+    targetState.pomodoroTime = Math.max(0, remSecs);
+    if (typeof updateDocumentTitleTimer === 'function') updateDocumentTitleTimer(remSecs, true);
+    if (typeof updateTimerNotification === 'function') updateTimerNotification(remSecs, true);
+
+    if (remSecs <= 0) {
+      // Finished
+      window.planexActiveTimer.isRunning = false;
+      if (timer.intervalId) clearInterval(timer.intervalId);
+      timer.intervalId = null;
+      if (typeof window.clearAllTimerIntervals === 'function') window.clearAllTimerIntervals();
+      targetState.isPomodoroRunning = false;
+      targetState.isStudying = false;
+      if (window.appState) window.appState.isStudying = false;
+      localStorage.removeItem('planex_active_timer_state');
+      if (typeof window.finishPomodoroSession === 'function') window.finishPomodoroSession();
+      return;
+    }
+  }
+
+  if (typeof updateTimerDisplayDOM === 'function' && document.visibilityState === 'visible') {
+    updateTimerDisplayDOM();
+  }
+};
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && window.planexActiveTimer && window.planexActiveTimer.isRunning) {
+    window.planexGlobalTimerTick();
+  }
+});
+
 export function renderApp() {
+  if (window.planexActiveTimer && window.planexActiveTimer.isRunning) window.planexGlobalTimerTick();
+
   try {
     if (typeof document !== 'undefined') {
       const active = document.activeElement;
@@ -3315,6 +3378,13 @@ const isStudyCategoryHelper = (cat) => Boolean(cat && (cat.isStudy !== false && 
 window.isStudyCategory = isStudyCategoryHelper;
 
 window.clearAllTimerIntervals = function() {
+  if (window.planexActiveTimer && window.planexActiveTimer.intervalId) {
+    clearInterval(window.planexActiveTimer.intervalId);
+  }
+  if (window.planexActiveTimer) {
+    window.planexActiveTimer.isRunning = false;
+    window.planexActiveTimer.intervalId = null;
+  }
   if (typeof restoreDocumentTitle === 'function') {
     restoreDocumentTitle();
   }
@@ -3768,18 +3838,17 @@ window.resumeTimerFromState = function() {
         if (typeof spawnPersistentTimerNotification === 'function') {
           spawnPersistentTimerNotification(state.focusSubject, state.selectedStudyMethod, null, true);
         }
-        state.stopwatchInterval = setInterval(() => {
-          state.stopwatchTime = Math.floor((Date.now() - state.timerStartTime) / 1000) + state.timerPreviouslyElapsed;
-          if (typeof updateDocumentTitleTimer === 'function') {
-            updateDocumentTitleTimer(state.stopwatchTime, false);
-          }
-          if (typeof updateTimerNotification === 'function') {
-            updateTimerNotification(state.stopwatchTime, false);
-          }
-          if (!document.hidden && typeof updateTimerDisplayDOM === 'function') {
-            updateTimerDisplayDOM();
-          }
-        }, 1000);
+        // Use global indestructible timer
+        window.planexActiveTimer = {
+          isRunning: true,
+          timerType: 0,
+          startTime: state.timerStartTime,
+          accumulatedTime: state.timerPreviouslyElapsed,
+          targetEndTime: null,
+          presetMins: 25,
+          intervalId: setInterval(window.planexGlobalTimerTick, 1000)
+        };
+        window.planexGlobalTimerTick();
 
         if (isVisible && typeof updateTimerDisplayDOM === 'function') {
           updateTimerDisplayDOM();
@@ -3842,28 +3911,17 @@ window.resumeTimerFromState = function() {
           if (typeof spawnPersistentTimerNotification === 'function') {
             spawnPersistentTimerNotification(state.focusSubject, state.selectedStudyMethod, state.timerTargetEndTime, false);
           }
-          state.pomodoroInterval = setInterval(() => {
-            const remSecs = Math.ceil((state.timerTargetEndTime - Date.now()) / 1000);
-            state.pomodoroTime = Math.max(0, remSecs);
-            if (typeof updateDocumentTitleTimer === 'function') {
-              updateDocumentTitleTimer(remSecs, true);
-            }
-            if (typeof updateTimerNotification === 'function') {
-              updateTimerNotification(remSecs, true);
-            }
-            if (remSecs > 0) {
-              if (!document.hidden && typeof updateTimerDisplayDOM === 'function') {
-                updateTimerDisplayDOM();
-              }
-            } else {
-              window.clearAllTimerIntervals();
-              state.isPomodoroRunning = false;
-              state.isStudying = false;
-              if (window.appState) window.appState.isStudying = false;
-              localStorage.removeItem('planex_active_timer_state');
-              window.finishPomodoroSession();
-            }
-          }, 1000);
+          // Use global indestructible timer
+          window.planexActiveTimer = {
+            isRunning: true,
+            timerType: 1, // assumption or get from state
+            startTime: Date.now(), // dummy for pomodoro
+            accumulatedTime: 0,
+            targetEndTime: state.timerTargetEndTime,
+            presetMins: state.focusPresetMins,
+            intervalId: setInterval(window.planexGlobalTimerTick, 1000)
+          };
+          window.planexGlobalTimerTick();
 
           if (isVisible && typeof updateTimerDisplayDOM === 'function') {
             updateTimerDisplayDOM();
