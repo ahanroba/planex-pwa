@@ -132,7 +132,7 @@ class AiService {
     const authHeaders = this.getAuthHeaders();
 
     try {
-      let res = await fetch(`https://ai-bot.planexapp.ir`, {
+      let res = await fetch(`https://api.planexapp.ir/ai-worker`, {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({
