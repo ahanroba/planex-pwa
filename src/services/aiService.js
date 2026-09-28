@@ -132,7 +132,7 @@ class AiService {
     const authHeaders = this.getAuthHeaders();
 
     try {
-      let res = await fetch(`${API_BASE_URL}/api/ai/chat.php`, {
+      let res = await fetch(`${API_BASE_URL}/api/ai.php`, {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({
@@ -142,22 +142,11 @@ class AiService {
         })
       });
 
-      if (!res.ok) {
-        const res2 = await fetch(`${API_BASE_URL}/api/v1/ai/chat.php`, {
-          method: 'POST',
-          headers: authHeaders,
-          body: JSON.stringify({
-            message: trimmedMsg,
-            history: cleanHistory,
-            context
-          })
-        }).catch(() => null);
-        if (res2 && res2.ok) {
-          res = res2;
-        }
-      }
-
       const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error((data && data.error) ? data.error : `HTTP Status: ${res.status}`);
+      }
 
       if (data && data.reply) {
         botReply = data.reply;
