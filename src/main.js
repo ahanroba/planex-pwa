@@ -2907,6 +2907,8 @@ window.sendAiChatMessage = async function(textToSend = null) {
   const message = (textToSend !== null ? textToSend : (input ? input.value : '')).trim();
   if (!message) return;
 
+  if (typeof window !== 'undefined') window._aiChatDraft = '';
+
   if (input) input.value = '';
 
   let userProf = {};
@@ -3172,6 +3174,15 @@ function renderArticlesViewSafe() {
 // Global Main UI Render Pipeline
 export function renderApp() {
   try {
+    if (typeof document !== 'undefined') {
+      const active = document.activeElement;
+      const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+      if (isTyping) {
+        console.log('renderApp aborted: User is typing');
+        return;
+      }
+    }
+
     const appEl = document.getElementById('app');
     if (!appEl) return;
 

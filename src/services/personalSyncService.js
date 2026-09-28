@@ -328,13 +328,15 @@ export const personalSyncService = {
           if (returnedName) {
             document.querySelectorAll('#btn-header-user-account span:last-child, .user-nickname-display, #profile-display-name-val, .profile-name-text').forEach(el => {
               if (el.tagName === 'INPUT') {
-                if (el.value !== returnedName) el.value = returnedName;
+                if (document.activeElement !== el && el.value !== returnedName) el.value = returnedName;
               } else {
-                if (el.innerText !== returnedName) el.innerText = returnedName;
+                if (document.activeElement !== el && el.innerText !== returnedName) el.innerText = returnedName;
               }
             });
             const profileInput = document.getElementById('profile-display-name');
-            if (profileInput && profileInput.value !== returnedName) profileInput.value = returnedName;
+            if (profileInput && document.activeElement !== profileInput && profileInput.value !== returnedName) {
+              profileInput.value = returnedName;
+            }
           }
 
           if (targetAvatar) {
@@ -383,9 +385,13 @@ export const personalSyncService = {
    * Pulls and recovers full personal data, study logs and study rooms from Cloudflare backend using Phone Number
    */
   async pullFromCloud(inputPhone = null) {
-    if (typeof window !== 'undefined' && window.isUserActivelyTyping) {
-      console.log('Sync aborted: User is typing');
-      return { success: false, message: 'همگام‌سازی موقتاً متوقف شد زیرا در حال تایپ هستید.' };
+    if (typeof document !== 'undefined') {
+      const active = document.activeElement;
+      const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+      if (isTyping) {
+        console.log('Sync aborted: User is typing');
+        return { success: false, message: 'همگام‌سازی موقتاً متوقف شد زیرا در حال تایپ هستید.' };
+      }
     }
 
     let authUser = null;
@@ -589,13 +595,15 @@ export const personalSyncService = {
           if (effectiveName) {
             document.querySelectorAll('#btn-header-user-account span:last-child, .user-nickname-display, #profile-display-name-val, .profile-name-text').forEach(el => {
               if (el.tagName === 'INPUT') {
-                if (el.value !== effectiveName) el.value = effectiveName;
+                if (document.activeElement !== el && el.value !== effectiveName) el.value = effectiveName;
               } else {
-                if (el.innerText !== effectiveName) el.innerText = effectiveName;
+                if (document.activeElement !== el && el.innerText !== effectiveName) el.innerText = effectiveName;
               }
             });
             const profileInput = document.getElementById('profile-display-name');
-            if (profileInput && profileInput.value !== effectiveName) profileInput.value = effectiveName;
+            if (profileInput && document.activeElement !== profileInput && profileInput.value !== effectiveName) {
+              profileInput.value = effectiveName;
+            }
           }
 
           if (effectiveAvatar) {
@@ -771,9 +779,13 @@ let _actionPushDebounceTimeout = null;
  * Throttled to at most once per 2 seconds (unless forced) to prevent rapid redundant calls.
  */
 export function handleFocusDrivenSync(force = false) {
-  if (typeof window !== 'undefined' && window.isUserActivelyTyping) {
-    console.log('Sync aborted: User is typing');
-    return;
+  if (typeof document !== 'undefined') {
+    const active = document.activeElement;
+    const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+    if (isTyping) {
+      console.log('Sync aborted: User is typing');
+      return;
+    }
   }
 
   if (typeof document !== 'undefined') {
@@ -804,9 +816,13 @@ export function startSmartSyncInterval() {
   if (_smartSyncInterval) clearInterval(_smartSyncInterval);
 
   _smartSyncInterval = setInterval(() => {
-    if (typeof window !== 'undefined' && window.isUserActivelyTyping) {
-      console.log('Sync aborted: User is typing');
-      return;
+    if (typeof document !== 'undefined') {
+      const active = document.activeElement;
+      const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+      if (isTyping) {
+        console.log('Sync aborted: User is typing');
+        return;
+      }
     }
     if (window.navigator && !window.navigator.onLine) return;
     

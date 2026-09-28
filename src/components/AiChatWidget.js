@@ -83,7 +83,8 @@ export function renderAiChatWidget(isOpen = false, isTyping = false) {
             rows="1"
             placeholder="سؤال خود را بپرسید یا متنی برای تبدیل به فلش‌کارت بفرستید..."
             ${isTyping ? 'disabled' : ''}
-          ></textarea>
+            oninput="if(typeof window !== 'undefined') window._aiChatDraft = this.value"
+          >${typeof window !== 'undefined' && window._aiChatDraft ? window._aiChatDraft : ''}</textarea>
           <button
             id="btn-trigger-flashcard-mode"
             class="btn-flashcard-trigger"
