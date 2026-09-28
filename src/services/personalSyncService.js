@@ -4,6 +4,24 @@
 import { db } from '../db.js';
 import { API_BASE_URL } from '../config.js';
 
+if (typeof window !== 'undefined') {
+  window.isUserActivelyTyping = false;
+  if (typeof document !== 'undefined') {
+    document.addEventListener('focusin', (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t.hasAttribute && t.hasAttribute('contenteditable')) || t.isContentEditable)) {
+        window.isUserActivelyTyping = true;
+      }
+    });
+    document.addEventListener('focusout', (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || (t.hasAttribute && t.hasAttribute('contenteditable')) || t.isContentEditable)) {
+        window.isUserActivelyTyping = false;
+      }
+    });
+  }
+}
+
 export function normalizePhone(rawPhone) {
   if (!rawPhone) return '';
   let p = String(rawPhone).trim();
@@ -365,12 +383,9 @@ export const personalSyncService = {
    * Pulls and recovers full personal data, study logs and study rooms from Cloudflare backend using Phone Number
    */
   async pullFromCloud(inputPhone = null) {
-    if (typeof document !== 'undefined') {
-      const activeElement = document.activeElement;
-      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.hasAttribute('contenteditable') || activeElement.isContentEditable)) {
-        console.log('[PersonalSync] Aborted pullFromCloud: User is actively typing.');
-        return { success: false, message: 'همگام‌سازی موقتاً متوقف شد زیرا در حال تایپ هستید.' };
-      }
+    if (typeof window !== 'undefined' && window.isUserActivelyTyping) {
+      console.log('Sync aborted: User is typing');
+      return { success: false, message: 'همگام‌سازی موقتاً متوقف شد زیرا در حال تایپ هستید.' };
     }
 
     let authUser = null;
@@ -463,8 +478,17 @@ export const personalSyncService = {
             json.backupData.planex_user_profile.avatar = targetAvatar;
             json.backupData.planex_user_profile.avatar_url = targetAvatar;
           }
-          const oldBackupStr = JSON.stringify(this.exportLocalState() || {});
-          const newBackupStr = JSON.stringify(json.backupData);
+          const cleanTimestamps = (obj) => {
+            if (!obj || typeof obj !== 'object') return obj;
+            const cloned = JSON.parse(JSON.stringify(obj));
+            delete cloned.updatedAt;
+            delete cloned.updated_at;
+            delete cloned.last_sync;
+            delete cloned.lastSync;
+            return cloned;
+          };
+          const oldBackupStr = JSON.stringify(cleanTimestamps(this.exportLocalState() || {}));
+          const newBackupStr = JSON.stringify(cleanTimestamps(json.backupData));
           if (oldBackupStr !== newBackupStr) {
             isDataChanged = true;
             this.importLocalState(json.backupData);
@@ -747,14 +771,14 @@ let _actionPushDebounceTimeout = null;
  * Throttled to at most once per 2 seconds (unless forced) to prevent rapid redundant calls.
  */
 export function handleFocusDrivenSync(force = false) {
+  if (typeof window !== 'undefined' && window.isUserActivelyTyping) {
+    console.log('Sync aborted: User is typing');
+    return;
+  }
+
   if (typeof document !== 'undefined') {
     if (document.visibilityState !== 'visible') return;
 
-    // Pause sync if user is editing their profile or typing
-    const activeElement = document.activeElement;
-    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.hasAttribute('contenteditable') || activeElement.isContentEditable)) {
-      return;
-    }
     if (typeof window !== 'undefined' && window.appState && window.appState.activeModal === 'editProfile') {
       return;
     }
@@ -780,13 +804,12 @@ export function startSmartSyncInterval() {
   if (_smartSyncInterval) clearInterval(_smartSyncInterval);
 
   _smartSyncInterval = setInterval(() => {
+    if (typeof window !== 'undefined' && window.isUserActivelyTyping) {
+      console.log('Sync aborted: User is typing');
+      return;
+    }
     if (window.navigator && !window.navigator.onLine) return;
     
-    // Pause sync if user is editing their profile or typing
-    if (typeof document !== 'undefined') {
-      const activeElement = document.activeElement;
-      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.hasAttribute('contenteditable') || activeElement.isContentEditable)) return;
-    }
     if (typeof window !== 'undefined' && window.appState && window.appState.activeModal === 'editProfile') return;
 
     if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pullFromCloud === 'function') {
