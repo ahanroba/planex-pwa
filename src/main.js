@@ -4522,14 +4522,18 @@ export function initApp() {
     if (splashBar) splashBar.style.width = '100%';
     if (splashText) splashText.textContent = 'خوش آمدید!';
     if (splashScreen) {
+      // Wait for the browser to fully paint the app DOM before fading out
+      // the splash screen. 1000ms gives one full animation frame budget after
+      // renderApp() completes, preventing premature reveal of unstyled content.
       setTimeout(() => {
         splashScreen.style.opacity = '0';
+        splashScreen.style.visibility = 'hidden';
         setTimeout(() => {
           try {
             splashScreen.remove();
           } catch (_) {}
         }, 400);
-      }, 400);
+      }, 1000);
     }
 
     console.log('[PlanEx] App initialized successfully with tab:', state.activeTab);

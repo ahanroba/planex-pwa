@@ -139,6 +139,7 @@ html, body, button, input, select, textarea, table, h1, h2, h3, h4, h5, h6, th, 
 
 html, body {
   width: 100%;
+  height: 100%;
   max-width: 100vw;
   overflow-x: hidden;
 }
@@ -189,6 +190,12 @@ body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  /* Layout-shift prevention: isolate reflows inside #app from the root */
+  isolation: isolate;
+  contain: layout style;
+  /* Reserve stable vertical space immediately — prevents height collapse
+     during the first render before child components paint */
+  box-sizing: border-box;
 }
 
 /* Top Header */
@@ -2820,4 +2827,22 @@ td.matrix-slot-cell {
   .app-header {
     padding-top: env(safe-area-inset-top, 6px);
   }
+}
+
+/* ── Splash Screen: compositor-layer promotion & layout-shift guard ── */
+#planex-splash-screen {
+  /* Promote to GPU layer so the opacity transition never triggers layout */
+  will-change: opacity, visibility;
+  /* Ensure it truly covers the viewport on all iOS Safari notch sizes */
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  /* Prevent the splash from participating in the normal layout flow */
+  contain: strict;
+}
+
+/* During the splash fade, prevent #app content from shifting upward */
+body:has(#planex-splash-screen) #app {
+  /* While the splash is visible, keep the app invisible but layout-stable */
+  pointer-events: none;
 }
