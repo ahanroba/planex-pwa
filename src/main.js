@@ -4441,6 +4441,13 @@ export function initApp() {
       window.resumeTimerFromState();
     }
 
+    // 3.5. Synchronize & hydrate local database state (profile, study logs) before initial render
+    try {
+      if (typeof db !== 'undefined' && typeof db.hydrateAndSyncState === 'function') {
+        db.hydrateAndSyncState();
+      }
+    } catch (_) {}
+
     // 4. Initial Render
     renderApp();
 

@@ -34,9 +34,20 @@ const STORAGE_KEYS = {
 import { ACTIVITY_PALETTE_24, DEFAULT_CATEGORIES, DEFAULT_NON_STUDY_CATEGORIES, formatStudyTime, getNextActivityColor, isStudyCategory } from './constants.js';
 
 
-const DEFAULT_SUBJECTS = [
-  "زیست‌شناسی", "ریاضیات", "فیزیک", "شیمی", "ادبیات", "زبان انگلیسی", "دین و زندگی", "زمین‌شناسی"
-];
+export function isPlaceholderName(n) {
+  if (!n || typeof n !== 'string') return true;
+  const clean = n.trim().replace(/\u200C/g, ' ').replace(/\s+/g, ' ');
+  return (
+    clean === '' ||
+    clean === 'دانش آموز پرتلاش' ||
+    clean === 'دانش اموز پر تلاش' ||
+    clean === 'دانش آموز پر تلاش' ||
+    clean === 'کاربر مهمان' ||
+    clean === 'کاربر' ||
+    clean === 'کاربر پلنکس' ||
+    clean.toLowerCase() === 'x'
+  );
+}
 
 class DatabaseEngine {
 
@@ -81,6 +92,8 @@ class DatabaseEngine {
       const data = typeof jsonInput === 'string' ? JSON.parse(jsonInput) : jsonInput;
       if (typeof data !== 'object' || data === null) throw new Error("فرمت فایل پشتیبان معتبر نیست.");
       
+      const localCustomName = this.getEffectiveUserName();
+
       Object.keys(data).forEach(key => {
         if (key === '_backup_metadata') return;
         const val = data[key];
@@ -91,6 +104,49 @@ class DatabaseEngine {
           const currentGroups = this.getUserGroups();
           if (currentGroups && currentGroups.length > 0) {
             return;
+          }
+        }
+
+        // Never overwrite existing non-empty study logs with an empty array from backup data
+        if ((key === 'planex_recent_activity_sessions' || key === 'planex_study_logs') && Array.isArray(val)) {
+          if (val.length === 0) {
+            try {
+              const existingRecent = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
+              const existingLogs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
+              if ((Array.isArray(existingRecent) && existingRecent.length > 0) || (Array.isArray(existingLogs) && existingLogs.length > 0)) {
+                return;
+              }
+            } catch (_) {}
+          } else {
+            // Merge incoming non-empty logs with local logs so no sessions are lost
+            try {
+              const existing = JSON.parse(localStorage.getItem(key) || '[]');
+              if (Array.isArray(existing) && existing.length > 0) {
+                const map = new Map();
+                [...existing, ...val].forEach(s => {
+                  if (!s || typeof s !== 'object') return;
+                  const k = s.id || `${s.date || s.dateStr}_${s.startTime || s.timestamp || s.subject}_${s.duration || s.minutes}`;
+                  map.set(k, s);
+                });
+                const merged = Array.from(map.values());
+                localStorage.setItem(key, JSON.stringify(merged));
+                return;
+              }
+            } catch (_) {}
+          }
+        }
+
+        // Never overwrite a custom local nickname with a default placeholder from backup data
+        if ((key === 'planex_user_nickname' || key === 'planex_nickname' || key === 'planex_leaderboard_nickname') && typeof val === 'string') {
+          if (localCustomName && isPlaceholderName(val)) {
+            return;
+          }
+        }
+
+        if (key === STORAGE_KEYS.USER_PROFILE && typeof val === 'object' && val !== null) {
+          if (localCustomName && isPlaceholderName(val.name)) {
+            val.name = localCustomName;
+            val.nickname = localCustomName;
           }
         }
 
@@ -127,18 +183,7 @@ class DatabaseEngine {
         }
       } catch (_) {}
 
-      // Ensure planex_recent_activity_sessions and planex_study_logs are populated and synchronized
-      try {
-        const recent = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
-        const logs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
-        if (Array.isArray(logs) && logs.length > 0 && (!Array.isArray(recent) || recent.length === 0)) {
-          localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(logs));
-        } else if (Array.isArray(recent) && recent.length > 0 && (!Array.isArray(logs) || logs.length === 0)) {
-          localStorage.setItem('planex_study_logs', JSON.stringify(recent));
-        }
-      } catch (_) {}
-
-      this._breakdownMemoMap = {};
+      this.hydrateAndSyncState();
       return true;
     } catch(err) {
       console.error('Import failed:', err);
@@ -146,8 +191,104 @@ class DatabaseEngine {
     }
   }
 
+  getEffectiveUserName() {
+    try {
+      const candidates = [
+        localStorage.getItem('planex_user_nickname'),
+        localStorage.getItem('planex_nickname'),
+        localStorage.getItem('planex_leaderboard_nickname')
+      ];
+
+      try {
+        const p = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILE) || '{}');
+        if (p) {
+          candidates.push(p.nickname);
+          candidates.push(p.name);
+          candidates.push(p.displayName);
+        }
+      } catch (_) {}
+
+      try {
+        const auth = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
+        if (auth) {
+          candidates.push(auth.full_name);
+          candidates.push(auth.name);
+          candidates.push(auth.nickname);
+          candidates.push(auth.first_name);
+        }
+      } catch (_) {}
+
+      for (const cand of candidates) {
+        if (cand && typeof cand === 'string' && !isPlaceholderName(cand)) {
+          return cand.trim();
+        }
+      }
+    } catch (_) {}
+
+    return '';
+  }
+
+  hydrateAndSyncState() {
+    try {
+      // 1. Sync & preserve effective user nickname across all profile storage locations
+      const effectiveName = this.getEffectiveUserName();
+      if (effectiveName) {
+        localStorage.setItem('planex_user_nickname', effectiveName);
+        localStorage.setItem('planex_nickname', effectiveName);
+        localStorage.setItem('planex_leaderboard_nickname', effectiveName);
+
+        try {
+          const prof = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILE) || '{}');
+          if (prof.name !== effectiveName || prof.nickname !== effectiveName) {
+            prof.name = effectiveName;
+            prof.nickname = effectiveName;
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(prof));
+          }
+        } catch (_) {}
+
+        try {
+          const auth = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
+          if (auth && typeof auth === 'object' && Object.keys(auth).length > 0) {
+            auth.name = effectiveName;
+            auth.full_name = effectiveName;
+            auth.nickname = effectiveName;
+            localStorage.setItem('planex_auth_user', JSON.stringify(auth));
+            localStorage.setItem('planex_user_account', JSON.stringify(auth));
+          }
+        } catch (_) {}
+      }
+
+      // 2. Synchronize recent_activity_sessions and study_logs so neither is lost
+      const recent = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
+      const logs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
+      if (Array.isArray(recent) && Array.isArray(logs)) {
+        if (recent.length > 0 || logs.length > 0) {
+          const map = new Map();
+          [...recent, ...logs].forEach(s => {
+            if (!s || typeof s !== 'object') return;
+            const k = s.id || `${s.date || s.dateStr}_${s.startTime || s.timestamp || s.subject}_${s.duration || s.minutes}`;
+            map.set(k, s);
+          });
+          const merged = Array.from(map.values());
+          merged.sort((a, b) => {
+            const tsA = Number(a.timestamp || a.createdAt || 0);
+            const tsB = Number(b.timestamp || b.createdAt || 0);
+            return tsB - tsA;
+          });
+          localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(merged));
+          localStorage.setItem('planex_study_logs', JSON.stringify(merged));
+        }
+      }
+
+      this._breakdownMemoMap = {};
+    } catch (e) {
+      console.warn('[db] hydrateAndSyncState error:', e);
+    }
+  }
+
   constructor() {
     this.initDefaults();
+    this.hydrateAndSyncState();
   }
 
   // 100% Precise Standard Gregorian to Jalali Astronomical Algorithm
@@ -1369,11 +1510,15 @@ class DatabaseEngine {
 
       let rawSessions = [];
       try {
-        rawSessions = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
-        if (!Array.isArray(rawSessions) || rawSessions.length === 0) {
-          rawSessions = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
-        }
-        if (!Array.isArray(rawSessions)) rawSessions = [];
+        const recent = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
+        const logs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
+        const map = new Map();
+        [...recent, ...logs].forEach(s => {
+          if (!s || typeof s !== 'object') return;
+          const key = s.id || `${s.date || s.dateStr}_${s.startTime || s.timestamp || s.subject}_${s.duration || s.minutes}`;
+          map.set(key, s);
+        });
+        rawSessions = Array.from(map.values());
       } catch (e) {
         rawSessions = [];
       }
@@ -2073,9 +2218,21 @@ class DatabaseEngine {
 
   getRecentFocusSessions(limit = 10) {
     try {
-      const recentSessions = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
-      if (!Array.isArray(recentSessions)) return [];
-      return recentSessions.filter(s => s && typeof s === 'object').slice(0, limit);
+      const recent = JSON.parse(localStorage.getItem('planex_recent_activity_sessions') || '[]');
+      const logs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
+      const map = new Map();
+      [...recent, ...logs].forEach(s => {
+        if (!s || typeof s !== 'object') return;
+        const key = s.id || `${s.date || s.dateStr}_${s.startTime || s.timestamp || s.subject}_${s.duration || s.minutes}`;
+        map.set(key, s);
+      });
+      const merged = Array.from(map.values());
+      merged.sort((a, b) => {
+        const tsA = Number(a.timestamp || a.createdAt || 0);
+        const tsB = Number(b.timestamp || b.createdAt || 0);
+        return tsB - tsA;
+      });
+      return merged.slice(0, limit);
     } catch(e) {
       return [];
     }
@@ -2196,7 +2353,13 @@ class DatabaseEngine {
     };
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILE));
-      return (parsed && typeof parsed === 'object') ? { ...DEFAULT_PROFILE, ...parsed } : DEFAULT_PROFILE;
+      const profile = (parsed && typeof parsed === 'object') ? { ...DEFAULT_PROFILE, ...parsed } : DEFAULT_PROFILE;
+      const effectiveName = this.getEffectiveUserName();
+      if (effectiveName) {
+        profile.name = effectiveName;
+        profile.nickname = effectiveName;
+      }
+      return profile;
     } catch (e) {
       return DEFAULT_PROFILE;
     }

@@ -1,3 +1,5 @@
+import { isPlaceholderName } from '../db.js';
+
 const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 function getLivePresenceCount() {
@@ -13,6 +15,34 @@ function getLivePresenceCount() {
   return base + jitter;
 }
 
+export function getEffectiveHeaderName() {
+  const storedNickname = (typeof localStorage !== 'undefined' ? (
+    localStorage.getItem('planex_user_nickname') ||
+    localStorage.getItem('planex_nickname') ||
+    localStorage.getItem('planex_leaderboard_nickname') || ''
+  ) : '');
+  if (storedNickname && !isPlaceholderName(storedNickname)) return storedNickname.trim();
+
+  let userProfile = null;
+  try {
+    userProfile = JSON.parse(localStorage.getItem('planex_user_profile') || localStorage.getItem('planex_profile') || 'null');
+  } catch(e) {}
+
+  if (userProfile?.nickname && !isPlaceholderName(userProfile.nickname)) return userProfile.nickname.trim();
+  if (userProfile?.name && !isPlaceholderName(userProfile.name)) return userProfile.name.trim();
+
+  let authUser = null;
+  try {
+    authUser = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || 'null');
+  } catch(e) {}
+
+  if (authUser?.full_name && !isPlaceholderName(authUser.full_name)) return authUser.full_name.trim();
+  if (authUser?.name && !isPlaceholderName(authUser.name)) return authUser.name.trim();
+  if (authUser?.first_name && !isPlaceholderName(authUser.first_name)) return authUser.first_name.trim();
+
+  return '';
+}
+
 // Direct DOM patching for header name & avatar — guarantees instant UI update
 // even if renderApp() hasn't re-run yet or reads stale cached data.
 function updateHeaderDOM() {
@@ -23,13 +53,9 @@ function updateHeaderDOM() {
     try { userProfile = JSON.parse(localStorage.getItem('planex_user_profile') || 'null'); } catch(_){}
 
     const storedAvatar = localStorage.getItem('planex_user_avatar') || '';
-    const storedNickname = localStorage.getItem('planex_user_nickname') || localStorage.getItem('planex_leaderboard_nickname') || '';
-
     const avatar = storedAvatar || userProfile?.avatar || userProfile?.avatar_url || userProfile?.photo || userProfile?.photoUrl || authUser?.avatar_url || authUser?.photo_url || '';
-    const rawName = storedNickname || userProfile?.nickname || authUser?.full_name || authUser?.name || authUser?.first_name || '';
-    // Only use userProfile.name if it is NOT the hardcoded default
-    const profileName = (userProfile?.name && userProfile.name !== 'دانش\u200Cآموز پرتلاش') ? userProfile.name : '';
-    const name = rawName || profileName || '';
+
+    const name = getEffectiveHeaderName();
 
     const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.phone || authUser.phone_number)));
     const displayName = name || (hasUser ? 'کاربر' : 'ورود');
@@ -105,13 +131,9 @@ export function renderHeader(stateProp = null) {
   } catch(e) {}
 
   const storedAvatar = localStorage.getItem('planex_user_avatar') || '';
-  const storedNickname = localStorage.getItem('planex_user_nickname') || localStorage.getItem('planex_leaderboard_nickname') || localStorage.getItem('planex_nickname') || '';
-
   const avatar = storedAvatar || userProfile?.avatar || userProfile?.avatar_url || userProfile?.photo || userProfile?.photoUrl || authUser?.avatar_url || authUser?.photo_url || '';
-  // Skip the hardcoded default "دانش‌آموز پرتلاش" — it should never override real synced data
-  const profileName = (userProfile?.name && userProfile.name !== 'دانش\u200Cآموز پرتلاش') ? userProfile.name : '';
-  const profileNickname = userProfile?.nickname || '';
-  const name = storedNickname || profileName || profileNickname || authUser?.full_name || authUser?.name || authUser?.first_name || '';
+
+  const name = getEffectiveHeaderName();
 
   const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.email || authUser.phone || authUser.phone_number)));
   const displayName = name || (hasUser ? 'کاربر' : 'ورود');

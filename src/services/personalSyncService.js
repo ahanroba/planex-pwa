@@ -1,7 +1,7 @@
 // Personal Cloud Sync Service for PlanEx Web
 // Enables seamless full-data, study logs, and study rooms synchronization based on Phone Number
 
-import { db } from '../db.js';
+import { db, isPlaceholderName } from '../db.js';
 import { API_BASE_URL } from '../config.js';
 
 if (typeof window !== 'undefined') {
@@ -474,7 +474,7 @@ export const personalSyncService = {
             cleanEbStale(json.appState);
           }
 
-          if (pulledName && pulledName !== 'x' && pulledName !== 'دانش آموز پرتلاش' && pulledName !== 'دانش‌آموز پرتلاش') {
+          if (pulledName && !isPlaceholderName(pulledName)) {
             json.backupData.planex_user_nickname = pulledName;
             if (!json.backupData.planex_user_profile) json.backupData.planex_user_profile = {};
             json.backupData.planex_user_profile.name = pulledName;
@@ -526,7 +526,7 @@ export const personalSyncService = {
         }
 
         // 3. Force UI Update: Overwrite all name & avatar localStorage keys immediately with server's response
-        if (pulledName && pulledName !== 'کاربر مهمان') {
+        if (pulledName && !isPlaceholderName(pulledName)) {
           try {
             const oldName = localStorage.getItem('planex_user_nickname');
             if (oldName !== pulledName) isDataChanged = true;
