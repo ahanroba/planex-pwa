@@ -443,7 +443,7 @@ class DatabaseEngine {
     }
 
     if (!localStorage.getItem(STORAGE_KEYS.CUSTOM_SUBJECTS)) {
-      localStorage.setItem(STORAGE_KEYS.CUSTOM_SUBJECTS, JSON.stringify(DEFAULT_SUBJECTS));
+      localStorage.setItem(STORAGE_KEYS.CUSTOM_SUBJECTS, JSON.stringify([]));
     }
 
     if (!localStorage.getItem(STORAGE_KEYS.STUDY_TARGETS)) {

@@ -4424,10 +4424,14 @@ export function parseUrlSearchParameters() {
 export function initApp() {
   try {
     // 1. Apply global dark glass theme and saved Persian font family
-    applyGlobalThemeSettings();
+    try {
+      applyGlobalThemeSettings();
+    } catch (e) { console.warn('Error in applyGlobalThemeSettings:', e); }
 
     // 2. Parse URL parameters for direct deep-linking
-    parseUrlSearchParameters();
+    try {
+      parseUrlSearchParameters();
+    } catch (e) { console.warn('Error in parseUrlSearchParameters:', e); }
 
     // 2.5. Self-healing check for any previously corrupted stats/sessions (>12h)
     try {
@@ -4437,9 +4441,11 @@ export function initApp() {
     } catch (_) {}
 
     // 3. Resume any active stopwatch or pomodoro session from localStorage
-    if (typeof window.resumeTimerFromState === 'function') {
-      window.resumeTimerFromState();
-    }
+    try {
+      if (typeof window.resumeTimerFromState === 'function') {
+        window.resumeTimerFromState();
+      }
+    } catch (e) { console.warn('Error in resumeTimerFromState:', e); }
 
     // 3.5. Synchronize & hydrate local database state (profile, study logs) before initial render
     try {
