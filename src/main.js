@@ -202,6 +202,17 @@ if (typeof window !== 'undefined') {
 // Unified Central Modal Dismissal Handler
 window.closeActiveModal = function() {
   const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
+  
+  if (targetState && (targetState.activeModal === 'editProfile' || targetState.activeModal === 'onboarding')) {
+    const userProf = typeof db !== 'undefined' && db.getUserProfile ? db.getUserProfile() : null;
+    const authProf = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('planex_auth_user') || 'null') : null;
+    const currentName = (userProf?.name || userProf?.nickname || authProf?.name || authProf?.full_name || '').trim();
+    if (!currentName) {
+      if (typeof window.showToast === 'function') window.showToast('لطفاً ابتدا نام خود را وارد کنید.', 'warning', 3000);
+      return; // Block closing
+    }
+  }
+
   if (targetState) {
     targetState.activeModal = null;
   }
@@ -3089,6 +3100,13 @@ export function renderApp() {
   // because it used to force DOM work on every renderApp() even for unrelated tabs.
 
   try {
+    const userProf = typeof db !== 'undefined' && db.getUserProfile ? db.getUserProfile() : null;
+    const authProf = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('planex_auth_user') || 'null') : null;
+    const currentName = (userProf?.name || userProf?.nickname || authProf?.name || authProf?.full_name || '').trim();
+    if (!currentName && state.activeModal !== 'editProfile') {
+      state.activeModal = 'editProfile';
+    }
+
     if (typeof document !== 'undefined') {
       const active = document.activeElement;
       const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);

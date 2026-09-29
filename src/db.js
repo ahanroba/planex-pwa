@@ -39,12 +39,7 @@ export function isPlaceholderName(n) {
   const clean = n.trim().replace(/\u200C/g, ' ').replace(/\s+/g, ' ');
   return (
     clean === '' ||
-    clean === 'دانش آموز پرتلاش' ||
-    clean === 'دانش اموز پر تلاش' ||
-    clean === 'دانش آموز پر تلاش' ||
-    clean === 'کاربر مهمان' ||
     clean === 'کاربر' ||
-    clean === 'کاربر پلنکس' ||
     clean.toLowerCase() === 'x'
   );
 }
@@ -457,9 +452,9 @@ class DatabaseEngine {
 
     if (!localStorage.getItem(STORAGE_KEYS.USER_PROFILE)) {
       localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify({
-        name: "دانش‌آموز پرتلاش",
-        major: "علوم تجربی",
-        targetField: "پزشکی دانشگاه تهران"
+        name: "",
+        major: "",
+        targetField: ""
       }));
     }
 
@@ -2347,9 +2342,9 @@ class DatabaseEngine {
   // User Profile
   getUserProfile() {
     const DEFAULT_PROFILE = {
-      name: "دانش‌آموز پرتلاش",
-      major: "علوم تجربی",
-      targetField: "پزشکی دانشگاه تهران"
+      name: "",
+      major: "",
+      targetField: ""
     };
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILE));
