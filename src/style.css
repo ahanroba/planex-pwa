@@ -2815,3 +2815,9 @@ td.matrix-slot-cell {
 [data-section="section-live-timer"] .btn-fab-study-pill.active span[style*="color"] {
   color: #a7f3d0 !important;
 }
+
+@media (display-mode: standalone) {
+  .app-header {
+    padding-top: env(safe-area-inset-top, 6px);
+  }
+}

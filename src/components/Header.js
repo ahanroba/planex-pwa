@@ -1,6 +1,6 @@
 import { isPlaceholderName } from '../db.js';
 
-const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => 'Û°Û±Û²Û³Û´ÛµÛ¶Û·Û¸Û¹'[d]);
 
 function getLivePresenceCount() {
   const hour = new Date().getHours();
@@ -43,7 +43,7 @@ export function getEffectiveHeaderName() {
   return '';
 }
 
-// Direct DOM patching for header name & avatar — guarantees instant UI update
+// Direct DOM patching for header name & avatar â€” guarantees instant UI update
 // even if renderApp() hasn't re-run yet or reads stale cached data.
 function updateHeaderDOM() {
   try {
@@ -58,7 +58,7 @@ function updateHeaderDOM() {
     const name = getEffectiveHeaderName();
 
     const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.phone || authUser.phone_number)));
-    const displayName = name || (hasUser ? 'کاربر' : 'ورود');
+    const displayName = name || (hasUser ? 'Ú©Ø§Ø±Ø¨Ø±' : 'ÙˆØ±ÙˆØ¯');
 
     // Patch the header button's display name
     const headerBtn = document.getElementById('btn-header-user-account');
@@ -72,9 +72,9 @@ function updateHeaderDOM() {
         if (avatarImg) {
           if (avatarImg.src !== avatar) avatarImg.src = avatar;
         } else {
-          // Replace the 👤 placeholder span with an actual img element
+          // Replace the ðŸ‘¤ placeholder span with an actual img element
           const placeholder = headerBtn.querySelector('span:first-child');
-          if (placeholder && placeholder.textContent.includes('👤')) {
+          if (placeholder && placeholder.textContent.includes('ðŸ‘¤')) {
             const img = document.createElement('img');
             img.src = avatar;
             img.style.cssText = 'width: 22px; height: 22px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1; border: 1px solid rgba(16, 185, 129, 0.5);';
@@ -136,41 +136,32 @@ export function renderHeader(stateProp = null) {
   const name = getEffectiveHeaderName();
 
   const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.email || authUser.phone || authUser.phone_number)));
-  const displayName = name || (hasUser ? 'کاربر' : 'ورود');
-  const activeCount = getLivePresenceCount();
-
-  return `
-    <header class="app-header" style="padding: max(env(safe-area-inset-top), 35px) 12px 6px 12px; min-height: 44px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; width: 100%; box-sizing: border-box; gap: 8px;">
+  const displayName = name || (hasUser ? 'Ú©Ø§Ø±Ø¨Ø±' : 'ÙˆØ±ÙˆØ¯');
+  return `<header class="app-header" style=" min-height: 44px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; width: 100%; box-sizing: border-box; gap: 8px;">
       <div class="header-brand" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
         <img src="./logo-transparent.png" alt="PlanEx Logo" style="width: 24px; height: 24px; border-radius: 6px; object-fit: contain;" />
         <div class="header-title" style="font-weight: 800; font-size: 0.92rem; letter-spacing: -0.3px; color: #e4e4e7;">PlanEx</div>
       </div>
 
-      <!-- Single Sleek Top Live Presence Badge -->
-      <div class="header-presence-badge" onclick="if(window.openFabActivityModal) window.openFabActivityModal();" style="display: flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; color: #34d399; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; overflow: hidden; text-overflow: ellipsis; max-width: 260px;" title="شروع مطالعه با همکاران آنلاین">
-        <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; flex-shrink: 0; box-shadow: 0 0 10px #10b981; animation: livePulse 1.8s infinite ease-in-out;"></span>
-        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🟢 ${toPersianDigits(activeCount)} نفر در حال مطالعه با تو هستند</span>
-      </div>
-
-      <div class="header-actions-wrapper" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-shrink: 0;">
-        <!-- ☕ Hamibash Support Link -->
-        <a href="https://hamibash.com/planexmedicalaa" target="_blank" rel="noopener noreferrer" id="btn-hamibash-link" class="btn-header-action" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; text-decoration: none; font-size: 0.74rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s ease;" title="حمایت از ما در حامی‌باش">
-          <span style="font-size: 0.82rem;">☕</span>
-          <span>حمایت از ما</span>
+<div class="header-actions-wrapper" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-shrink: 0;">
+        <!-- â˜• Hamibash Support Link -->
+        <a href="https://hamibash.com/planexmedicalaa" target="_blank" rel="noopener noreferrer" id="btn-hamibash-link" class="btn-header-action" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; text-decoration: none; font-size: 0.74rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s ease;" title="Ø­Ù…Ø§ÛŒØª Ø§Ø² Ù…Ø§ Ø¯Ø± Ø­Ø§Ù…ÛŒâ€ŒØ¨Ø§Ø´">
+          <span style="font-size: 0.82rem;">â˜•</span>
+          <span>Ø­Ù…Ø§ÛŒØª Ø§Ø² Ù…Ø§</span>
         </a>
 
-        <!-- ❤️ Support Modal Trigger Button -->
-        <button id="btn-support-modal" class="btn-header-action" onclick="if(window.appState){ window.appState.activeModal = 'support'; window.renderApp(); }" style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.74rem; font-weight: 700; flex-shrink: 0;" title="شبکه‌ها و راهنما">
-          <span style="font-size: 0.82rem;">❤️</span>
-          <span>راهنما</span>
+        <!-- â¤ï¸ Support Modal Trigger Button -->
+        <button id="btn-support-modal" class="btn-header-action" onclick="if(window.appState){ window.appState.activeModal = 'support'; window.renderApp(); }" style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.74rem; font-weight: 700; flex-shrink: 0;" title="Ø´Ø¨Ú©Ù‡â€ŒÙ‡Ø§ Ùˆ Ø±Ø§Ù‡Ù†Ù…Ø§">
+          <span style="font-size: 0.82rem;">â¤ï¸</span>
+          <span>Ø±Ø§Ù‡Ù†Ù…Ø§</span>
         </button>
 
         <!-- User Profile / Login Button -->
-        <button type="button" onclick="if(window.appState){ window.appState.activeModal = 'login'; window.renderApp(); }" id="btn-header-user-account" class="btn-header-action" style="background: #1f2029; border: 1px solid ${hasUser ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; color: ${hasUser ? '#34d399' : '#a1a1aa'}; padding: 3px 8px; border-radius: 10px; display: flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;" title="👤 حساب کاربری و مشخصات">
+        <button type="button" onclick="if(window.appState){ window.appState.activeModal = 'login'; window.renderApp(); }" id="btn-header-user-account" class="btn-header-action" style="background: #1f2029; border: 1px solid ${hasUser ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; color: ${hasUser ? '#34d399' : '#a1a1aa'}; padding: 3px 8px; border-radius: 10px; display: flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;" title="ðŸ‘¤ Ø­Ø³Ø§Ø¨ Ú©Ø§Ø±Ø¨Ø±ÛŒ Ùˆ Ù…Ø´Ø®ØµØ§Øª">
           ${avatar ? `
             <img src="${avatar}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1; border: 1px solid rgba(16, 185, 129, 0.5);" onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=planex';" />
           ` : `
-            <span style="font-size: 0.85rem; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border-radius: 50%;">👤</span>
+            <span style="font-size: 0.85rem; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border-radius: 50%;">ðŸ‘¤</span>
           `}
           <span style="font-size: 0.74rem; font-weight: 700; max-width: 75px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayName}</span>
         </button>
@@ -182,4 +173,6 @@ export function renderHeader(stateProp = null) {
 export function bindHeaderTouchIsolation() {
   // Touch isolation disabled as header is fixed single-row without horizontal scrolling
 }
+
+
 
