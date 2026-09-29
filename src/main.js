@@ -95,12 +95,12 @@ window.requestWakeLock = requestWakeLock;
 window.releaseWakeLock = releaseWakeLock;
 
 // ==========================================================================
-// ðŸž Global Toast Notification Engine & Modal Control System (Jakob Nielsen Heuristics 1 & 3)
+// 🍞 Global Toast Notification Engine & Modal Control System (Jakob Nielsen Heuristics 1 & 3)
 // ==========================================================================
 window.showToast = function(message, type = 'info', duration = 3500) {
   if (!message) return;
   const str = String(message).trim();
-  const icon = type === 'success' ? 'âœ…' : (type === 'error' ? 'âŒ' : (type === 'warning' ? 'âš ï¸' : 'â„¹ï¸'));
+  const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : 'ℹ️'));
 
   let container = document.getElementById('planex-global-toast-container');
   if (!container) {
@@ -188,11 +188,11 @@ if (typeof window !== 'undefined') {
     if (!msg) return;
     const str = String(msg);
     let type = 'info';
-    if (str.includes('خطا') || str.includes('âŒ') || str.includes('نامعتبر') || str.includes('اشتباه')) {
+    if (str.includes('خطا') || str.includes('❌') || str.includes('نامعتبر') || str.includes('اشتباه')) {
       type = 'error';
-    } else if (str.includes('موفقیت') || str.includes('âœ…') || str.includes('ðŸŽ‰') || str.includes('ذخیره شد')) {
+    } else if (str.includes('موفقیت') || str.includes('✅') || str.includes('🎉') || str.includes('ذخیره شد')) {
       type = 'success';
-    } else if (str.includes('âš ï¸') || str.includes('لطفاً') || str.includes('هشدار')) {
+    } else if (str.includes('⚠️') || str.includes('لطفاً') || str.includes('هشدار')) {
       type = 'warning';
     }
     window.showToast(str, type, 4000);
@@ -337,7 +337,7 @@ window.closeManualActivityLogModal = () => {
   if (typeof renderApp === 'function') renderApp();
 };
 
-// â”€â”€ Create & Join Group / Room Modals â”€â”€
+// ── Create & Join Group / Room Modals ──
 window.openCreateGroupModal = (defaultTab = 'create') => {
   window.createRoomModalActiveTab = defaultTab;
   const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
@@ -387,7 +387,7 @@ window.switchCreateRoomModalTab = (tab = 'create') => {
   }
 };
 
-// â”€â”€ Persistent Timer Notification & Dynamic Tab Title â”€â”€
+// ── Persistent Timer Notification & Dynamic Tab Title ──
 window._originalDocumentTitle = typeof document !== 'undefined' ? (document.title || 'پلنکس | برنامه ریزی درسی هوشمند') : '';
 window._planexTimerNotification = null;
 window._lastNotifUpdateTime = 0;
@@ -471,7 +471,7 @@ function updateTimerNotification(seconds, isCountdown = false) {
     const isNonStudy = (targetState?.focusActivityMode === 'non-study' && !isBreak);
     const statusLabel = isBreak ? 'در حال استراحت' : (isNonStudy ? 'فعالیت غیردرسی' : 'در حال مطالعه');
 
-    const notifTitle = `â±ï¸ (${timeStr}) - ${statusLabel}`;
+    const notifTitle = `⏱️ (${timeStr}) - ${statusLabel}`;
 
     let bodyText = '';
     if (!isCountdown || !targetState?.timerTargetEndTime) {
@@ -557,7 +557,7 @@ function spawnPersistentTimerNotification(subject, phase, targetEndTime, isStopw
           bodyText = `${subject ? `مبحث: ${subject} | ` : ''}مرحله: ${phase || 'تمرکز'} | پایان در ساعت ${endHours}:${endMins}`;
         }
 
-        const notifTitle = `â±ï¸ (${initialTimeStr}) - ${statusLabel}`;
+        const notifTitle = `⏱️ (${initialTimeStr}) - ${statusLabel}`;
         const notifOptions = {
           body: bodyText,
           icon: '/logo-transparent.png',
@@ -606,7 +606,7 @@ function spawnPersistentTimerNotification(subject, phase, targetEndTime, isStopw
 }
 window.spawnPersistentTimerNotification = spawnPersistentTimerNotification;
 
-// â”€â”€ Live Focus Timer Start & Toggle Engine â”€â”€
+// ── Live Focus Timer Start & Toggle Engine ──
 window.planexStartFocusTimer = function(event, options = {}) {
   try {
     if (event) {
@@ -948,7 +948,7 @@ window.resetTimer = function(e) {
   if (typeof updateTimerDisplayDOM === 'function') updateTimerDisplayDOM();
   if (typeof renderApp === 'function') renderApp();
   if (typeof window.showToast === 'function') {
-    window.showToast('تایمر متوقف و لغو شد (بدون ثبت) ðŸ”„', 'info', 2500);
+    window.showToast('تایمر متوقف و لغو شد (بدون ثبت) 🔄', 'info', 2500);
   }
 };
 
@@ -1085,7 +1085,7 @@ window.handleSelectFocusSubject = function(el, subjectName, catCode) {
   if (typeof updateTimerDisplayDOM === 'function') updateTimerDisplayDOM();
 };
 
-// â”€â”€ FAB Activity Modal State & Helpers â”€â”€
+// ── FAB Activity Modal State & Helpers ──
 window.fabActivityState = window.fabActivityState || {
   activeTab: 'timer',
   selectedSubject: '',
@@ -1202,12 +1202,12 @@ window.updateFabTestScorePreview = function() {
       const pct = (((correct * 3 - wrong) / (total * 3)) * 100).toFixed(1);
       preview.textContent = `درصد تراز: %${pct} (${total} تست کل)`;
     } else {
-      preview.textContent = `درصد تراز: %Û°`;
+      preview.textContent = `درصد تراز: %۰`;
     }
   }
 };
 
-// â”€â”€ Manual Log Modal Helpers â”€â”€
+// ── Manual Log Modal Helpers ──
 window.syncManualTimeInputs = function(source) {
   const startEl = document.getElementById('input-manual-start-time');
   const endEl = document.getElementById('input-manual-end-time');
@@ -1475,15 +1475,15 @@ window.updateManualTestScorePreview = function() {
       const pct = (((correct * 3 - wrong) / (total * 3)) * 100).toFixed(1);
       scoreEl.textContent = `%${pct}`;
     } else {
-      scoreEl.textContent = `%Û°`;
+      scoreEl.textContent = `%۰`;
     }
   }
 
   const totalEl = document.getElementById('manual-total-tests-count') || document.getElementById('manual-tests-total-badge');
-  if (totalEl) totalEl.textContent = total > 0 ? `${total} تست` : 'Û°';
+  if (totalEl) totalEl.textContent = total > 0 ? `${total} تست` : '۰';
 };
 
-// â”€â”€ Manual Log Modal: activity mode tabs & Focus accordion inline fallback â”€â”€
+// ── Manual Log Modal: activity mode tabs & Focus accordion inline fallback ──
 window.setManualLogMode = function(mode, event) {
   try {
     if (event) {
@@ -1533,10 +1533,10 @@ window.setManualLogMode = function(mode, event) {
       if (submitBtn) {
         if (isStudy) {
           submitBtn.style.background = '#7c3aed';
-          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">ðŸ’¾</span><span id="btn-submit-manual-log-text">ثبت در کارنامه و نمودارها</span>';
+          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">💾</span><span id="btn-submit-manual-log-text">ثبت در کارنامه و نمودارها</span>';
         } else {
           submitBtn.style.background = 'linear-gradient(135deg, #d97706 0%, #b45309 100%)';
-          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">â˜•</span><span id="btn-submit-manual-log-text">ثبت فعالیت غیردرسی (بدون احتساب در ساعت مطالعه)</span>';
+          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">☕</span><span id="btn-submit-manual-log-text">ثبت فعالیت غیردرسی (بدون احتساب در ساعت مطالعه)</span>';
         }
       }
     } else {
@@ -1575,7 +1575,7 @@ window.toggleFocusAccordion = function(key, event) {
   } catch (e) { console.warn('[toggleFocusAccordion]', e); }
 };
 
-// â”€â”€ Save Manual Activity Log Engine â”€â”€
+// ── Save Manual Activity Log Engine ──
 window.saveManualActivityLog = function(event) {
   if (event) {
     if (typeof event.preventDefault === 'function') event.preventDefault();
@@ -1775,9 +1775,9 @@ window.saveManualActivityLog = function(event) {
   const mins = duration % 60;
   const durStr = hours > 0 ? (mins > 0 ? `${hours} ساعت و ${mins} دقیقه` : `${hours} ساعت`) : `${mins} دقیقه`;
   if (typeof window.showToast === 'function') {
-    window.showToast(`فعالیت با موفقیت ثبت شد ✅ (${durStr} Â«${subject}Â»)`, 'success', 4500);
+    window.showToast(`فعالیت با موفقیت ثبت شد ✅ (${durStr} «${subject}»)`, 'success', 4500);
   } else {
-    alert(`فعالیت با موفقیت ثبت شد ✅ (${durStr} Â«${subject}Â»)`);
+    alert(`فعالیت با موفقیت ثبت شد ✅ (${durStr} «${subject}»)`);
   }
 
   // 10. Re-render UI
@@ -1843,7 +1843,7 @@ window.tickTimeBlockerSlot = (dayIdx, slotIdx) => {
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
   const categories = db.getCategories();
-  const activeCode = window.activePaletteCode || 'Ø¹-Ø³';
+  const activeCode = window.activePaletteCode || 'ع-س';
   const cat = categories.find(c => c.code === activeCode);
   const title = cat ? cat.title : 'مطالعه';
 
@@ -2096,7 +2096,7 @@ if (!window.globalDelegationBound) {
       return;
     }
 
-    // â”€â”€ A. Centralized modal dismissal (document-level: survives innerHTML rewrites) â”€â”€
+    // ── A. Centralized modal dismissal (document-level: survives innerHTML rewrites) ──
     try {
       const isDirectBackdrop = Boolean(
         e.target && (
@@ -2130,7 +2130,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ B. Quick Activity mode toggle (تایمر زنده / ثبت دستی) â”€â”€
+    // ── B. Quick Activity mode toggle (تایمر زنده / ثبت دستی) ──
     try {
       const modeBtn = (e.target && e.target.closest) ? e.target.closest('#btn-mode-timer, #btn-mode-manual, [data-mode="timer"], [data-mode="manual"]') : null;
       if (modeBtn && modeBtn.closest('#modal-fab-activity-registration')) {
@@ -2158,7 +2158,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ C. Konkur estimator trigger (تخمین رتبه) â”€â”€
+    // ── C. Konkur estimator trigger (تخمین رتبه) ──
     try {
       const konkurCard = (e.target && e.target.closest) ? e.target.closest('#card-konkur-estimator, [data-action="open-konkur-estimator"]') : null;
       if (konkurCard) {
@@ -2184,7 +2184,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ D. Leitner close (بستن لایتنر) â”€â”€
+    // ── D. Leitner close (بستن لایتنر) ──
     try {
       const leitnerCloseBtn = (e.target && e.target.closest) ? e.target.closest('#btn-close-leitner, [data-action="toggle-leitner"]') : null;
       if (leitnerCloseBtn) {
@@ -2204,7 +2204,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ E. Create Group Modal Open Trigger â”€â”€
+    // ── E. Create Group Modal Open Trigger ──
     try {
       const openCreateGroupBtn = (e.target && e.target.closest) ? e.target.closest('#btn-open-create-group, #btn-create-group-directory, [data-action="create-group"]') : null;
       if (openCreateGroupBtn) {
@@ -2218,7 +2218,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ E2. Story & Daily Analysis Modal Open Delegation (survives dynamic innerHTML updates) â”€â”€
+    // ── E2. Story & Daily Analysis Modal Open Delegation (survives dynamic innerHTML updates) ──
     try {
       const storyBtn = (e.target && e.target.closest) ? e.target.closest('#btn-open-daily-story, #btn-open-daily-analysis, .btn-story-trigger, .btn-open-daily-story, .btn-open-daily-analysis, .btn-quick-story, .btn-daily-report, [data-story-id], [data-action="open-story"]') : null;
       if (storyBtn) {
@@ -2248,7 +2248,7 @@ if (!window.globalDelegationBound) {
 
     
 
-    // â”€â”€ F. Live Focus Timer Start, Reset & Toggle Trigger â”€â”€
+    // ── F. Live Focus Timer Start, Reset & Toggle Trigger ──
     try {
       const resetBtn = (e.target && e.target.closest) ? e.target.closest('#btn-reset-timer-main') : null;
       if (resetBtn) {
@@ -2284,7 +2284,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ G. Manual Activity Log Submit Trigger â”€â”€
+    // ── G. Manual Activity Log Submit Trigger ──
     try {
       const manualSubmitBtn = (e.target && e.target.closest) ? e.target.closest('#btn-submit-manual-log, #btn-fab-submit-manual-log') : null;
       if (manualSubmitBtn) {
@@ -2296,7 +2296,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ H. Subject & Category Chip Selection in Modals â”€â”€
+    // ── H. Subject & Category Chip Selection in Modals ──
     try {
       const catChip = (e.target && e.target.closest) ? e.target.closest('.btn-manual-cat-chip, .btn-fab-cat-chip') : null;
       if (catChip) {
@@ -2310,7 +2310,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ I. Study Phase / Method Pills in Modals â”€â”€
+    // ── I. Study Phase / Method Pills in Modals ──
     try {
       const phasePill = (e.target && e.target.closest) ? e.target.closest('.btn-phase-chip, .btn-manual-study-pill, .btn-fab-study-pill, .study-phase-btn, .phase-chip, [data-phase], [data-pill]') : null;
       if (phasePill) {
@@ -2326,7 +2326,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ J. Quick Duration Adjust Buttons (+-15, +-5, etc.) â”€â”€
+    // ── J. Quick Duration Adjust Buttons (+-15, +-5, etc.) ──
     try {
       const durAdjustBtn = (e.target && e.target.closest) ? e.target.closest('.btn-dur-adjust, [data-adjust-dur]') : null;
       if (durAdjustBtn) {
@@ -2339,7 +2339,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ K. Quick Duration Preset Buttons (15, 30, 45, 60, 90, 120) â”€â”€
+    // ── K. Quick Duration Preset Buttons (15, 30, 45, 60, 90, 120) ──
     try {
       const durPresetBtn = (e.target && e.target.closest) ? e.target.closest('.btn-quick-dur-preset, [data-preset-mins]') : null;
       if (durPresetBtn) {
@@ -2409,7 +2409,7 @@ window.openDailyAnalysisReport = window.openDailyReportModal;
 window.openDailyReport = window.openDailyReportModal;
 window.openQuickStory = window.openQuickStoryModal;
 
-// â”€â”€ Global Personal Cloud Sync Handlers (100% Independent from Leaderboard) â”€â”€
+// ── Global Personal Cloud Sync Handlers (100% Independent from Leaderboard) ──
 window.handleCopyPersonalSyncToken = async (token) => {
   const code = token || personalSyncService.getOrCreateSyncToken();
   try {
@@ -2421,7 +2421,7 @@ window.handleCopyPersonalSyncToken = async (token) => {
     
     const toast = document.createElement('div');
     toast.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; padding: 12px 24px; border-radius: 14px; font-weight: 900; font-size: 0.92rem; z-index: 99999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: fadeIn 0.3s; text-align: center; direction: rtl;';
-    toast.innerHTML = `ðŸ“‹ کد همگام‌سازی (${code}) در حافظه کپی شد!`;
+    toast.innerHTML = `📋 کد همگام‌سازی (${code}) در حافظه کپی شد!`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2500);
   } catch (e) {
@@ -2434,7 +2434,7 @@ window.handlePersonalCloudPush = async () => {
   const originalText = btn ? btn.innerHTML : '';
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = 'â³ در حال ذخیره ابری...';
+    btn.innerHTML = '⏳ در حال ذخیره ابری...';
   }
 
   try {
@@ -2442,7 +2442,7 @@ window.handlePersonalCloudPush = async () => {
     if (res && res.success) {
       const toast = document.createElement('div');
       toast.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 26px; border-radius: 16px; font-weight: 900; font-size: 0.92rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: fadeIn 0.3s; text-align: center; direction: rtl;';
-      toast.innerHTML = `â˜ï¸ تمام اطلاعات شما با موفقیت با کد «${res.token}» در فضای ابری ذخیره شد!`;
+      toast.innerHTML = `☁️ تمام اطلاعات شما با موفقیت با کد «${res.token}» در فضای ابری ذخیره شد!`;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
       renderApp();
@@ -2455,7 +2455,7 @@ window.handlePersonalCloudPush = async () => {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = originalText || '<span>ðŸ“¤</span><span>ذخیره و پشتیبان‌گیری در ابری</span>';
+      btn.innerHTML = originalText || '<span>📤</span><span>ذخیره و پشتیبان‌گیری در ابری</span>';
     }
   }
 };
@@ -2478,7 +2478,7 @@ window.handlePersonalCloudPull = async (customToken = null) => {
   const originalText = btn ? btn.innerHTML : '';
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = 'â³ در حال بازیابی و اعمال...';
+    btn.innerHTML = '⏳ در حال بازیابی و اعمال...';
   }
 
   try {
@@ -2486,7 +2486,7 @@ window.handlePersonalCloudPull = async (customToken = null) => {
     if (res && res.success) {
       const toast = document.createElement('div');
       toast.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; padding: 14px 26px; border-radius: 16px; font-weight: 900; font-size: 0.92rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: fadeIn 0.3s; text-align: center; direction: rtl;';
-      toast.innerHTML = `ðŸŽ‰ تمام اطلاعات از کد «${token}» بازیابی و اعمال شد!`;
+      toast.innerHTML = `🎉 تمام اطلاعات از کد «${token}» بازیابی و اعمال شد!`;
       document.body.appendChild(toast);
 
       setTimeout(() => {
@@ -2502,7 +2502,7 @@ window.handlePersonalCloudPull = async (customToken = null) => {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = originalText || 'ðŸ“¥ بازیابی و اعمال';
+      btn.innerHTML = originalText || '📥 بازیابی و اعمال';
     }
   }
 };
@@ -2843,7 +2843,7 @@ window.closeConsultationModal = () => {
 
 
 // Quick-Action handlers for the interactive 4-step study-cycle card on the dashboard.
-// No modal is opened or closed here â€” each action switches the view directly.
+// No modal is opened or closed here — each action switches the view directly.
 window.handleUserGuideAction = (action) => {
   if (!action) return;
 
@@ -2886,10 +2886,10 @@ window.handleUserGuideAction = (action) => {
         .then(res => {
           const ok = res && res.success && res.serverConfirmed;
           alert(ok
-            ? `âœ… کارنامه شما روی سرور ثبت شد${res.rank ? ` â€” رتبه ${res.rank}` : ''}`
-            : `âŒ ثبت روی سرور انجام نشد: ${(res && (res.errorDetail || res.message)) || 'خطای ناشناخته'}`);
+            ? `✅ کارنامه شما روی سرور ثبت شد${res.rank ? ` — رتبه ${res.rank}` : ''}`
+            : `❌ ثبت روی سرور انجام نشد: ${(res && (res.errorDetail || res.message)) || 'خطای ناشناخته'}`);
         })
-        .catch(err => alert(`âŒ خطا در همگام‌سازی: ${err && err.message ? err.message : err}`));
+        .catch(err => alert(`❌ خطا در همگام‌سازی: ${err && err.message ? err.message : err}`));
     }
     return;
   }
@@ -3011,11 +3011,11 @@ function renderLeaderboardViewSafe() {
     }
     return `
       <div class="main-container" style="padding: 40px 20px; text-align: center; direction: rtl;">
-        <div style="font-size: 3rem; margin-bottom: 12px;">ðŸ†</div>
+        <div style="font-size: 3rem; margin-bottom: 12px;">🏆</div>
         <h3 style="color: #ef4444; font-weight: 800; margin-bottom: 8px;">خطا در بارگذاری تالار رقابت</h3>
         <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 20px;">${(err?.message || 'مشکلی در بارگذاری داده‌های رقابت رخ داده است.')}</p>
         <button onclick="if(window.switchTab) window.switchTab(0);" class="btn-primary" style="width: auto; padding: 10px 22px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto;">
-          <span>ðŸ </span>
+          <span>🏠</span>
           <span>بازگشت به داشبورد</span>
         </button>
       </div>
@@ -3036,11 +3036,11 @@ function renderArticlesViewSafe() {
     }
     return `
       <div class="main-container" style="padding: 40px 20px; text-align: center; direction: rtl;">
-        <div style="font-size: 3rem; margin-bottom: 12px;">ðŸ“š</div>
+        <div style="font-size: 3rem; margin-bottom: 12px;">📚</div>
         <h3 style="color: #ef4444; font-weight: 800; margin-bottom: 8px;">خطا در بارگذاری بخش مقالات و آزمون‌ها</h3>
         <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 20px;">${(err?.message || 'مشکلی در نمایش این بخش رخ داده است.')}</p>
         <button onclick="if(window.switchTab) window.switchTab(0);" class="btn-primary" style="width: auto; padding: 10px 22px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto;">
-          <span>ðŸ </span>
+          <span>🏠</span>
           <span>بازگشت به داشبورد</span>
         </button>
       </div>
@@ -3103,7 +3103,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 export function renderApp() {
-  // Decouple: let the timer's own setInterval handle ticks â€” do NOT call it here,
+  // Decouple: let the timer's own setInterval handle ticks — do NOT call it here,
   // because it used to force DOM work on every renderApp() even for unrelated tabs.
 
   try {
@@ -3122,7 +3122,7 @@ export function renderApp() {
         return;
       }
 
-      // Also bail out when the add-habit-modal is visibly open â€” the user is
+      // Also bail out when the add-habit-modal is visibly open — the user is
       // interacting with modal inputs that live inside the Routines view HTML.
       const habitModal = document.getElementById('add-habit-modal');
       if (habitModal && habitModal.style.display === 'flex') {
@@ -3211,15 +3211,15 @@ export function renderApp() {
           <div class="modal-card" style="max-width: 540px; background: rgba(15, 23, 42, 0.96); border-color: rgba(236, 72, 153, 0.5);">
             <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
               <div class="modal-title" style="color: #ec4899; display: flex; align-items: center; gap: 8px;">
-                ðŸ«™ کوزه شیشه‌ای خاطرات و شکرگزاری ✨
+                🫙 کوزه شیشه‌ای خاطرات و شکرگزاری ✨
               </div>
-              <button class="btn-close" id="btn-close-gratitude-modal">âœ•</button>
+              <button class="btn-close" id="btn-close-gratitude-modal">✕</button>
             </div>
 
             <div style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin: 14px 0;">
               ${notes.length === 0 ? `
                 <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
-                  <div style="font-size: 3rem; margin-bottom: 10px;">ðŸŒ¸</div>
+                  <div style="font-size: 3rem; margin-bottom: 10px;">🌸</div>
                   <div style="font-weight: bold; color: white;">هنوز خاطره‌ای در کوزه شیشه‌ای انداخته نشده!</div>
                   <div style="font-size: 0.8rem; margin-top: 4px;">با ثبت یک اتفاق کوچک، حس خوب امروزت رو ذخیره کن.</div>
                 </div>
@@ -3227,16 +3227,16 @@ export function renderApp() {
                 <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(236, 72, 153, 0.3); padding: 12px 14px; border-radius: 14px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <span style="background: rgba(236, 72, 153, 0.2); color: #f472b6; padding: 2px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: bold;">${item.dateStr || 'امروز'}</span>
-                    <button class="btn-delete-gratitude-item" data-id="${item.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem;">ðŸ—‘ï¸ حذف</button>
+                    <button class="btn-delete-gratitude-item" data-id="${item.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem;">🗑️ حذف</button>
                   </div>
-                  <div style="font-size: 0.78rem; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">â“ ${item.prompt || 'شکرگزاری'}</div>
-                  <div style="font-size: 0.9rem; color: white; line-height: 1.6;">âœ¨ ${item.text}</div>
+                  <div style="font-size: 0.78rem; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">❓ ${item.prompt || 'شکرگزاری'}</div>
+                  <div style="font-size: 0.9rem; color: white; line-height: 1.6;">✨ ${item.text}</div>
                 </div>
               `).join('')}
             </div>
 
             <div style="background: rgba(236, 72, 153, 0.12); padding: 10px; border-radius: 12px; font-size: 0.78rem; color: #fbcfe8; text-align: center; margin-top: 10px;">
-              ðŸ’¡ در روزهایی که احساس خستگی می‌کنی، مرور این کوزه بهترین منبع انرژی و انگیزه‌ست!
+              💡 در روزهایی که احساس خستگی می‌کنی، مرور این کوزه بهترین منبع انرژی و انگیزه‌ست!
             </div>
           </div>
         </div>
@@ -3290,21 +3290,21 @@ export function renderApp() {
           <div class="modal-content" style="max-width: 450px; background: #1a1a2e; border: 1px solid rgba(168, 85, 247, 0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
               <h2 style="margin: 0; color: #c084fc; font-size: 1.3rem; display: flex; align-items: center; gap: 8px;">
-                â„¹ï¸ قوانین برنامه‌ریزی و دیتابیس لوکال
+                ℹ️ قوانین برنامه‌ریزی و دیتابیس لوکال
               </h2>
-              <button onclick="window.appState.activeModal = null; window.renderApp();" class="btn-icon">âœ–</button>
+              <button onclick="window.appState.activeModal = null; window.renderApp();" class="btn-icon">✖</button>
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 15px;">
               <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: bold; color: #60a5fa; margin-bottom: 5px;">ðŸ”„ همگام‌سازی خودکار</div>
+                <div style="font-weight: bold; color: #60a5fa; margin-bottom: 5px;">🔄 همگام‌سازی خودکار</div>
                 <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
                   اطلاعات شما به صورت خودکار بین دستگاه‌های مختلف با باز کردن برنامه همگام می‌شود.
                 </div>
               </div>
               
               <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: bold; color: #f472b6; margin-bottom: 5px;">â³ محدودیت ویرایش پروفایل</div>
+                <div style="font-weight: bold; color: #f472b6; margin-bottom: 5px;">⏳ محدودیت ویرایش پروفایل</div>
                 <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
                   برای حفظ ثبات هویتی و جلوگیری از سوءاستفاده، ویرایش مشخصات پروفایل تنها هر ۴ ساعت یک‌بار امکان‌پذیر است.
                 </div>
@@ -3367,7 +3367,7 @@ export function renderApp() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        alert('ðŸ“¥ فایل پشتیبان JSON با موفقیت دانلود شد!');
+        alert('📥 فایل پشتیبان JSON با موفقیت دانلود شد!');
       } catch (err) {
         alert('خطا در پشتیبان‌گیری: ' + err.message);
       }
@@ -3389,7 +3389,7 @@ export function renderApp() {
       reader.onload = (evt) => {
         try {
           db.importAllDataJSON(evt.target.result);
-          alert('ðŸ“¤ اطلاعات با موفقیت بازیابی شدند!');
+          alert('📤 اطلاعات با موفقیت بازیابی شدند!');
           renderApp();
         } catch (err) {
           alert('خطا در بازیابی اطلاعات: ' + err.message);
@@ -3560,7 +3560,7 @@ window.finishPomodoroSession = function() {
       try {
         const toast = document.createElement('div');
         toast.style.cssText = `position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 14px 22px; border-radius: 14px; font-weight: 800; font-size: 0.9rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; direction: rtl; border: 1px solid rgba(255,255,255,0.15);`;
-        toast.innerHTML = 'âš ï¸ مدت زمان تایمر منقضی شده بود (> ۱۲ ساعت) و در کارنامه ثبت نشد.';
+        toast.innerHTML = '⚠️ مدت زمان تایمر منقضی شده بود (> ۱۲ ساعت) و در کارنامه ثبت نشد.';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 4000);
       } catch (_) {}
@@ -3628,9 +3628,9 @@ window.finishPomodoroSession = function() {
         const toast = document.createElement('div');
         toast.style.cssText = `position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 14px 22px; border-radius: 14px; font-weight: 800; font-size: 0.9rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; direction: rtl; border: 1px solid rgba(255,255,255,0.15);`;
         if (!wasRunning && elapsedSeconds === 0) {
-          toast.innerHTML = 'âš ï¸ تایمر در حال اجرا نیست! برای ثبت مطالعه بدون تایمر، از دکمه <strong>«ثبت دستی»</strong> استفاده کنید.';
+          toast.innerHTML = '⚠️ تایمر در حال اجرا نیست! برای ثبت مطالعه بدون تایمر، از دکمه <strong>«ثبت دستی»</strong> استفاده کنید.';
         } else {
-          toast.innerHTML = 'â±ï¸ زمان مطالعه بسیار کوتاه بود (کمتر از ۱ دقیقه) و در کارنامه ثبت نشد.';
+          toast.innerHTML = '⏱️ زمان مطالعه بسیار کوتاه بود (کمتر از ۱ دقیقه) و در کارنامه ثبت نشد.';
         }
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3500);
@@ -3740,11 +3740,11 @@ window.finishPomodoroSession = function() {
       const toast = document.createElement('div');
       const toastBg = isBreakMode ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : (isStudy ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #d97706 0%, #b45309 100%)');
       toast.style.cssText = `position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: ${toastBg}; color: white; padding: 16px 26px; border-radius: 18px; font-weight: 900; font-size: 0.95rem; line-height: 1.8; z-index: 99999; box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; direction: rtl; border: 1.5px solid rgba(255,255,255,0.35);`;
-      let toastContent = `ðŸŽ‰ پارت «${categoryTitle}Â» (${duration} دقیقه) پایان یافت و در کارنامه ثبت شد! ✅${tests > 0 ? `<br><span style="font-size: 0.84rem; opacity: 0.95;">ðŸŽ¯ ثبت ${tests} تست حل‌شده در آمار امروز</span>` : ''}`;
+      let toastContent = `🎉 پارت «${categoryTitle}» (${duration} دقیقه) پایان یافت و در کارنامه ثبت شد! ✅${tests > 0 ? `<br><span style="font-size: 0.84rem; opacity: 0.95;">🎯 ثبت ${tests} تست حل‌شده در آمار امروز</span>` : ''}`;
       if (isBreakMode) {
-        toastContent = `â˜• پارت استراحت (${duration} دقیقه) پایان یافت (بدون احتساب در ساعت مطالعه) â˜•`;
+        toastContent = `☕ پارت استراحت (${duration} دقیقه) پایان یافت (بدون احتساب در ساعت مطالعه) ☕`;
       } else if (isNonStudy) {
-        toastContent = `ðŸ§˜ فعالیت غیردرسی «${categoryTitle}Â» (${duration} دقیقه) ثبت شد (بدون احتساب در ساعت مطالعه) ðŸ§˜`;
+        toastContent = `🧘 فعالیت غیردرسی «${categoryTitle}» (${duration} دقیقه) ثبت شد (بدون احتساب در ساعت مطالعه) 🧘`;
       }
       toast.innerHTML = toastContent;
       document.body.appendChild(toast);
@@ -4041,13 +4041,13 @@ function updateTimerDisplayDOM() {
   if (toggleBtn) {
     const isRunning = Boolean(targetState.isPomodoroRunning || targetState.isStopwatchRunning);
     if (isRunning) {
-      toggleBtn.textContent = 'â¸ توقف و ثبت پارت';
+      toggleBtn.textContent = '⏸ توقف و ثبت پارت';
       toggleBtn.style.background = '#ef4444';
       toggleBtn.style.boxShadow = '0 4px 16px rgba(239,68,68,0.35)';
     } else {
       const isBreak = (targetState.focusTimerType === 2);
       const isNonStudy = (targetState.focusActivityMode === 'non-study' && !isBreak);
-      toggleBtn.textContent = isBreak ? 'â˜• شروع استراحت' : (isNonStudy ? 'ðŸ§˜ شروع فعالیت غیردرسی' : 'â–¶ شروع تایمر');
+      toggleBtn.textContent = isBreak ? '☕ شروع استراحت' : (isNonStudy ? '🧘 شروع فعالیت غیردرسی' : '▶ شروع تایمر');
       toggleBtn.style.background = isBreak ? '#0284c7' : (isNonStudy ? '#d97706' : '#10b981');
       toggleBtn.style.boxShadow = '0 4px 16px rgba(16,185,129,0.35)';
     }
@@ -4291,7 +4291,7 @@ function bindEvents() {
       btnShareArticle.onclick = () => {
         const url = window.location.origin + window.location.pathname + '?tab=articles&article=' + encodeURIComponent(btnShareArticle.dataset.articleId);
         if (navigator.share) navigator.share({ title: document.title, url }).catch(() => {});
-        else navigator.clipboard.writeText(url).then(() => alert('âœ… لینک کپی شد!')).catch(() => prompt('لینک را کپی کنید:', url));
+        else navigator.clipboard.writeText(url).then(() => alert('✅ لینک کپی شد!')).catch(() => prompt('لینک را کپی کنید:', url));
       };
     }
 
@@ -4308,7 +4308,7 @@ function bindEvents() {
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
         btn.style.opacity = '0.7';
-        btn.innerHTML = `<span>â³ در حال آماده‌سازی دانلود...</span>`;
+        btn.innerHTML = `<span>⏳ در حال آماده‌سازی دانلود...</span>`;
 
         try {
           const response = await fetch(fileUrl);
@@ -4324,7 +4324,7 @@ function bindEvents() {
           setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 
           if (typeof window.showToast === 'function') {
-            window.showToast(`âœ… فایل «${fileName}» با موفقیت دانلود شد!`, 'success', 3500);
+            window.showToast(`✅ فایل «${fileName}» با موفقیت دانلود شد!`, 'success', 3500);
           }
         } catch (fetchErr) {
           console.warn('Direct fetch failed, falling back to anchor trigger:', fetchErr);
@@ -4336,7 +4336,7 @@ function bindEvents() {
           link.click();
           document.body.removeChild(link);
           if (typeof window.showToast === 'function') {
-            window.showToast(`ðŸ“¥ فایل «${fileName}» در حال بارگیری است.`, 'info', 3000);
+            window.showToast(`📥 فایل «${fileName}» در حال بارگیری است.`, 'info', 3000);
           }
         } finally {
           setTimeout(() => {
@@ -4379,7 +4379,7 @@ function bindEvents() {
 }
 
 // ==========================================================================
-// ðŸš€ Application Boot & Deep-Link Router Engine
+// 🚀 Application Boot & Deep-Link Router Engine
 // ==========================================================================
 export function parseUrlSearchParameters() {
   try {
