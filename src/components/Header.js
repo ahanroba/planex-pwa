@@ -1,6 +1,6 @@
 import { isPlaceholderName } from '../db.js';
 
-const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => 'Û°Û±Û²Û³Û´ÛµÛ¶Û·Û¸Û¹'[d]);
+const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 function getLivePresenceCount() {
   const hour = new Date().getHours();
@@ -58,7 +58,7 @@ function updateHeaderDOM() {
     const name = getEffectiveHeaderName();
 
     const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.phone || authUser.phone_number)));
-    const displayName = name || (hasUser ? 'Ú©Ø§Ø±Ø¨Ø±' : 'ÙˆØ±ÙˆØ¯');
+    const displayName = name || (hasUser ? 'کاربر' : 'ورود');
 
     // Patch the header button's display name
     const headerBtn = document.getElementById('btn-header-user-account');
@@ -136,7 +136,7 @@ export function renderHeader(stateProp = null) {
   const name = getEffectiveHeaderName();
 
   const hasUser = Boolean(name || avatar || (authUser && (authUser.id || authUser.telegram_id || authUser.email || authUser.phone || authUser.phone_number)));
-  const displayName = name || (hasUser ? 'Ú©Ø§Ø±Ø¨Ø±' : 'ÙˆØ±ÙˆØ¯');
+  const displayName = name || (hasUser ? 'کاربر' : 'ورود');
   return `<header class="app-header" style=" min-height: 44px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; width: 100%; box-sizing: border-box; gap: 8px;">
       <div class="header-brand" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
         <img src="./logo-transparent.png" alt="PlanEx Logo" style="width: 24px; height: 24px; border-radius: 6px; object-fit: contain;" />
@@ -145,19 +145,19 @@ export function renderHeader(stateProp = null) {
 
 <div class="header-actions-wrapper" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-shrink: 0;">
         <!-- â˜• Hamibash Support Link -->
-        <a href="https://hamibash.com/planexmedicalaa" target="_blank" rel="noopener noreferrer" id="btn-hamibash-link" class="btn-header-action" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; text-decoration: none; font-size: 0.74rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s ease;" title="Ø­Ù…Ø§ÛŒØª Ø§Ø² Ù…Ø§ Ø¯Ø± Ø­Ø§Ù…ÛŒâ€ŒØ¨Ø§Ø´">
+        <a href="https://hamibash.com/planexmedicalaa" target="_blank" rel="noopener noreferrer" id="btn-hamibash-link" class="btn-header-action" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; text-decoration: none; font-size: 0.74rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s ease;" title="حمایت از ما در حامی‌باش">
           <span style="font-size: 0.82rem;">â˜•</span>
-          <span>Ø­Ù…Ø§ÛŒØª Ø§Ø² Ù…Ø§</span>
+          <span>حمایت از ما</span>
         </a>
 
         <!-- â¤ï¸ Support Modal Trigger Button -->
-        <button id="btn-support-modal" class="btn-header-action" onclick="if(window.appState){ window.appState.activeModal = 'support'; window.renderApp(); }" style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.74rem; font-weight: 700; flex-shrink: 0;" title="Ø´Ø¨Ú©Ù‡â€ŒÙ‡Ø§ Ùˆ Ø±Ø§Ù‡Ù†Ù…Ø§">
+        <button id="btn-support-modal" class="btn-header-action" onclick="if(window.appState){ window.appState.activeModal = 'support'; window.renderApp(); }" style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.74rem; font-weight: 700; flex-shrink: 0;" title="شبکه‌ها و راهنما">
           <span style="font-size: 0.82rem;">â¤ï¸</span>
-          <span>Ø±Ø§Ù‡Ù†Ù…Ø§</span>
+          <span>راهنما</span>
         </button>
 
         <!-- User Profile / Login Button -->
-        <button type="button" onclick="if(window.appState){ window.appState.activeModal = 'login'; window.renderApp(); }" id="btn-header-user-account" class="btn-header-action" style="background: #1f2029; border: 1px solid ${hasUser ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; color: ${hasUser ? '#34d399' : '#a1a1aa'}; padding: 3px 8px; border-radius: 10px; display: flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;" title="ðŸ‘¤ Ø­Ø³Ø§Ø¨ Ú©Ø§Ø±Ø¨Ø±ÛŒ Ùˆ Ù…Ø´Ø®ØµØ§Øª">
+        <button type="button" onclick="if(window.appState){ window.appState.activeModal = 'login'; window.renderApp(); }" id="btn-header-user-account" class="btn-header-action" style="background: #1f2029; border: 1px solid ${hasUser ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; color: ${hasUser ? '#34d399' : '#a1a1aa'}; padding: 3px 8px; border-radius: 10px; display: flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;" title="ðŸ‘¤ حساب کاربری و مشخصات">
           ${avatar ? `
             <img src="${avatar}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1; border: 1px solid rgba(16, 185, 129, 0.5);" onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=planex';" />
           ` : `

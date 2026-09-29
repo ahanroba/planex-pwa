@@ -188,11 +188,11 @@ if (typeof window !== 'undefined') {
     if (!msg) return;
     const str = String(msg);
     let type = 'info';
-    if (str.includes('Ø®Ø·Ø§') || str.includes('âŒ') || str.includes('Ù†Ø§Ù…Ø¹ØªØ¨Ø±') || str.includes('Ø§Ø´ØªØ¨Ø§Ù‡')) {
+    if (str.includes('خطا') || str.includes('âŒ') || str.includes('نامعتبر') || str.includes('اشتباه')) {
       type = 'error';
-    } else if (str.includes('Ù…ÙˆÙÙ‚ÛŒØª') || str.includes('âœ…') || str.includes('ðŸŽ‰') || str.includes('Ø°Ø®ÛŒØ±Ù‡ Ø´Ø¯')) {
+    } else if (str.includes('موفقیت') || str.includes('âœ…') || str.includes('ðŸŽ‰') || str.includes('ذخیره شد')) {
       type = 'success';
-    } else if (str.includes('âš ï¸') || str.includes('Ù„Ø·ÙØ§Ù‹') || str.includes('Ù‡Ø´Ø¯Ø§Ø±')) {
+    } else if (str.includes('âš ï¸') || str.includes('لطفاً') || str.includes('هشدار')) {
       type = 'warning';
     }
     window.showToast(str, type, 4000);
@@ -208,7 +208,7 @@ window.closeActiveModal = function() {
     const authProf = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('planex_auth_user') || 'null') : null;
     const currentName = (userProf?.name || userProf?.nickname || authProf?.name || authProf?.full_name || '').trim();
     if (!currentName) {
-      if (typeof window.showToast === 'function') window.showToast('Ù„Ø·ÙØ§Ù‹ Ø§Ø¨ØªØ¯Ø§ Ù†Ø§Ù… Ø®ÙˆØ¯ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†ÛŒØ¯.', 'warning', 3000);
+      if (typeof window.showToast === 'function') window.showToast('لطفاً ابتدا نام خود را وارد کنید.', 'warning', 3000);
       return; // Block closing
     }
   }
@@ -356,7 +356,7 @@ window.openCreateRoomModal = window.openCreateGroupModal;
 window.joinStudyRoom = (roomId, roomName = null) => {
   const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
   if (!targetState) return;
-  const finalName = roomName || (roomId ? `Ø³Ø§Ù„Ù† Ù…Ø·Ø§Ù„Ø¹Ù‡ ${roomId}` : 'Ø³Ø§Ù„Ù† Ù…Ø·Ø§Ù„Ø¹Ù‡');
+  const finalName = roomName || (roomId ? `سالن مطالعه ${roomId}` : 'سالن مطالعه');
   targetState.currentRoom = {
     id: roomId,
     code: roomId,
@@ -388,7 +388,7 @@ window.switchCreateRoomModalTab = (tab = 'create') => {
 };
 
 // â”€â”€ Persistent Timer Notification & Dynamic Tab Title â”€â”€
-window._originalDocumentTitle = typeof document !== 'undefined' ? (document.title || 'Ù¾Ù„Ù†Ú©Ø³ | Ø¨Ø±Ù†Ø§Ù…Ù‡ Ø±ÛŒØ²ÛŒ Ø¯Ø±Ø³ÛŒ Ù‡ÙˆØ´Ù…Ù†Ø¯') : '';
+window._originalDocumentTitle = typeof document !== 'undefined' ? (document.title || 'پلنکس | برنامه ریزی درسی هوشمند') : '';
 window._planexTimerNotification = null;
 window._lastNotifUpdateTime = 0;
 window._notifRateLimitBackoffUntil = 0;
@@ -396,7 +396,7 @@ window._notifRateLimitBackoffUntil = 0;
 function updateDocumentTitleTimer(seconds, isCountdown = false) {
   try {
     if (!window._originalDocumentTitle || window._originalDocumentTitle.startsWith('(')) {
-      window._originalDocumentTitle = 'Ù¾Ù„Ù†Ú©Ø³ | Ø¨Ø±Ù†Ø§Ù…Ù‡ Ø±ÛŒØ²ÛŒ Ø¯Ø±Ø³ÛŒ Ù‡ÙˆØ´Ù…Ù†Ø¯';
+      window._originalDocumentTitle = 'پلنکس | برنامه ریزی درسی هوشمند';
     }
     const s = Math.max(0, Math.floor(seconds || 0));
     const mins = Math.floor(s / 60);
@@ -412,7 +412,7 @@ function restoreDocumentTitle() {
     if (window._originalDocumentTitle && !window._originalDocumentTitle.startsWith('(')) {
       document.title = window._originalDocumentTitle;
     } else {
-      document.title = 'Ù¾Ù„Ù†Ú©Ø³ | Ø¨Ø±Ù†Ø§Ù…Ù‡ Ø±ÛŒØ²ÛŒ Ø¯Ø±Ø³ÛŒ Ù‡ÙˆØ´Ù…Ù†Ø¯';
+      document.title = 'پلنکس | برنامه ریزی درسی هوشمند';
     }
   } catch (_) {}
 }
@@ -465,22 +465,22 @@ function updateTimerNotification(seconds, isCountdown = false) {
     const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
     const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
-    const subject = targetState?.focusSubject || 'Ù…Ø·Ø§Ù„Ø¹Ù‡';
-    const phase = targetState?.selectedStudyMethod || targetState?.focusPhase || 'ØªÙ…Ø±Ú©Ø²';
+    const subject = targetState?.focusSubject || 'مطالعه';
+    const phase = targetState?.selectedStudyMethod || targetState?.focusPhase || 'تمرکز';
     const isBreak = (targetState?.focusTimerType === 2);
     const isNonStudy = (targetState?.focusActivityMode === 'non-study' && !isBreak);
-    const statusLabel = isBreak ? 'Ø¯Ø± Ø­Ø§Ù„ Ø§Ø³ØªØ±Ø§Ø­Øª' : (isNonStudy ? 'ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ' : 'Ø¯Ø± Ø­Ø§Ù„ Ù…Ø·Ø§Ù„Ø¹Ù‡');
+    const statusLabel = isBreak ? 'در حال استراحت' : (isNonStudy ? 'فعالیت غیردرسی' : 'در حال مطالعه');
 
     const notifTitle = `â±ï¸ (${timeStr}) - ${statusLabel}`;
 
     let bodyText = '';
     if (!isCountdown || !targetState?.timerTargetEndTime) {
-      bodyText = `${subject ? `Ù…Ø¨Ø­Ø«: ${subject} | ` : ''}Ù…Ø±Ø­Ù„Ù‡: ${phase} | Ø²Ù…Ø§Ù†: ${timeStr}`;
+      bodyText = `${subject ? `مبحث: ${subject} | ` : ''}مرحله: ${phase} | زمان: ${timeStr}`;
     } else {
       const endD = new Date(targetState.timerTargetEndTime);
       const endHours = String(endD.getHours()).padStart(2, '0');
       const endMins = String(endD.getMinutes()).padStart(2, '0');
-      bodyText = `${subject ? `Ù…Ø¨Ø­Ø«: ${subject} | ` : ''}Ù…Ø±Ø­Ù„Ù‡: ${phase} | Ø§ØªÙ…Ø§Ù… Ø¯Ø± Ø³Ø§Ø¹Øª ${endHours}:${endMins}`;
+      bodyText = `${subject ? `مبحث: ${subject} | ` : ''}مرحله: ${phase} | اتمام در ساعت ${endHours}:${endMins}`;
     }
 
     const notifOptions = {
@@ -536,7 +536,7 @@ function spawnPersistentTimerNotification(subject, phase, targetEndTime, isStopw
         const targetState = (typeof state !== 'undefined' && state) ? state : window.appState;
         const isBreak = (targetState?.focusTimerType === 2);
         const isNonStudy = (targetState?.focusActivityMode === 'non-study' && !isBreak);
-        const statusLabel = isBreak ? 'Ø¯Ø± Ø­Ø§Ù„ Ø§Ø³ØªØ±Ø§Ø­Øª' : (isNonStudy ? 'ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ' : 'Ø¯Ø± Ø­Ø§Ù„ Ù…Ø·Ø§Ù„Ø¹Ù‡');
+        const statusLabel = isBreak ? 'در حال استراحت' : (isNonStudy ? 'فعالیت غیردرسی' : 'در حال مطالعه');
 
         let bodyText = '';
         let initialTimeStr = '00:00';
@@ -545,7 +545,7 @@ function spawnPersistentTimerNotification(subject, phase, targetEndTime, isStopw
           const mins = Math.floor(s / 60);
           const secs = s % 60;
           initialTimeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-          bodyText = `${subject ? `Ù…Ø¨Ø­Ø«: ${subject} | ` : ''}Ù…Ø±Ø­Ù„Ù‡: ${phase || 'ØªÙ…Ø±Ú©Ø²'} | Ù¾Ø§Ø±Øª Ù…Ø·Ø§Ù„Ø¹Ù‡ Ø¢Ø²Ø§Ø¯ Ø¢ØºØ§Ø² Ø´Ø¯`;
+          bodyText = `${subject ? `مبحث: ${subject} | ` : ''}مرحله: ${phase || 'تمرکز'} | پارت مطالعه آزاد آغاز شد`;
         } else {
           const remSecs = Math.max(0, Math.ceil((targetEndTime - Date.now()) / 1000));
           const mins = Math.floor(remSecs / 60);
@@ -554,7 +554,7 @@ function spawnPersistentTimerNotification(subject, phase, targetEndTime, isStopw
           const endD = new Date(targetEndTime);
           let endHours = String(endD.getHours()).padStart(2, '0');
           let endMins = String(endD.getMinutes()).padStart(2, '0');
-          bodyText = `${subject ? `Ù…Ø¨Ø­Ø«: ${subject} | ` : ''}Ù…Ø±Ø­Ù„Ù‡: ${phase || 'ØªÙ…Ø±Ú©Ø²'} | Ù¾Ø§ÛŒØ§Ù† Ø¯Ø± Ø³Ø§Ø¹Øª ${endHours}:${endMins}`;
+          bodyText = `${subject ? `مبحث: ${subject} | ` : ''}مرحله: ${phase || 'تمرکز'} | پایان در ساعت ${endHours}:${endMins}`;
         }
 
         const notifTitle = `â±ï¸ (${initialTimeStr}) - ${statusLabel}`;
@@ -669,7 +669,7 @@ window.planexStartFocusTimer = function(event, options = {}) {
     if (!subject && targetState.focusSubject) subject = String(targetState.focusSubject).trim();
     if (!subject && fabState.selectedSubject) subject = String(fabState.selectedSubject).trim();
 
-    let phase = options.phase || targetState.selectedStudyMethod || targetState.focusPhase || fabState.selectedPhase || fabState.studyType || 'ÛŒØ§Ø¯Ú¯ÛŒØ±ÛŒ';
+    let phase = options.phase || targetState.selectedStudyMethod || targetState.focusPhase || fabState.selectedPhase || fabState.studyType || 'یادگیری';
     if (!options.phase) {
       const activePhaseChip = document.querySelector('#fab-timer-phase-container .active, #focus-phase-chips-container .active, .btn-phase-chip.active');
       if (activePhaseChip) {
@@ -696,7 +696,7 @@ window.planexStartFocusTimer = function(event, options = {}) {
       const cat = allCats.find(c => c.code === categoryCode);
       if (cat) subject = cat.title;
     }
-    if (!subject) subject = 'Ù…Ø·Ø§Ù„Ø¹Ù‡ Ù…ØªÙ…Ø±Ú©Ø²';
+    if (!subject) subject = 'مطالعه متمرکز';
 
     let presetMins = parseInt(options.presetMins || targetState.focusPresetMins || fabState.timerPresetMins || 25);
     if (isNaN(presetMins) || presetMins <= 0) presetMins = 25;
@@ -948,7 +948,7 @@ window.resetTimer = function(e) {
   if (typeof updateTimerDisplayDOM === 'function') updateTimerDisplayDOM();
   if (typeof renderApp === 'function') renderApp();
   if (typeof window.showToast === 'function') {
-    window.showToast('ØªØ§ÛŒÙ…Ø± Ù…ØªÙˆÙ‚Ù Ùˆ Ù„ØºÙˆ Ø´Ø¯ (Ø¨Ø¯ÙˆÙ† Ø«Ø¨Øª) ðŸ”„', 'info', 2500);
+    window.showToast('تایمر متوقف و لغو شد (بدون ثبت) ðŸ”„', 'info', 2500);
   }
 };
 
@@ -1090,7 +1090,7 @@ window.fabActivityState = window.fabActivityState || {
   activeTab: 'timer',
   selectedSubject: '',
   selectedCategoryCode: null,
-  selectedPhase: 'ÛŒØ§Ø¯Ú¯ÛŒØ±ÛŒ',
+  selectedPhase: 'یادگیری',
   timerPresetMins: 25,
   timerType: 'pomodoro',
   durationMins: 60
@@ -1170,7 +1170,7 @@ window.updateFabDurationPreview = function() {
       const badge = document.getElementById('fab-manual-computed-duration-badge');
       if (badge) {
         const bh = Math.floor(diff / 60), bm = diff % 60;
-        badge.textContent = (bh > 0 && bm > 0) ? `${bh} Ø³Ø§Ø¹Øª Ùˆ ${bm} Ø¯Ù‚ÛŒÙ‚Ù‡` : (bh > 0 ? `${bh} Ø³Ø§Ø¹Øª` : `${bm} Ø¯Ù‚ÛŒÙ‚Ù‡`);
+        badge.textContent = (bh > 0 && bm > 0) ? `${bh} ساعت و ${bm} دقیقه` : (bh > 0 ? `${bh} ساعت` : `${bm} دقیقه`);
       }
     }
   } catch (_) {}
@@ -1181,10 +1181,10 @@ window.updateFabDurationPreview = function() {
     const h = Math.floor(val / 60);
     const m = val % 60;
     let text = '';
-    if (h > 0 && m > 0) text = `${h} Ø³Ø§Ø¹Øª Ùˆ ${m} Ø¯Ù‚ÛŒÙ‚Ù‡`;
-    else if (h > 0) text = `${h} Ø³Ø§Ø¹Øª`;
-    else text = `${m} Ø¯Ù‚ÛŒÙ‚Ù‡`;
-    preview.textContent = `Ù…Ø¬Ù…ÙˆØ¹ Ù†Ù‡Ø§ÛŒÛŒ Ø«Ø¨Øªâ€ŒØ´Ø¯Ù‡: ${text} (${val} Ø¯Ù‚ÛŒÙ‚Ù‡)`;
+    if (h > 0 && m > 0) text = `${h} ساعت و ${m} دقیقه`;
+    else if (h > 0) text = `${h} ساعت`;
+    else text = `${m} دقیقه`;
+    preview.textContent = `مجموع نهایی ثبت‌شده: ${text} (${val} دقیقه)`;
   }
 };
 
@@ -1195,14 +1195,14 @@ window.updateFabTestScorePreview = function() {
   const total = correct + wrong + unanswered;
   // Live total badge inside the FAB modal
   const totalBadge = document.getElementById('fab-manual-tests-total-badge');
-  if (totalBadge) totalBadge.textContent = `Ù…Ø¬Ù…ÙˆØ¹: ${total} ØªØ³Øª`;
+  if (totalBadge) totalBadge.textContent = `مجموع: ${total} تست`;
   const preview = document.getElementById('fab-test-score-preview');
   if (preview) {
     if (total > 0) {
       const pct = (((correct * 3 - wrong) / (total * 3)) * 100).toFixed(1);
-      preview.textContent = `Ø¯Ø±ØµØ¯ ØªØ±Ø§Ø²: %${pct} (${total} ØªØ³Øª Ú©Ù„)`;
+      preview.textContent = `درصد تراز: %${pct} (${total} تست کل)`;
     } else {
-      preview.textContent = `Ø¯Ø±ØµØ¯ ØªØ±Ø§Ø²: %Û°`;
+      preview.textContent = `درصد تراز: %Û°`;
     }
   }
 };
@@ -1279,12 +1279,12 @@ window.updateManualDurationPreview = function(customVal) {
   const h = Math.floor(val / 60);
   const m = val % 60;
   let text = '';
-  if (h > 0 && m > 0) text = `${h} Ø³Ø§Ø¹Øª Ùˆ ${m} Ø¯Ù‚ÛŒÙ‚Ù‡`;
-  else if (h > 0) text = `${h} Ø³Ø§Ø¹Øª`;
-  else text = `${m} Ø¯Ù‚ÛŒÙ‚Ù‡`;
+  if (h > 0 && m > 0) text = `${h} ساعت و ${m} دقیقه`;
+  else if (h > 0) text = `${h} ساعت`;
+  else text = `${m} دقیقه`;
   const preview = document.getElementById('manual-duration-preview-text');
   if (preview) {
-    preview.textContent = `Ù…Ø¬Ù…ÙˆØ¹ Ù†Ù‡Ø§ÛŒÛŒ Ø«Ø¨Øªâ€ŒØ´Ø¯Ù‡: ${text} (${val} Ø¯Ù‚ÛŒÙ‚Ù‡)`;
+    preview.textContent = `مجموع نهایی ثبت‌شده: ${text} (${val} دقیقه)`;
   }
   // Human-readable duration badge in Manual Log Modal
   const badge = document.getElementById('manual-duration-human-badge');
@@ -1310,7 +1310,7 @@ window.updateManualDurationPreview = function(customVal) {
     const todayMins = (typeof db !== 'undefined' && typeof db.getStudyMinutesByDate === 'function') ? (parseInt(db.getStudyMinutesByDate()) || 0) : 0;
     const finalMins = replaceMode ? val : (todayMins + val);
     const fh = Math.floor(finalMins / 60), fm = finalMins % 60;
-    const finalText = (fh > 0 && fm > 0) ? `${fh} Ø³Ø§Ø¹Øª Ùˆ ${fm} Ø¯Ù‚ÛŒÙ‚Ù‡` : (fh > 0 ? `${fh} Ø³Ø§Ø¹Øª` : `${fm} Ø¯Ù‚ÛŒÙ‚Ù‡`);
+    const finalText = (fh > 0 && fm > 0) ? `${fh} ساعت و ${fm} دقیقه` : (fh > 0 ? `${fh} ساعت` : `${fm} دقیقه`);
     const finalEl = document.getElementById('manual-final-total-text');
     if (finalEl) finalEl.textContent = finalText;
   } catch (_) {}
@@ -1383,7 +1383,7 @@ window.selectStudyPhase = function(el, phaseName) {
     if (!phaseName && el) {
       phaseName = el.getAttribute('data-phase') || el.getAttribute('data-pill') || el.dataset?.phase || el.dataset?.pill || el.textContent.trim();
     }
-    if (!phaseName) phaseName = 'ÛŒØ§Ø¯Ú¯ÛŒØ±ÛŒ';
+    if (!phaseName) phaseName = 'یادگیری';
 
     // 1. Sync across all namespaces and state objects
     window.fabActivityState = window.fabActivityState || {};
@@ -1480,7 +1480,7 @@ window.updateManualTestScorePreview = function() {
   }
 
   const totalEl = document.getElementById('manual-total-tests-count') || document.getElementById('manual-tests-total-badge');
-  if (totalEl) totalEl.textContent = total > 0 ? `${total} ØªØ³Øª` : 'Û°';
+  if (totalEl) totalEl.textContent = total > 0 ? `${total} تست` : 'Û°';
 };
 
 // â”€â”€ Manual Log Modal: activity mode tabs & Focus accordion inline fallback â”€â”€
@@ -1533,10 +1533,10 @@ window.setManualLogMode = function(mode, event) {
       if (submitBtn) {
         if (isStudy) {
           submitBtn.style.background = '#7c3aed';
-          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">ðŸ’¾</span><span id="btn-submit-manual-log-text">Ø«Ø¨Øª Ø¯Ø± Ú©Ø§Ø±Ù†Ø§Ù…Ù‡ Ùˆ Ù†Ù…ÙˆØ¯Ø§Ø±Ù‡Ø§</span>';
+          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">ðŸ’¾</span><span id="btn-submit-manual-log-text">ثبت در کارنامه و نمودارها</span>';
         } else {
           submitBtn.style.background = 'linear-gradient(135deg, #d97706 0%, #b45309 100%)';
-          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">â˜•</span><span id="btn-submit-manual-log-text">Ø«Ø¨Øª ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ (Ø¨Ø¯ÙˆÙ† Ø§Ø­ØªØ³Ø§Ø¨ Ø¯Ø± Ø³Ø§Ø¹Øª Ù…Ø·Ø§Ù„Ø¹Ù‡)</span>';
+          submitBtn.innerHTML = '<span id="btn-submit-manual-log-icon" style="font-size: 1.2rem;">â˜•</span><span id="btn-submit-manual-log-text">ثبت فعالیت غیردرسی (بدون احتساب در ساعت مطالعه)</span>';
         }
       }
     } else {
@@ -1610,9 +1610,9 @@ window.saveManualActivityLog = function(event) {
 
   if (isNaN(duration) || duration <= 0) {
     if (typeof window.showToast === 'function') {
-      window.showToast('Ù„Ø·ÙØ§Ù‹ Ù…Ø¯Øª Ø²Ù…Ø§Ù† Ù…Ø¹ØªØ¨Ø±ÛŒ (Ø¨ÛŒØ´ØªØ± Ø§Ø² Û° Ø¯Ù‚ÛŒÙ‚Ù‡) ÙˆØ§Ø±Ø¯ Ù†Ù…Ø§ÛŒÛŒØ¯ âš ï¸', 'warning', 3500);
+      window.showToast('لطفاً مدت زمان معتبری (بیشتر از ۰ دقیقه) وارد نمایید ⚠️', 'warning', 3500);
     } else {
-      alert('Ù„Ø·ÙØ§Ù‹ Ù…Ø¯Øª Ø²Ù…Ø§Ù† Ù…Ø¹ØªØ¨Ø±ÛŒ ÙˆØ§Ø±Ø¯ Ù†Ù…Ø§ÛŒÛŒØ¯.');
+      alert('لطفاً مدت زمان معتبری وارد نمایید.');
     }
     return;
   }
@@ -1692,14 +1692,14 @@ window.saveManualActivityLog = function(event) {
         if (found) subject = found.title;
       }
     }
-    if (!subject) subject = 'Ø¹Ù…ÙˆÙ…ÛŒ';
+    if (!subject) subject = 'عمومی';
   } else {
     if (!categoryCode || !String(categoryCode).startsWith('non_')) {
       categoryCode = targetState?.manualLogState?.selectedNonStudyCode || 'non_sports';
     }
     if (!subject) {
       const foundNonStudy = (typeof db !== 'undefined' && typeof db.getNonStudyCategories === 'function' ? db.getNonStudyCategories() : []).find(c => c.code === categoryCode);
-      subject = foundNonStudy?.title || 'ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ';
+      subject = foundNonStudy?.title || 'فعالیت غیردرسی';
     }
   }
 
@@ -1707,7 +1707,7 @@ window.saveManualActivityLog = function(event) {
   const activePhaseEl = document.querySelector('#manual-phase-chips-list .active, #fab-manual-phase-container .active, .btn-manual-study-pill.active, .btn-phase-chip.active');
   const domPhase = activePhaseEl ? (activePhaseEl.getAttribute('data-phase') || activePhaseEl.getAttribute('data-pill') || activePhaseEl.dataset?.phase || activePhaseEl.textContent.trim()) : null;
   const hidPhase = document.getElementById('input-manual-phase')?.value || document.getElementById('fab-manual-phase')?.value;
-  const phase = domPhase || hidPhase || fabState.selectedPhase || fabState.studyType || targetState?.manualLogState?.studyPhase || targetState?.selectedStudyMethod || 'ÛŒØ§Ø¯Ú¯ÛŒØ±ÛŒ';
+  const phase = domPhase || hidPhase || fabState.selectedPhase || fabState.studyType || targetState?.manualLogState?.studyPhase || targetState?.selectedStudyMethod || 'یادگیری';
   const correct = parseInt(document.getElementById('input-manual-test-correct')?.value || document.getElementById('fab-test-correct')?.value || document.getElementById('input-fab-test-correct')?.value) || 0;
   const wrong = parseInt(document.getElementById('input-manual-test-wrong')?.value || document.getElementById('fab-test-wrong')?.value || document.getElementById('input-fab-test-wrong')?.value) || 0;
   const unanswered = parseInt(document.getElementById('input-manual-test-unanswered')?.value || document.getElementById('fab-test-unanswered')?.value || document.getElementById('input-fab-test-unanswered')?.value) || 0;
@@ -1773,11 +1773,11 @@ window.saveManualActivityLog = function(event) {
   // 9. Show Success Toast
   const hours = Math.floor(duration / 60);
   const mins = duration % 60;
-  const durStr = hours > 0 ? (mins > 0 ? `${hours} Ø³Ø§Ø¹Øª Ùˆ ${mins} Ø¯Ù‚ÛŒÙ‚Ù‡` : `${hours} Ø³Ø§Ø¹Øª`) : `${mins} Ø¯Ù‚ÛŒÙ‚Ù‡`;
+  const durStr = hours > 0 ? (mins > 0 ? `${hours} ساعت و ${mins} دقیقه` : `${hours} ساعت`) : `${mins} دقیقه`;
   if (typeof window.showToast === 'function') {
-    window.showToast(`ÙØ¹Ø§Ù„ÛŒØª Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø«Ø¨Øª Ø´Ø¯ âœ… (${durStr} Â«${subject}Â»)`, 'success', 4500);
+    window.showToast(`فعالیت با موفقیت ثبت شد ✅ (${durStr} Â«${subject}Â»)`, 'success', 4500);
   } else {
-    alert(`ÙØ¹Ø§Ù„ÛŒØª Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø«Ø¨Øª Ø´Ø¯ âœ… (${durStr} Â«${subject}Â»)`);
+    alert(`فعالیت با موفقیت ثبت شد ✅ (${durStr} Â«${subject}Â»)`);
   }
 
   // 10. Re-render UI
@@ -1792,7 +1792,7 @@ window.openExamBox = () => { state.activeModal = 'examBox'; renderApp(); };
 window.openJalaliDayDetailsModal = (dateStr) => { state.selectedJalaliDetailDate = dateStr; state.activeModal = 'jalaliDayDetails'; renderApp(); };
 
 window.deleteFocusSession = (sessionId) => {
-  if (confirm('Ø¢ÛŒØ§ Ø§Ø² Ø­Ø°Ù Ø§ÛŒÙ† Ù¾Ø§Ø±Øª Ù…Ø·Ø§Ù„Ø¹Ù‡ Ø§Ø·Ù…ÛŒÙ†Ø§Ù† Ø¯Ø§Ø±ÛŒØ¯ØŸ')) {
+  if (confirm('آیا از حذف این پارت مطالعه اطمینان دارید؟')) {
     db.deleteFocusSession(sessionId);
     if (window.dashboardChartInstances) window.dashboardChartInstances = null;
     window.dispatchEvent(new CustomEvent('activity-saved', { detail: { type: 'delete', sessionId } }));
@@ -1809,7 +1809,7 @@ window.addNewDashboardActivity = () => {
 
 // Delete Dashboard Activity Handler
 window.deleteDashboardActivity = (catCode) => {
-  if (!confirm('Ø¢ÛŒØ§ Ø§Ø² Ø­Ø°Ù Ø§ÛŒÙ† ÙØ¹Ø§Ù„ÛŒØª Ø§Ø·Ù…ÛŒÙ†Ø§Ù† Ø¯Ø§Ø±ÛŒØ¯ØŸ (ØªØ§Ø±ÛŒØ®Ú†Ù‡ ØªÛŒÚ©â€ŒÙ‡Ø§ÛŒ Ø§ÛŒÙ† ÙØ¹Ø§Ù„ÛŒØª Ù†ÛŒØ² Ø¨Ø±Ø§ÛŒ Ù‡Ù…ÛŒØ´Ù‡ Ù¾Ø§Ú© Ø®ÙˆØ§Ù‡Ø¯ Ø´Ø¯)')) return;
+  if (!confirm('آیا از حذف این فعالیت اطمینان دارید؟ (تاریخچه تیک‌های این فعالیت نیز برای همیشه پاک خواهد شد)')) return;
 
   // 1. Remove from categories
   let categories = db.getCategories();
@@ -1845,7 +1845,7 @@ window.tickTimeBlockerSlot = (dayIdx, slotIdx) => {
   const categories = db.getCategories();
   const activeCode = window.activePaletteCode || 'Ø¹-Ø³';
   const cat = categories.find(c => c.code === activeCode);
-  const title = cat ? cat.title : 'Ù…Ø·Ø§Ù„Ø¹Ù‡';
+  const title = cat ? cat.title : 'مطالعه';
 
   const hourlyLogs = db.getHourlyLogs(weekId);
   const currentLog = hourlyLogs[`${dayIdx}_${slotIdx}`];
@@ -1856,7 +1856,7 @@ window.tickTimeBlockerSlot = (dayIdx, slotIdx) => {
   } else {
     // Paint & Tick with active category
     // Signature: (weekId, dayIndex, slotIndex, categoryCode, note, subject, testCount, studyMethod, description, rating)
-    db.setHourlyLog(weekId, dayIdx, slotIdx, activeCode, 'Ø«Ø¨Øª Ø¢Ù†ÛŒ Ù¾Ø§Ù„Øª', null, 0, null, title, 0);
+    db.setHourlyLog(weekId, dayIdx, slotIdx, activeCode, 'ثبت آنی پالت', null, 0, null, title, 0);
   }
   renderApp();
 };
@@ -1865,12 +1865,12 @@ window.tickTimeBlockerSlot = (dayIdx, slotIdx) => {
 export function normalizeTab(tabId) {
   if (tabId === undefined || tabId === null) return 0;
   const str = String(tabId).trim().toLowerCase();
-  if (str === '0' || str === 'dashboard' || str === 'Ø¯Ø§Ø´Ø¨ÙˆØ±Ø¯' || str === 'home') return 0;
-  if (str === '1' || str === 'planning' || str === 'Ø¨Ø±Ù†Ø§Ù…Ù‡â€ŒØ±ÛŒØ²ÛŒ' || str === 'Ø¨Ø±Ù†Ø§Ù…Ù‡ Ø±ÛŒØ²ÛŒ' || str === 'plan' || str === 'planner') return 1;
-  if (str === '2' || str === 'routines' || str === 'Ø±ÙˆØªÛŒÙ†â€ŒÙ‡Ø§' || str === 'Ø±ÙˆØªÛŒÙ† Ù‡Ø§' || str === 'routine') return 2;
-  if (str === '3' || str === 'tools' || str === 'Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§' || str === 'tool') return 3;
-  if (str === '4' || str === 'articles' || str === 'Ù…Ù‚Ø§Ù„Ø§Øª' || str === 'article' || str === 'questions' || str === 'questionbank' || str === 'Ø¢Ø²Ù…ÙˆÙ†Ù‡Ø§' || str === 'Ø¢Ø²Ù…ÙˆÙ†â€ŒÙ‡Ø§' || str === 'Ø¨Ø§Ù†Ú© Ø³ÙˆØ§Ù„Ø§Øª' || str === 'exam') return 4;
-  if (str === '5' || str === 'leaderboard' || str === 'competition' || str === 'Ø±Ù‚Ø§Ø¨Øª' || str === 'Ù„ÛŒØ¯Ø±Ø¨Ø±Ø¯' || str === 'compete' || str === 'ranking') return 'leaderboard';
+  if (str === '0' || str === 'dashboard' || str === 'داشبورد' || str === 'home') return 0;
+  if (str === '1' || str === 'planning' || str === 'برنامه‌ریزی' || str === 'برنامه ریزی' || str === 'plan' || str === 'planner') return 1;
+  if (str === '2' || str === 'routines' || str === 'روتین‌ها' || str === 'روتین ها' || str === 'routine') return 2;
+  if (str === '3' || str === 'tools' || str === 'ابزارها' || str === 'tool') return 3;
+  if (str === '4' || str === 'articles' || str === 'مقالات' || str === 'article' || str === 'questions' || str === 'questionbank' || str === 'آزمونها' || str === 'آزمون‌ها' || str === 'بانک سوالات' || str === 'exam') return 4;
+  if (str === '5' || str === 'leaderboard' || str === 'competition' || str === 'رقابت' || str === 'لیدربرد' || str === 'compete' || str === 'ranking') return 'leaderboard';
   return tabId;
 }
 window.normalizeTab = normalizeTab;
@@ -1895,7 +1895,7 @@ window.switchTab = function(tabId, options = {}) {
         window.questionBankState = {
           selectedExamId: options.exam,
           searchQuery: '',
-          selectedCategory: 'Ù‡Ù…Ù‡',
+          selectedCategory: 'همه',
           activeRecallMode: false,
           revealedQuestionIds: new Set(),
           userAnswers: {}
@@ -2002,7 +2002,7 @@ window.switchTab = function(tabId, options = {}) {
       } catch (err) {
         console.error('Error rendering Leaderboard view:', err);
         if (typeof window.showToast === 'function') {
-          window.showToast('Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ ØªØ§Ù„Ø§Ø± Ø±Ù‚Ø§Ø¨Øª', 'error');
+          window.showToast('خطا در بارگذاری تالار رقابت', 'error');
         }
       } finally {
         console.timeEnd('TabSwitch:Leaderboard');
@@ -2018,7 +2018,7 @@ window.switchTab = function(tabId, options = {}) {
     } catch (err) {
       console.error('Error rendering Articles view:', err);
       if (typeof window.showToast === 'function') {
-        window.showToast('Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ù…Ù‚Ø§Ù„Ø§Øª Ùˆ Ø¨Ø§Ù†Ú© Ø³ÙˆØ§Ù„Ø§Øª', 'error');
+        window.showToast('خطا در بارگذاری مقالات و بانک سوالات', 'error');
       }
     }
   } else {
@@ -2038,7 +2038,7 @@ window.openQuestionBank = function(examId = '1405-khordad') {
       window.questionBankState = {
         selectedExamId: examId || '1405-khordad',
         searchQuery: '',
-        selectedCategory: 'Ù‡Ù…Ù‡',
+        selectedCategory: 'همه',
         activeRecallMode: false,
         revealedQuestionIds: new Set(),
         userAnswers: {}
@@ -2046,7 +2046,7 @@ window.openQuestionBank = function(examId = '1405-khordad') {
     } else if (examId) {
       window.questionBankState.selectedExamId = examId;
       window.questionBankState.searchQuery = '';
-      window.questionBankState.selectedCategory = 'Ù‡Ù…Ù‡';
+      window.questionBankState.selectedCategory = 'همه';
     }
     try {
       const url = new URL(window.location.href);
@@ -2130,7 +2130,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ B. Quick Activity mode toggle (ØªØ§ÛŒÙ…Ø± Ø²Ù†Ø¯Ù‡ / Ø«Ø¨Øª Ø¯Ø³ØªÛŒ) â”€â”€
+    // â”€â”€ B. Quick Activity mode toggle (تایمر زنده / ثبت دستی) â”€â”€
     try {
       const modeBtn = (e.target && e.target.closest) ? e.target.closest('#btn-mode-timer, #btn-mode-manual, [data-mode="timer"], [data-mode="manual"]') : null;
       if (modeBtn && modeBtn.closest('#modal-fab-activity-registration')) {
@@ -2158,7 +2158,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ C. Konkur estimator trigger (ØªØ®Ù…ÛŒÙ† Ø±ØªØ¨Ù‡) â”€â”€
+    // â”€â”€ C. Konkur estimator trigger (تخمین رتبه) â”€â”€
     try {
       const konkurCard = (e.target && e.target.closest) ? e.target.closest('#card-konkur-estimator, [data-action="open-konkur-estimator"]') : null;
       if (konkurCard) {
@@ -2184,7 +2184,7 @@ if (!window.globalDelegationBound) {
       }
     } catch (_) {}
 
-    // â”€â”€ D. Leitner close (Ø¨Ø³ØªÙ† Ù„Ø§ÛŒØªÙ†Ø±) â”€â”€
+    // â”€â”€ D. Leitner close (بستن لایتنر) â”€â”€
     try {
       const leitnerCloseBtn = (e.target && e.target.closest) ? e.target.closest('#btn-close-leitner, [data-action="toggle-leitner"]') : null;
       if (leitnerCloseBtn) {
@@ -2416,16 +2416,16 @@ window.handleCopyPersonalSyncToken = async (token) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(code);
     } else {
-      prompt('Ú©Ø¯ Ù‡Ù…Ú¯Ø§Ù…â€ŒØ³Ø§Ø²ÛŒ Ø±Ø§ Ú©Ù¾ÛŒ Ú©Ù†ÛŒØ¯:', code);
+      prompt('کد همگام‌سازی را کپی کنید:', code);
     }
     
     const toast = document.createElement('div');
     toast.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; padding: 12px 24px; border-radius: 14px; font-weight: 900; font-size: 0.92rem; z-index: 99999; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: fadeIn 0.3s; text-align: center; direction: rtl;';
-    toast.innerHTML = `ðŸ“‹ Ú©Ø¯ Ù‡Ù…Ú¯Ø§Ù…â€ŒØ³Ø§Ø²ÛŒ (${code}) Ø¯Ø± Ø­Ø§ÙØ¸Ù‡ Ú©Ù¾ÛŒ Ø´Ø¯!`;
+    toast.innerHTML = `ðŸ“‹ کد همگام‌سازی (${code}) در حافظه کپی شد!`;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2500);
   } catch (e) {
-    prompt('Ú©Ø¯ Ù‡Ù…Ú¯Ø§Ù…â€ŒØ³Ø§Ø²ÛŒ Ø±Ø§ Ú©Ù¾ÛŒ Ú©Ù†ÛŒØ¯:', code);
+    prompt('کد همگام‌سازی را کپی کنید:', code);
   }
 };
 
@@ -2434,7 +2434,7 @@ window.handlePersonalCloudPush = async () => {
   const originalText = btn ? btn.innerHTML : '';
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = 'â³ Ø¯Ø± Ø­Ø§Ù„ Ø°Ø®ÛŒØ±Ù‡ Ø§Ø¨Ø±ÛŒ...';
+    btn.innerHTML = 'â³ در حال ذخیره ابری...';
   }
 
   try {
@@ -2442,20 +2442,20 @@ window.handlePersonalCloudPush = async () => {
     if (res && res.success) {
       const toast = document.createElement('div');
       toast.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 26px; border-radius: 16px; font-weight: 900; font-size: 0.92rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: fadeIn 0.3s; text-align: center; direction: rtl;';
-      toast.innerHTML = `â˜ï¸ ØªÙ…Ø§Ù… Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø´Ù…Ø§ Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø¨Ø§ Ú©Ø¯ Â«${res.token}Â» Ø¯Ø± ÙØ¶Ø§ÛŒ Ø§Ø¨Ø±ÛŒ Ø°Ø®ÛŒØ±Ù‡ Ø´Ø¯!`;
+      toast.innerHTML = `â˜ï¸ تمام اطلاعات شما با موفقیت با کد «${res.token}» در فضای ابری ذخیره شد!`;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
       renderApp();
     } else {
-      alert(res?.message || 'Ø®Ø·Ø§ Ø¯Ø± Ø°Ø®ÛŒØ±Ù‡ Ø§Ø¨Ø±ÛŒ Ø§Ø·Ù„Ø§Ø¹Ø§Øª.');
+      alert(res?.message || 'خطا در ذخیره ابری اطلاعات.');
     }
   } catch (err) {
     console.error('Personal sync push failed:', err);
-    alert('Ø®Ø·Ø§ Ø¯Ø± Ø§Ø±ØªØ¨Ø§Ø· Ø¨Ø§ Ø³Ø±ÙˆØ± Ø§Ø¨Ø±ÛŒ: ' + err.message);
+    alert('خطا در ارتباط با سرور ابری: ' + err.message);
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = originalText || '<span>ðŸ“¤</span><span>Ø°Ø®ÛŒØ±Ù‡ Ùˆ Ù¾Ø´ØªÛŒØ¨Ø§Ù†â€ŒÚ¯ÛŒØ±ÛŒ Ø¯Ø± Ø§Ø¨Ø±ÛŒ</span>';
+      btn.innerHTML = originalText || '<span>ðŸ“¤</span><span>ذخیره و پشتیبان‌گیری در ابری</span>';
     }
   }
 };
@@ -2468,7 +2468,7 @@ window.handlePersonalCloudPull = async (customToken = null) => {
   }
 
   if (!token) {
-    alert('Ù„Ø·ÙØ§Ù‹ Ú©Ø¯ Ù‡Ù…Ú¯Ø§Ù…â€ŒØ³Ø§Ø²ÛŒ Ø´Ø®ØµÛŒ Ø®ÙˆØ¯ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ù†Ù…Ø§ÛŒÛŒØ¯ (Ù…Ø«Ø§Ù„: SYNC-93821).');
+    alert('لطفاً کد همگام‌سازی شخصی خود را وارد نمایید (مثال: SYNC-93821).');
     const input = document.getElementById('input-personal-sync-token');
     if (input) input.focus();
     return;
@@ -2478,7 +2478,7 @@ window.handlePersonalCloudPull = async (customToken = null) => {
   const originalText = btn ? btn.innerHTML : '';
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = 'â³ Ø¯Ø± Ø­Ø§Ù„ Ø¨Ø§Ø²ÛŒØ§Ø¨ÛŒ Ùˆ Ø§Ø¹Ù…Ø§Ù„...';
+    btn.innerHTML = 'â³ در حال بازیابی و اعمال...';
   }
 
   try {
@@ -2486,7 +2486,7 @@ window.handlePersonalCloudPull = async (customToken = null) => {
     if (res && res.success) {
       const toast = document.createElement('div');
       toast.style.cssText = 'position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; padding: 14px 26px; border-radius: 16px; font-weight: 900; font-size: 0.92rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: fadeIn 0.3s; text-align: center; direction: rtl;';
-      toast.innerHTML = `ðŸŽ‰ ØªÙ…Ø§Ù… Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø§Ø² Ú©Ø¯ Â«${token}Â» Ø¨Ø§Ø²ÛŒØ§Ø¨ÛŒ Ùˆ Ø§Ø¹Ù…Ø§Ù„ Ø´Ø¯!`;
+      toast.innerHTML = `ðŸŽ‰ تمام اطلاعات از کد «${token}» بازیابی و اعمال شد!`;
       document.body.appendChild(toast);
 
       setTimeout(() => {
@@ -2494,15 +2494,15 @@ window.handlePersonalCloudPull = async (customToken = null) => {
         setTimeout(() => window.location.reload(), 400);
       }, 500);
     } else {
-      alert(res?.message || `Ú©Ø¯ Â«${token}Â» Ù†Ø§Ù…Ø¹ØªØ¨Ø± Ø§Ø³Øª ÛŒØ§ Ø¯ÛŒØªØ§ÛŒÛŒ Ø¨Ø±Ø§ÛŒ Ø¢Ù† Ø°Ø®ÛŒØ±Ù‡ Ù†Ø´Ø¯Ù‡ Ø§Ø³Øª.`);
+      alert(res?.message || `کد «${token}» نامعتبر است یا دیتایی برای آن ذخیره نشده است.`);
     }
   } catch (err) {
     console.error('Personal sync pull failed:', err);
-    alert('Ø®Ø·Ø§ Ø¯Ø± Ø§Ø±ØªØ¨Ø§Ø· Ø¨Ø§ Ø³Ø±ÙˆØ± Ù‡Ù†Ú¯Ø§Ù… Ø¨Ø§Ø²ÛŒØ§Ø¨ÛŒ: ' + err.message);
+    alert('خطا در ارتباط با سرور هنگام بازیابی: ' + err.message);
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = originalText || 'ðŸ“¥ Ø¨Ø§Ø²ÛŒØ§Ø¨ÛŒ Ùˆ Ø§Ø¹Ù…Ø§Ù„';
+      btn.innerHTML = originalText || 'ðŸ“¥ بازیابی و اعمال';
     }
   }
 };
@@ -2608,7 +2608,7 @@ window.triggerPwaInstall = async () => {
     return outcome;
   }
 
-  // ÙÙ‚Ø· Ùˆ ÙÙ‚Ø· Ø¯Ø± ØµÙˆØ±ØªÛŒ Ú©Ù‡ window.deferredPrompt Ù†Ø§Ù„ Ø¨ÙˆØ¯ Ùˆ Ø¯Ø³ØªÚ¯Ø§Ù‡ iOS (Ø¢ÛŒÙÙˆÙ†/Ø¢ÛŒÙ¾Ø¯) Ø¨ÙˆØ¯ØŒ Ø±Ø§Ù‡Ù†Ù…Ø§ÛŒ ØªØµÙˆÛŒØ±ÛŒ Ø¯Ø³ØªÛŒ (Share > Add to Home Screen) Ù†Ù…Ø§ÛŒØ´ Ø¯Ø§Ø¯Ù‡ Ø´ÙˆØ¯
+  // فقط و فقط در صورتی که window.deferredPrompt نال بود و دستگاه iOS (آیفون/آیپد) بود، راهنمای تصویری دستی (Share > Add to Home Screen) نمایش داده شود
   if (isIOS) {
     state.activeModal = 'pwaInstall';
     renderApp();
@@ -2616,9 +2616,9 @@ window.triggerPwaInstall = async () => {
   }
 
   if (window.isPwaInstalled()) {
-    alert('Ø§Ù¾Ù„ÛŒÚ©ÛŒØ´Ù† PlanEx Ø¯Ø± Ø­Ø§Ù„ Ø­Ø§Ø¶Ø± Ø¨Ø± Ø±ÙˆÛŒ Ø¯Ø³ØªÚ¯Ø§Ù‡ Ø´Ù…Ø§ Ù†ØµØ¨ Ø´Ø¯Ù‡ Ø§Ø³Øª.');
+    alert('اپلیکیشن PlanEx در حال حاضر بر روی دستگاه شما نصب شده است.');
   } else {
-    alert('Ø¨Ø±Ø§ÛŒ Ù†ØµØ¨ Ø¨Ø±Ù†Ø§Ù…Ù‡ØŒ Ù„Ø·ÙØ§Ù‹ Ø§Ø² Ù…Ù†ÙˆÛŒ Ø³Ù‡â€ŒÙ†Ù‚Ø·Ù‡ Ø¨Ø§Ù„Ø§ÛŒ Ù…Ø±ÙˆØ±Ú¯Ø± Ú¯Ø²ÛŒÙ†Ù‡ Â«Ù†ØµØ¨ Ø¨Ø±Ù†Ø§Ù…Ù‡Â» ÛŒØ§ Â«Install App / Add to Home screenÂ» Ø±Ø§ Ø§Ù†ØªØ®Ø§Ø¨ Ù†Ù…Ø§ÛŒÛŒØ¯.');
+    alert('برای نصب برنامه، لطفاً از منوی سه‌نقطه بالای مرورگر گزینه «نصب برنامه» یا «Install App / Add to Home screen» را انتخاب نمایید.');
   }
 };
 
@@ -2736,12 +2736,12 @@ let state = {
   // Onboarding Wizard State
   onboardingStep: 1,
   onboardingData: {
-    education_level: 'Ú©Ù†Ú©ÙˆØ±ÛŒ Û±Û´Û°Û´',
-    major: 'Ø¹Ù„ÙˆÙ… ØªØ¬Ø±Ø¨ÛŒ',
+    education_level: 'کنکوری ۱۴۰۴',
+    major: 'علوم تجربی',
     university: '',
     username: '',
-    age_group: 'Û±Ûµ ØªØ§ Û±Û¸ Ø³Ø§Ù„',
-    gender: 'Ù¾Ø³Ø±'
+    age_group: '۱۵ تا ۱۸ سال',
+    gender: 'پسر'
   },
 
   // Live Study Room State
@@ -2886,10 +2886,10 @@ window.handleUserGuideAction = (action) => {
         .then(res => {
           const ok = res && res.success && res.serverConfirmed;
           alert(ok
-            ? `âœ… Ú©Ø§Ø±Ù†Ø§Ù…Ù‡ Ø´Ù…Ø§ Ø±ÙˆÛŒ Ø³Ø±ÙˆØ± Ø«Ø¨Øª Ø´Ø¯${res.rank ? ` â€” Ø±ØªØ¨Ù‡ ${res.rank}` : ''}`
-            : `âŒ Ø«Ø¨Øª Ø±ÙˆÛŒ Ø³Ø±ÙˆØ± Ø§Ù†Ø¬Ø§Ù… Ù†Ø´Ø¯: ${(res && (res.errorDetail || res.message)) || 'Ø®Ø·Ø§ÛŒ Ù†Ø§Ø´Ù†Ø§Ø®ØªÙ‡'}`);
+            ? `âœ… کارنامه شما روی سرور ثبت شد${res.rank ? ` â€” رتبه ${res.rank}` : ''}`
+            : `âŒ ثبت روی سرور انجام نشد: ${(res && (res.errorDetail || res.message)) || 'خطای ناشناخته'}`);
         })
-        .catch(err => alert(`âŒ Ø®Ø·Ø§ Ø¯Ø± Ù‡Ù…Ú¯Ø§Ù…â€ŒØ³Ø§Ø²ÛŒ: ${err && err.message ? err.message : err}`));
+        .catch(err => alert(`âŒ خطا در همگام‌سازی: ${err && err.message ? err.message : err}`));
     }
     return;
   }
@@ -2908,7 +2908,7 @@ window.handleUserGuideAction = (action) => {
     renderApp();
     setTimeout(() => {
       const chartHeadings = Array.from(document.querySelectorAll('h3'));
-      const targetHeading = chartHeadings.find(h => h.textContent.includes('Ù…ÛŒØ²Ø§Ù† Ù…Ø·Ø§Ù„Ø¹Ù‡ Ù‡ÙØªÚ¯ÛŒ') || h.textContent.includes('ØªØ¹Ø¯Ø§Ø¯ ØªØ³Øª Ù‡ÙØªÚ¯ÛŒ') || h.textContent.includes('ØªØ­Ù„ÛŒÙ„ Û²Û´ Ø³Ø§Ø¹ØªÙ‡'));
+      const targetHeading = chartHeadings.find(h => h.textContent.includes('میزان مطالعه هفتگی') || h.textContent.includes('تعداد تست هفتگی') || h.textContent.includes('تحلیل ۲۴ ساعته'));
       const target = targetHeading ? targetHeading.closest('.glass-panel') : null;
       if (target && typeof target.scrollIntoView === 'function') {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2970,7 +2970,7 @@ function renderDashboardViewSafe() {
     return renderDashboardView(state.selectedDayIndex, state.dashboardViewMode);
   } catch (err) {
     console.error('[DashboardView] Render error:', err);
-    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ø¯Ø§Ø´Ø¨ÙˆØ±Ø¯: ${err?.message || ''}</p></div>`;
+    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">خطا در بارگذاری داشبورد: ${err?.message || ''}</p></div>`;
   }
 }
 
@@ -2979,7 +2979,7 @@ function renderPlannerViewSafe() {
     return renderPlannerView(state.selectedDayIndex, { plannerAccordions: state.plannerAccordions });
   } catch (err) {
     console.error('[PlannerView] Render error:', err);
-    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ø¨Ø±Ù†Ø§Ù…Ù‡â€ŒØ±ÛŒØ²ÛŒ: ${err?.message || ''}</p></div>`;
+    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">خطا در بارگذاری برنامه‌ریزی: ${err?.message || ''}</p></div>`;
   }
 }
 
@@ -2988,7 +2988,7 @@ function renderRoutinesViewSafe() {
     return renderRoutinesView({ routinesAccordions: state.routinesAccordions });
   } catch (err) {
     console.error('[RoutinesView] Render error:', err);
-    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ø±ÙˆØªÛŒÙ†â€ŒÙ‡Ø§: ${err?.message || ''}</p></div>`;
+    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">خطا در بارگذاری روتین‌ها: ${err?.message || ''}</p></div>`;
   }
 }
 
@@ -2997,7 +2997,7 @@ function renderToolsViewSafe() {
     return renderToolsView();
   } catch (err) {
     console.error('[ToolsView] Render error:', err);
-    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ø§Ø¨Ø²Ø§Ø±Ù‡Ø§: ${err?.message || ''}</p></div>`;
+    return `<div class="main-container" style="padding: 30px; text-align: center;"><p style="color: #ef4444;">خطا در بارگذاری ابزارها: ${err?.message || ''}</p></div>`;
   }
 }
 
@@ -3007,16 +3007,16 @@ function renderLeaderboardViewSafe() {
   } catch (err) {
     console.error('[LeaderboardView] Render error:', err);
     if (typeof window.showToast === 'function') {
-      window.showToast('Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ ØªØ§Ù„Ø§Ø± Ø±Ù‚Ø§Ø¨Øª: ' + (err?.message || 'Ù†Ø§Ù…Ø´Ø®Øµ'), 'error', 4500);
+      window.showToast('خطا در بارگذاری تالار رقابت: ' + (err?.message || 'نامشخص'), 'error', 4500);
     }
     return `
       <div class="main-container" style="padding: 40px 20px; text-align: center; direction: rtl;">
         <div style="font-size: 3rem; margin-bottom: 12px;">ðŸ†</div>
-        <h3 style="color: #ef4444; font-weight: 800; margin-bottom: 8px;">Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ ØªØ§Ù„Ø§Ø± Ø±Ù‚Ø§Ø¨Øª</h3>
-        <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 20px;">${(err?.message || 'Ù…Ø´Ú©Ù„ÛŒ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ø¯Ø§Ø¯Ù‡â€ŒÙ‡Ø§ÛŒ Ø±Ù‚Ø§Ø¨Øª Ø±Ø® Ø¯Ø§Ø¯Ù‡ Ø§Ø³Øª.')}</p>
+        <h3 style="color: #ef4444; font-weight: 800; margin-bottom: 8px;">خطا در بارگذاری تالار رقابت</h3>
+        <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 20px;">${(err?.message || 'مشکلی در بارگذاری داده‌های رقابت رخ داده است.')}</p>
         <button onclick="if(window.switchTab) window.switchTab(0);" class="btn-primary" style="width: auto; padding: 10px 22px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto;">
           <span>ðŸ </span>
-          <span>Ø¨Ø§Ø²Ú¯Ø´Øª Ø¨Ù‡ Ø¯Ø§Ø´Ø¨ÙˆØ±Ø¯</span>
+          <span>بازگشت به داشبورد</span>
         </button>
       </div>
     `;
@@ -3032,16 +3032,16 @@ function renderArticlesViewSafe() {
   } catch (err) {
     console.error('[ArticlesView] Render error:', err);
     if (typeof window.showToast === 'function') {
-      window.showToast('Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ù…Ù‚Ø§Ù„Ø§Øª Ùˆ Ø¨Ø§Ù†Ú© Ø³ÙˆØ§Ù„Ø§Øª: ' + (err?.message || 'Ù†Ø§Ù…Ø´Ø®Øµ'), 'error', 4500);
+      window.showToast('خطا در بارگذاری مقالات و بانک سوالات: ' + (err?.message || 'نامشخص'), 'error', 4500);
     }
     return `
       <div class="main-container" style="padding: 40px 20px; text-align: center; direction: rtl;">
         <div style="font-size: 3rem; margin-bottom: 12px;">ðŸ“š</div>
-        <h3 style="color: #ef4444; font-weight: 800; margin-bottom: 8px;">Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ø¨Ø®Ø´ Ù…Ù‚Ø§Ù„Ø§Øª Ùˆ Ø¢Ø²Ù…ÙˆÙ†â€ŒÙ‡Ø§</h3>
-        <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 20px;">${(err?.message || 'Ù…Ø´Ú©Ù„ÛŒ Ø¯Ø± Ù†Ù…Ø§ÛŒØ´ Ø§ÛŒÙ† Ø¨Ø®Ø´ Ø±Ø® Ø¯Ø§Ø¯Ù‡ Ø§Ø³Øª.')}</p>
+        <h3 style="color: #ef4444; font-weight: 800; margin-bottom: 8px;">خطا در بارگذاری بخش مقالات و آزمون‌ها</h3>
+        <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 20px;">${(err?.message || 'مشکلی در نمایش این بخش رخ داده است.')}</p>
         <button onclick="if(window.switchTab) window.switchTab(0);" class="btn-primary" style="width: auto; padding: 10px 22px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto;">
           <span>ðŸ </span>
-          <span>Ø¨Ø§Ø²Ú¯Ø´Øª Ø¨Ù‡ Ø¯Ø§Ø´Ø¨ÙˆØ±Ø¯</span>
+          <span>بازگشت به داشبورد</span>
         </button>
       </div>
     `;
@@ -3200,7 +3200,7 @@ export function renderApp() {
         selectedCategoryCode: state.focusCategoryCode,
         selectedNonStudyCode: state.selectedNonStudyCode || 'non_sports',
         selectedSubject: state.focusSubject,
-        selectedStudyMethod: state.selectedStudyMethod || 'ÛŒØ§Ø¯Ú¯ÛŒØ±ÛŒ',
+        selectedStudyMethod: state.selectedStudyMethod || 'یادگیری',
         sessionNote: state.sessionNote,
         focusAccordions: state.focusAccordions || { activity: false, timing: false, testNote: false, audio: false }
       });
@@ -3211,7 +3211,7 @@ export function renderApp() {
           <div class="modal-card" style="max-width: 540px; background: rgba(15, 23, 42, 0.96); border-color: rgba(236, 72, 153, 0.5);">
             <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
               <div class="modal-title" style="color: #ec4899; display: flex; align-items: center; gap: 8px;">
-                ðŸ«™ Ú©ÙˆØ²Ù‡ Ø´ÛŒØ´Ù‡â€ŒØ§ÛŒ Ø®Ø§Ø·Ø±Ø§Øª Ùˆ Ø´Ú©Ø±Ú¯Ø²Ø§Ø±ÛŒ âœ¨
+                ðŸ«™ کوزه شیشه‌ای خاطرات و شکرگزاری ✨
               </div>
               <button class="btn-close" id="btn-close-gratitude-modal">âœ•</button>
             </div>
@@ -3220,23 +3220,23 @@ export function renderApp() {
               ${notes.length === 0 ? `
                 <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
                   <div style="font-size: 3rem; margin-bottom: 10px;">ðŸŒ¸</div>
-                  <div style="font-weight: bold; color: white;">Ù‡Ù†ÙˆØ² Ø®Ø§Ø·Ø±Ù‡â€ŒØ§ÛŒ Ø¯Ø± Ú©ÙˆØ²Ù‡ Ø´ÛŒØ´Ù‡â€ŒØ§ÛŒ Ø§Ù†Ø¯Ø§Ø®ØªÙ‡ Ù†Ø´Ø¯Ù‡!</div>
-                  <div style="font-size: 0.8rem; margin-top: 4px;">Ø¨Ø§ Ø«Ø¨Øª ÛŒÚ© Ø§ØªÙØ§Ù‚ Ú©ÙˆÚ†Ú©ØŒ Ø­Ø³ Ø®ÙˆØ¨ Ø§Ù…Ø±ÙˆØ²Øª Ø±Ùˆ Ø°Ø®ÛŒØ±Ù‡ Ú©Ù†.</div>
+                  <div style="font-weight: bold; color: white;">هنوز خاطره‌ای در کوزه شیشه‌ای انداخته نشده!</div>
+                  <div style="font-size: 0.8rem; margin-top: 4px;">با ثبت یک اتفاق کوچک، حس خوب امروزت رو ذخیره کن.</div>
                 </div>
               ` : notes.map(item => `
                 <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(236, 72, 153, 0.3); padding: 12px 14px; border-radius: 14px;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="background: rgba(236, 72, 153, 0.2); color: #f472b6; padding: 2px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: bold;">${item.dateStr || 'Ø§Ù…Ø±ÙˆØ²'}</span>
-                    <button class="btn-delete-gratitude-item" data-id="${item.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem;">ðŸ—‘ï¸ Ø­Ø°Ù</button>
+                    <span style="background: rgba(236, 72, 153, 0.2); color: #f472b6; padding: 2px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: bold;">${item.dateStr || 'امروز'}</span>
+                    <button class="btn-delete-gratitude-item" data-id="${item.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem;">ðŸ—‘ï¸ حذف</button>
                   </div>
-                  <div style="font-size: 0.78rem; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">â“ ${item.prompt || 'Ø´Ú©Ø±Ú¯Ø²Ø§Ø±ÛŒ'}</div>
+                  <div style="font-size: 0.78rem; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">â“ ${item.prompt || 'شکرگزاری'}</div>
                   <div style="font-size: 0.9rem; color: white; line-height: 1.6;">âœ¨ ${item.text}</div>
                 </div>
               `).join('')}
             </div>
 
             <div style="background: rgba(236, 72, 153, 0.12); padding: 10px; border-radius: 12px; font-size: 0.78rem; color: #fbcfe8; text-align: center; margin-top: 10px;">
-              ðŸ’¡ Ø¯Ø± Ø±ÙˆØ²Ù‡Ø§ÛŒÛŒ Ú©Ù‡ Ø§Ø­Ø³Ø§Ø³ Ø®Ø³ØªÚ¯ÛŒ Ù…ÛŒâ€ŒÚ©Ù†ÛŒØŒ Ù…Ø±ÙˆØ± Ø§ÛŒÙ† Ú©ÙˆØ²Ù‡ Ø¨Ù‡ØªØ±ÛŒÙ† Ù…Ù†Ø¨Ø¹ Ø§Ù†Ø±Ú˜ÛŒ Ùˆ Ø§Ù†Ú¯ÛŒØ²Ù‡â€ŒØ³Øª!
+              ðŸ’¡ در روزهایی که احساس خستگی می‌کنی، مرور این کوزه بهترین منبع انرژی و انگیزه‌ست!
             </div>
           </div>
         </div>
@@ -3254,7 +3254,7 @@ export function renderApp() {
       const ownerIdStr = String(state.currentRoom.owner_id || '');
       const isOwner = (currentUserIdStr !== '') && (currentUserIdStr === ownerIdStr);
       const rId = state.currentRoom.id || state.currentRoom.code;
-      const rName = state.currentRoom.name || state.currentRoom.title || state.currentRoom.roomName || state.currentRoom.groupName || 'Ø³Ø§Ù„Ù† Ù…Ø·Ø§Ù„Ø¹Ù‡';
+      const rName = state.currentRoom.name || state.currentRoom.title || state.currentRoom.roomName || state.currentRoom.groupName || 'سالن مطالعه';
       modalHTML = renderStudyRoomModal(rId, rName, state.studyRoomParticipants, isOwner, ownerIdStr, currentUserIdStr);
     } else if (state.activeModal === 'createRoom' || state.activeModal === 'createGroup') {
       modalHTML = renderCreateRoomModal(window.createRoomModalActiveTab || 'create');
@@ -3290,28 +3290,28 @@ export function renderApp() {
           <div class="modal-content" style="max-width: 450px; background: #1a1a2e; border: 1px solid rgba(168, 85, 247, 0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
               <h2 style="margin: 0; color: #c084fc; font-size: 1.3rem; display: flex; align-items: center; gap: 8px;">
-                â„¹ï¸ Ù‚ÙˆØ§Ù†ÛŒÙ† Ø¨Ø±Ù†Ø§Ù…Ù‡â€ŒØ±ÛŒØ²ÛŒ Ùˆ Ø¯ÛŒØªØ§Ø¨ÛŒØ³ Ù„ÙˆÚ©Ø§Ù„
+                â„¹ï¸ قوانین برنامه‌ریزی و دیتابیس لوکال
               </h2>
               <button onclick="window.appState.activeModal = null; window.renderApp();" class="btn-icon">âœ–</button>
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 15px;">
               <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: bold; color: #60a5fa; margin-bottom: 5px;">ðŸ”„ Ù‡Ù…Ú¯Ø§Ù…â€ŒØ³Ø§Ø²ÛŒ Ø®ÙˆØ¯Ú©Ø§Ø±</div>
+                <div style="font-weight: bold; color: #60a5fa; margin-bottom: 5px;">ðŸ”„ همگام‌سازی خودکار</div>
                 <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-                  Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø´Ù…Ø§ Ø¨Ù‡ ØµÙˆØ±Øª Ø®ÙˆØ¯Ú©Ø§Ø± Ø¨ÛŒÙ† Ø¯Ø³ØªÚ¯Ø§Ù‡â€ŒÙ‡Ø§ÛŒ Ù…Ø®ØªÙ„Ù Ø¨Ø§ Ø¨Ø§Ø² Ú©Ø±Ø¯Ù† Ø¨Ø±Ù†Ø§Ù…Ù‡ Ù‡Ù…Ú¯Ø§Ù… Ù…ÛŒâ€ŒØ´ÙˆØ¯.
+                  اطلاعات شما به صورت خودکار بین دستگاه‌های مختلف با باز کردن برنامه همگام می‌شود.
                 </div>
               </div>
               
               <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: bold; color: #f472b6; margin-bottom: 5px;">â³ Ù…Ø­Ø¯ÙˆØ¯ÛŒØª ÙˆÛŒØ±Ø§ÛŒØ´ Ù¾Ø±ÙˆÙØ§ÛŒÙ„</div>
+                <div style="font-weight: bold; color: #f472b6; margin-bottom: 5px;">â³ محدودیت ویرایش پروفایل</div>
                 <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-                  Ø¨Ø±Ø§ÛŒ Ø­ÙØ¸ Ø«Ø¨Ø§Øª Ù‡ÙˆÛŒØªÛŒ Ùˆ Ø¬Ù„ÙˆÚ¯ÛŒØ±ÛŒ Ø§Ø² Ø³ÙˆØ¡Ø§Ø³ØªÙØ§Ø¯Ù‡ØŒ ÙˆÛŒØ±Ø§ÛŒØ´ Ù…Ø´Ø®ØµØ§Øª Ù¾Ø±ÙˆÙØ§ÛŒÙ„ ØªÙ†Ù‡Ø§ Ù‡Ø± Û´ Ø³Ø§Ø¹Øª ÛŒÚ©â€ŒØ¨Ø§Ø± Ø§Ù…Ú©Ø§Ù†â€ŒÙ¾Ø°ÛŒØ± Ø§Ø³Øª.
+                  برای حفظ ثبات هویتی و جلوگیری از سوءاستفاده، ویرایش مشخصات پروفایل تنها هر ۴ ساعت یک‌بار امکان‌پذیر است.
                 </div>
               </div>
             </div>
             
-            <button onclick="window.appState.activeModal = null; window.renderApp();" class="btn-primary" style="margin-top: 20px; width: 100%;">Ù…ØªÙˆØ¬Ù‡ Ø´Ø¯Ù…</button>
+            <button onclick="window.appState.activeModal = null; window.renderApp();" class="btn-primary" style="margin-top: 20px; width: 100%;">متوجه شدم</button>
           </div>
         </div>
       `;
@@ -3367,9 +3367,9 @@ export function renderApp() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        alert('ðŸ“¥ ÙØ§ÛŒÙ„ Ù¾Ø´ØªÛŒØ¨Ø§Ù† JSON Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø¯Ø§Ù†Ù„ÙˆØ¯ Ø´Ø¯!');
+        alert('ðŸ“¥ فایل پشتیبان JSON با موفقیت دانلود شد!');
       } catch (err) {
-        alert('Ø®Ø·Ø§ Ø¯Ø± Ù¾Ø´ØªÛŒØ¨Ø§Ù†â€ŒÚ¯ÛŒØ±ÛŒ: ' + err.message);
+        alert('خطا در پشتیبان‌گیری: ' + err.message);
       }
     };
   }
@@ -3389,10 +3389,10 @@ export function renderApp() {
       reader.onload = (evt) => {
         try {
           db.importAllDataJSON(evt.target.result);
-          alert('ðŸ“¤ Ø§Ø·Ù„Ø§Ø¹Ø§Øª Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø¨Ø§Ø²ÛŒØ§Ø¨ÛŒ Ø´Ø¯Ù†Ø¯!');
+          alert('ðŸ“¤ اطلاعات با موفقیت بازیابی شدند!');
           renderApp();
         } catch (err) {
-          alert('Ø®Ø·Ø§ Ø¯Ø± Ø¨Ø§Ø²ÛŒØ§Ø¨ÛŒ Ø§Ø·Ù„Ø§Ø¹Ø§Øª: ' + err.message);
+          alert('خطا در بازیابی اطلاعات: ' + err.message);
         }
       };
       reader.readAsText(file);
@@ -3560,7 +3560,7 @@ window.finishPomodoroSession = function() {
       try {
         const toast = document.createElement('div');
         toast.style.cssText = `position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 14px 22px; border-radius: 14px; font-weight: 800; font-size: 0.9rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; direction: rtl; border: 1px solid rgba(255,255,255,0.15);`;
-        toast.innerHTML = 'âš ï¸ Ù…Ø¯Øª Ø²Ù…Ø§Ù† ØªØ§ÛŒÙ…Ø± Ù…Ù†Ù‚Ø¶ÛŒ Ø´Ø¯Ù‡ Ø¨ÙˆØ¯ (> Û±Û² Ø³Ø§Ø¹Øª) Ùˆ Ø¯Ø± Ú©Ø§Ø±Ù†Ø§Ù…Ù‡ Ø«Ø¨Øª Ù†Ø´Ø¯.';
+        toast.innerHTML = 'âš ï¸ مدت زمان تایمر منقضی شده بود (> ۱۲ ساعت) و در کارنامه ثبت نشد.';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 4000);
       } catch (_) {}
@@ -3628,9 +3628,9 @@ window.finishPomodoroSession = function() {
         const toast = document.createElement('div');
         toast.style.cssText = `position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 14px 22px; border-radius: 14px; font-weight: 800; font-size: 0.9rem; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; direction: rtl; border: 1px solid rgba(255,255,255,0.15);`;
         if (!wasRunning && elapsedSeconds === 0) {
-          toast.innerHTML = 'âš ï¸ ØªØ§ÛŒÙ…Ø± Ø¯Ø± Ø­Ø§Ù„ Ø§Ø¬Ø±Ø§ Ù†ÛŒØ³Øª! Ø¨Ø±Ø§ÛŒ Ø«Ø¨Øª Ù…Ø·Ø§Ù„Ø¹Ù‡ Ø¨Ø¯ÙˆÙ† ØªØ§ÛŒÙ…Ø±ØŒ Ø§Ø² Ø¯Ú©Ù…Ù‡ <strong>Â«Ø«Ø¨Øª Ø¯Ø³ØªÛŒÂ»</strong> Ø§Ø³ØªÙØ§Ø¯Ù‡ Ú©Ù†ÛŒØ¯.';
+          toast.innerHTML = 'âš ï¸ تایمر در حال اجرا نیست! برای ثبت مطالعه بدون تایمر، از دکمه <strong>«ثبت دستی»</strong> استفاده کنید.';
         } else {
-          toast.innerHTML = 'â±ï¸ Ø²Ù…Ø§Ù† Ù…Ø·Ø§Ù„Ø¹Ù‡ Ø¨Ø³ÛŒØ§Ø± Ú©ÙˆØªØ§Ù‡ Ø¨ÙˆØ¯ (Ú©Ù…ØªØ± Ø§Ø² Û± Ø¯Ù‚ÛŒÙ‚Ù‡) Ùˆ Ø¯Ø± Ú©Ø§Ø±Ù†Ø§Ù…Ù‡ Ø«Ø¨Øª Ù†Ø´Ø¯.';
+          toast.innerHTML = 'â±ï¸ زمان مطالعه بسیار کوتاه بود (کمتر از ۱ دقیقه) و در کارنامه ثبت نشد.';
         }
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3500);
@@ -3719,7 +3719,7 @@ window.finishPomodoroSession = function() {
           isBreak: isBreakMode,
           categoryCode,
           subject,
-          studyMethod: isStudy ? (targetState.selectedStudyMethod || targetState.focusPhase || window.fabActivityState?.selectedPhase || window.fabActivityState?.studyType || 'ÛŒØ§Ø¯Ú¯ÛŒØ±ÛŒ') : '',
+          studyMethod: isStudy ? (targetState.selectedStudyMethod || targetState.focusPhase || window.fabActivityState?.selectedPhase || window.fabActivityState?.studyType || 'یادگیری') : '',
           duration,
           minutes: duration,
           testCount: tests,
@@ -3733,18 +3733,18 @@ window.finishPomodoroSession = function() {
 
     const categoryTitle = (saved && (saved.categoryTitle || saved.category))
       ? (saved.categoryTitle || saved.category)
-      : (isBreakMode ? 'Ù¾Ø§Ø±Øª Ø§Ø³ØªØ±Ø§Ø­Øª â˜•' : (isStudy ? 'Ù…Ø·Ø§Ù„Ø¹Ù‡ Ù…ØªÙ…Ø±Ú©Ø²' : 'ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ'));
+      : (isBreakMode ? 'پارت استراحت ☕' : (isStudy ? 'مطالعه متمرکز' : 'فعالیت غیردرسی'));
 
     // 7. Success Toast with actual duration
     try {
       const toast = document.createElement('div');
       const toastBg = isBreakMode ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : (isStudy ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #d97706 0%, #b45309 100%)');
       toast.style.cssText = `position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: ${toastBg}; color: white; padding: 16px 26px; border-radius: 18px; font-weight: 900; font-size: 0.95rem; line-height: 1.8; z-index: 99999; box-shadow: 0 12px 36px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; direction: rtl; border: 1.5px solid rgba(255,255,255,0.35);`;
-      let toastContent = `ðŸŽ‰ Ù¾Ø§Ø±Øª Â«${categoryTitle}Â» (${duration} Ø¯Ù‚ÛŒÙ‚Ù‡) Ù¾Ø§ÛŒØ§Ù† ÛŒØ§ÙØª Ùˆ Ø¯Ø± Ú©Ø§Ø±Ù†Ø§Ù…Ù‡ Ø«Ø¨Øª Ø´Ø¯! âœ…${tests > 0 ? `<br><span style="font-size: 0.84rem; opacity: 0.95;">ðŸŽ¯ Ø«Ø¨Øª ${tests} ØªØ³Øª Ø­Ù„â€ŒØ´Ø¯Ù‡ Ø¯Ø± Ø¢Ù…Ø§Ø± Ø§Ù…Ø±ÙˆØ²</span>` : ''}`;
+      let toastContent = `ðŸŽ‰ پارت «${categoryTitle}Â» (${duration} دقیقه) پایان یافت و در کارنامه ثبت شد! ✅${tests > 0 ? `<br><span style="font-size: 0.84rem; opacity: 0.95;">ðŸŽ¯ ثبت ${tests} تست حل‌شده در آمار امروز</span>` : ''}`;
       if (isBreakMode) {
-        toastContent = `â˜• Ù¾Ø§Ø±Øª Ø§Ø³ØªØ±Ø§Ø­Øª (${duration} Ø¯Ù‚ÛŒÙ‚Ù‡) Ù¾Ø§ÛŒØ§Ù† ÛŒØ§ÙØª (Ø¨Ø¯ÙˆÙ† Ø§Ø­ØªØ³Ø§Ø¨ Ø¯Ø± Ø³Ø§Ø¹Øª Ù…Ø·Ø§Ù„Ø¹Ù‡) â˜•`;
+        toastContent = `â˜• پارت استراحت (${duration} دقیقه) پایان یافت (بدون احتساب در ساعت مطالعه) â˜•`;
       } else if (isNonStudy) {
-        toastContent = `ðŸ§˜ ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ Â«${categoryTitle}Â» (${duration} Ø¯Ù‚ÛŒÙ‚Ù‡) Ø«Ø¨Øª Ø´Ø¯ (Ø¨Ø¯ÙˆÙ† Ø§Ø­ØªØ³Ø§Ø¨ Ø¯Ø± Ø³Ø§Ø¹Øª Ù…Ø·Ø§Ù„Ø¹Ù‡) ðŸ§˜`;
+        toastContent = `ðŸ§˜ فعالیت غیردرسی «${categoryTitle}Â» (${duration} دقیقه) ثبت شد (بدون احتساب در ساعت مطالعه) ðŸ§˜`;
       }
       toast.innerHTML = toastContent;
       document.body.appendChild(toast);
@@ -3807,7 +3807,7 @@ window.getCurrentFocusSubjectTitle = function() {
         ? db.getNonStudyCategories()
         : [];
       const nonCat = (nonCategories && nonCategories.find) ? nonCategories.find(c => c.code === state.selectedNonStudyCode) : null;
-      return nonCat ? nonCat.title : 'ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ';
+      return nonCat ? nonCat.title : 'فعالیت غیردرسی';
     }
     const categories = (typeof db !== 'undefined' && typeof db.getCategories === 'function')
       ? db.getCategories()
@@ -3815,14 +3815,14 @@ window.getCurrentFocusSubjectTitle = function() {
     const checkStudy = (typeof isStudyCategory === 'function') ? isStudyCategory : isStudyCategoryHelper;
     const activeCode = state.focusCategoryCode || ((categories && categories.find) ? categories.find(c => checkStudy(c))?.code : null) || (categories && categories[0]?.code);
     const cat = (categories && categories.find) ? (categories.find(c => c.code === activeCode) || categories[0]) : null;
-    const catTitle = cat ? (cat.title || 'Ù…Ø·Ø§Ù„Ø¹Ù‡') : 'Ù…Ø·Ø§Ù„Ø¹Ù‡ Ù…ØªÙ…Ø±Ú©Ø²';
+    const catTitle = cat ? (cat.title || 'مطالعه') : 'مطالعه متمرکز';
     if (state.focusSubject && state.focusSubject.trim()) {
       return `${catTitle} (${state.focusSubject.trim()})`;
     }
-    return catTitle || 'Ù…Ø·Ø§Ù„Ø¹Ù‡ Ù…ØªÙ…Ø±Ú©Ø²';
+    return catTitle || 'مطالعه متمرکز';
   } catch (e) {
     console.warn('Fallback in getCurrentFocusSubjectTitle:', e);
-    return 'Ù…Ø·Ø§Ù„Ø¹Ù‡ Ø¢Ø²Ø§Ø¯';
+    return 'مطالعه آزاد';
   }
 };
 
@@ -4041,13 +4041,13 @@ function updateTimerDisplayDOM() {
   if (toggleBtn) {
     const isRunning = Boolean(targetState.isPomodoroRunning || targetState.isStopwatchRunning);
     if (isRunning) {
-      toggleBtn.textContent = 'â¸ ØªÙˆÙ‚Ù Ùˆ Ø«Ø¨Øª Ù¾Ø§Ø±Øª';
+      toggleBtn.textContent = 'â¸ توقف و ثبت پارت';
       toggleBtn.style.background = '#ef4444';
       toggleBtn.style.boxShadow = '0 4px 16px rgba(239,68,68,0.35)';
     } else {
       const isBreak = (targetState.focusTimerType === 2);
       const isNonStudy = (targetState.focusActivityMode === 'non-study' && !isBreak);
-      toggleBtn.textContent = isBreak ? 'â˜• Ø´Ø±ÙˆØ¹ Ø§Ø³ØªØ±Ø§Ø­Øª' : (isNonStudy ? 'ðŸ§˜ Ø´Ø±ÙˆØ¹ ÙØ¹Ø§Ù„ÛŒØª ØºÛŒØ±Ø¯Ø±Ø³ÛŒ' : 'â–¶ Ø´Ø±ÙˆØ¹ ØªØ§ÛŒÙ…Ø±');
+      toggleBtn.textContent = isBreak ? 'â˜• شروع استراحت' : (isNonStudy ? 'ðŸ§˜ شروع فعالیت غیردرسی' : 'â–¶ شروع تایمر');
       toggleBtn.style.background = isBreak ? '#0284c7' : (isNonStudy ? '#d97706' : '#10b981');
       toggleBtn.style.boxShadow = '0 4px 16px rgba(16,185,129,0.35)';
     }
@@ -4291,7 +4291,7 @@ function bindEvents() {
       btnShareArticle.onclick = () => {
         const url = window.location.origin + window.location.pathname + '?tab=articles&article=' + encodeURIComponent(btnShareArticle.dataset.articleId);
         if (navigator.share) navigator.share({ title: document.title, url }).catch(() => {});
-        else navigator.clipboard.writeText(url).then(() => alert('âœ… Ù„ÛŒÙ†Ú© Ú©Ù¾ÛŒ Ø´Ø¯!')).catch(() => prompt('Ù„ÛŒÙ†Ú© Ø±Ø§ Ú©Ù¾ÛŒ Ú©Ù†ÛŒØ¯:', url));
+        else navigator.clipboard.writeText(url).then(() => alert('âœ… لینک کپی شد!')).catch(() => prompt('لینک را کپی کنید:', url));
       };
     }
 
@@ -4303,12 +4303,12 @@ function bindEvents() {
         e.stopPropagation();
         const fileUrl = btn.dataset.url;
         const fileName = btn.dataset.filename || 'download';
-        const format = btn.dataset.format || 'ÙØ§ÛŒÙ„';
+        const format = btn.dataset.format || 'فایل';
 
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
         btn.style.opacity = '0.7';
-        btn.innerHTML = `<span>â³ Ø¯Ø± Ø­Ø§Ù„ Ø¢Ù…Ø§Ø¯Ù‡â€ŒØ³Ø§Ø²ÛŒ Ø¯Ø§Ù†Ù„ÙˆØ¯...</span>`;
+        btn.innerHTML = `<span>â³ در حال آماده‌سازی دانلود...</span>`;
 
         try {
           const response = await fetch(fileUrl);
@@ -4324,7 +4324,7 @@ function bindEvents() {
           setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 
           if (typeof window.showToast === 'function') {
-            window.showToast(`âœ… ÙØ§ÛŒÙ„ Â«${fileName}Â» Ø¨Ø§ Ù…ÙˆÙÙ‚ÛŒØª Ø¯Ø§Ù†Ù„ÙˆØ¯ Ø´Ø¯!`, 'success', 3500);
+            window.showToast(`âœ… فایل «${fileName}» با موفقیت دانلود شد!`, 'success', 3500);
           }
         } catch (fetchErr) {
           console.warn('Direct fetch failed, falling back to anchor trigger:', fetchErr);
@@ -4336,7 +4336,7 @@ function bindEvents() {
           link.click();
           document.body.removeChild(link);
           if (typeof window.showToast === 'function') {
-            window.showToast(`ðŸ“¥ ÙØ§ÛŒÙ„ Â«${fileName}Â» Ø¯Ø± Ø­Ø§Ù„ Ø¨Ø§Ø±Ú¯ÛŒØ±ÛŒ Ø§Ø³Øª.`, 'info', 3000);
+            window.showToast(`ðŸ“¥ فایل «${fileName}» در حال بارگیری است.`, 'info', 3000);
           }
         } finally {
           setTimeout(() => {
@@ -4398,7 +4398,7 @@ export function parseUrlSearchParameters() {
         window.questionBankState = {
           selectedExamId: examParam,
           searchQuery: '',
-          selectedCategory: 'Ù‡Ù…Ù‡',
+          selectedCategory: 'همه',
           activeRecallMode: false,
           revealedQuestionIds: new Set(),
           userAnswers: {}
@@ -4414,7 +4414,7 @@ export function parseUrlSearchParameters() {
           window.questionBankState = {
             selectedExamId: '1405-khordad',
             searchQuery: '',
-            selectedCategory: 'Ù‡Ù…Ù‡',
+            selectedCategory: 'همه',
             activeRecallMode: false,
             revealedQuestionIds: new Set(),
             userAnswers: {}
@@ -4520,7 +4520,7 @@ export function initApp() {
 
     // 7. Complete loading & fade out splash screen
     if (splashBar) splashBar.style.width = '100%';
-    if (splashText) splashText.textContent = 'Ø®ÙˆØ´ Ø¢Ù…Ø¯ÛŒØ¯!';
+    if (splashText) splashText.textContent = 'خوش آمدید!';
     if (splashScreen) {
       setTimeout(() => {
         splashScreen.style.opacity = '0';
