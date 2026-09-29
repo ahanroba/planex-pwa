@@ -2840,3 +2840,27 @@ body:has(#planex-splash-screen) #app {
   /* While the splash is visible, keep the app invisible but layout-stable */
   pointer-events: none;
 }
+
+/* PWA In-App Update Notification Banner */
+#pwa-update-banner {
+  display: none;
+  width: 100%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  text-align: center;
+  padding: 10px 16px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 10000;
+  direction: rtl;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+  transition: all 0.2s ease;
+}
+
+#pwa-update-banner:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+

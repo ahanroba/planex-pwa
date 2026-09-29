@@ -19,7 +19,6 @@ window.setPlannerPriorityFilter = (q) => {
 
 window.setPlannerNewTaskPriority = (q) => {
   window.plannerNewTaskPriority = q || DEFAULT_PRIORITY;
-  if (window.renderApp) window.renderApp();
 };
 
 window.selectPlannerDay = (idx) => {

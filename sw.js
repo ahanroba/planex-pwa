@@ -6,9 +6,8 @@ const ASSETS_TO_CACHE = [
   '/logo-transparent.png'
 ];
 
-// Install Event - Pre-caching core shell & skip waiting immediately
+// Install Event - Pre-caching core shell
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[ServiceWorker] Pre-caching offline PWA shell');

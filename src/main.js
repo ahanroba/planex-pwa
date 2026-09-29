@@ -2628,27 +2628,38 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(registration => {
       window.swRegistration = registration;
       
-      // Check for updates on every page load
-      registration.update().catch(() => {});
-      
+      const showUpdateBanner = (worker) => {
+        window.hasPwaUpdate = true;
+        const banner = document.getElementById('pwa-update-banner');
+        if (banner) {
+          banner.innerText = 'نسخه جدید در دسترس است. برای بروزرسانی کلیک کنید 🔄';
+          banner.style.display = 'block';
+          banner.onclick = () => {
+            const targetWorker = worker || registration.waiting || registration.installing;
+            if (targetWorker) {
+              targetWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+            window.location.reload();
+          };
+        }
+      };
+
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        showUpdateBanner(registration.waiting);
+      }
+
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              window.hasPwaUpdate = true;
-              const banner = document.getElementById('pwa-update-banner');
-              if (banner) {
-                banner.style.display = 'block';
-                banner.onclick = () => {
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
-                };
-              }
-              if (typeof renderApp === 'function') renderApp();
+              showUpdateBanner(newWorker);
             }
           });
         }
       });
+
+      registration.update().catch(() => {});
     }).catch(err => console.error('SW registration failed: ', err));
   });
   
@@ -3317,13 +3328,39 @@ export function renderApp() {
       `;
     }
 
+    // Preserve window scroll position & active element state (focus & selection)
+    const savedWindowScrollY = (typeof window !== 'undefined') ? (window.scrollY || window.pageYOffset || 0) : 0;
+    const savedWindowScrollX = (typeof window !== 'undefined') ? (window.scrollX || window.pageXOffset || 0) : 0;
+
+    const activeEl = (typeof document !== 'undefined') ? document.activeElement : null;
+    const activeElId = (activeEl && activeEl.id) ? activeEl.id : null;
+    const activeElTag = activeEl ? activeEl.tagName : null;
+    const isInputOrTextarea = activeElTag === 'INPUT' || activeElTag === 'TEXTAREA';
+    const activeElSelStart = (isInputOrTextarea && typeof activeEl.selectionStart === 'number') ? activeEl.selectionStart : null;
+    const activeElSelEnd = (isInputOrTextarea && typeof activeEl.selectionEnd === 'number') ? activeEl.selectionEnd : null;
+
+    // Snapshot input values from Planner, Eisenhower & Routines views so they survive innerHTML replacement
+    const taskInputIds = [
+      'input-daily-plan',
+      'input-quadrant-task-Q1',
+      'input-quadrant-task-Q2',
+      'input-quadrant-task-Q3',
+      'input-quadrant-task-Q4',
+      'input-weekly-goal',
+      'input-routine-checklist-text',
+      'input-event-title'
+    ];
+    const savedInputValues = {};
+    if (typeof document !== 'undefined') {
+      taskInputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.value) savedInputValues[id] = el.value;
+      });
+    }
+
     // Preserve header scroll position
     const headerWrapper = document.querySelector('.header-actions-wrapper');
     const scrollPos = headerWrapper ? headerWrapper.scrollLeft : 0;
-
-    // Snapshot input values from Routines tab so they survive innerHTML replacement
-    const routineInputEl = document.getElementById('input-routine-checklist-text');
-    const savedRoutineInputVal = routineInputEl ? routineInputEl.value : '';
 
     appEl.innerHTML = `
       ${renderHeader(state)}
@@ -3335,15 +3372,55 @@ export function renderApp() {
       <div id="modal-container">${modalHTML}</div>
     `;
 
+    // Restore saved task input values
+    Object.keys(savedInputValues).forEach(id => {
+      const restoredEl = document.getElementById(id);
+      if (restoredEl && savedInputValues[id] && !restoredEl.value) {
+        restoredEl.value = savedInputValues[id];
+      }
+    });
+
     const newWrapper = document.querySelector('.header-actions-wrapper');
     if (newWrapper) {
       newWrapper.scrollLeft = scrollPos;
     }
 
-    // Restore saved routine checklist input value
-    if (savedRoutineInputVal) {
-      const restoredInput = document.getElementById('input-routine-checklist-text');
-      if (restoredInput) restoredInput.value = savedRoutineInputVal;
+    // Restore window scroll position immediately and on next frame to prevent layout jumps
+    if (typeof window !== 'undefined') {
+      window.scrollTo(savedWindowScrollX, savedWindowScrollY);
+      requestAnimationFrame(() => {
+        window.scrollTo(savedWindowScrollX, savedWindowScrollY);
+      });
+    }
+
+    // Restore active element focus and text selection range
+    if (activeElId && typeof document !== 'undefined') {
+      const focusTarget = document.getElementById(activeElId);
+      if (focusTarget && typeof focusTarget.focus === 'function') {
+        try {
+          focusTarget.focus();
+          if (activeElSelStart !== null && activeElSelEnd !== null && typeof focusTarget.setSelectionRange === 'function') {
+            focusTarget.setSelectionRange(activeElSelStart, activeElSelEnd);
+          }
+        } catch (err) {}
+      }
+      requestAnimationFrame(() => {
+        const rTarget = document.getElementById(activeElId);
+        if (rTarget && document.activeElement !== rTarget && typeof rTarget.focus === 'function') {
+          try {
+            rTarget.focus();
+            if (activeElSelStart !== null && activeElSelEnd !== null && typeof rTarget.setSelectionRange === 'function') {
+              rTarget.setSelectionRange(activeElSelStart, activeElSelEnd);
+            }
+          } catch (err) {}
+        }
+      });
+    }
+
+    // Ensure update banner remains displayed if PWA update is pending
+    if (window.hasPwaUpdate && typeof document !== 'undefined') {
+      const banner = document.getElementById('pwa-update-banner');
+      if (banner) banner.style.display = 'block';
     }
 
     // NOTE: the ?room= invite parameter is handled once in initApp() (it strips the
