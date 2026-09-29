@@ -3085,7 +3085,8 @@ document.addEventListener('visibilitychange', () => {
 });
 
 export function renderApp() {
-  if (window.planexActiveTimer && window.planexActiveTimer.isRunning) window.planexGlobalTimerTick();
+  // Decouple: let the timer's own setInterval handle ticks — do NOT call it here,
+  // because it used to force DOM work on every renderApp() even for unrelated tabs.
 
   try {
     if (typeof document !== 'undefined') {
@@ -3093,6 +3094,14 @@ export function renderApp() {
       const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
       if (isTyping) {
         console.log('renderApp aborted: User is typing');
+        return;
+      }
+
+      // Also bail out when the add-habit-modal is visibly open — the user is
+      // interacting with modal inputs that live inside the Routines view HTML.
+      const habitModal = document.getElementById('add-habit-modal');
+      if (habitModal && habitModal.style.display === 'flex') {
+        console.log('renderApp aborted: Habit modal is open');
         return;
       }
     }
@@ -3287,6 +3296,10 @@ export function renderApp() {
     const headerWrapper = document.querySelector('.header-actions-wrapper');
     const scrollPos = headerWrapper ? headerWrapper.scrollLeft : 0;
 
+    // Snapshot input values from Routines tab so they survive innerHTML replacement
+    const routineInputEl = document.getElementById('input-routine-checklist-text');
+    const savedRoutineInputVal = routineInputEl ? routineInputEl.value : '';
+
     appEl.innerHTML = `
       ${renderHeader(state)}
       <main style="flex: 1;">
@@ -3300,6 +3313,12 @@ export function renderApp() {
     const newWrapper = document.querySelector('.header-actions-wrapper');
     if (newWrapper) {
       newWrapper.scrollLeft = scrollPos;
+    }
+
+    // Restore saved routine checklist input value
+    if (savedRoutineInputVal) {
+      const restoredInput = document.getElementById('input-routine-checklist-text');
+      if (restoredInput) restoredInput.value = savedRoutineInputVal;
     }
 
     // NOTE: the ?room= invite parameter is handled once in initApp() (it strips the

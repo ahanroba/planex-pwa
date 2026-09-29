@@ -507,9 +507,10 @@ export function renderRoutinesView(options = {}) {
   });
   const todayHabitsPct = totalHabits > 0 ? Math.round((todayDoneHabitsCount / totalHabits) * 100) : 0;
 
-  // Auto-fetch routines if not done yet
+  // Auto-fetch routines if not done yet (deferred to avoid re-render during render)
   if (!window.planexHasFetchedRoutines && localStorage.getItem('planex_jwt_token')) {
-    window.fetchPublicRoutines();
+    window.planexHasFetchedRoutines = true; // mark immediately to prevent repeated calls
+    setTimeout(() => window.fetchPublicRoutines(), 500);
   }
 
   return `
