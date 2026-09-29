@@ -4478,7 +4478,7 @@ export function initApp() {
     } catch (_) {}
 
     // 4. Initial Render
-    if (splashBar) splashBar.style.width = '70%';
+    if (splashBar) splashBar.style.width = '80%';
     renderApp();
 
     // 5. Initial fetch of user groups if authenticated
