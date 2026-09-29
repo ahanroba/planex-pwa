@@ -139,7 +139,6 @@ html, body, button, input, select, textarea, table, h1, h2, h3, h4, h5, h6, th, 
 
 html, body {
   width: 100%;
-  height: 100%;
   max-width: 100vw;
   overflow-x: hidden;
 }
@@ -190,11 +189,6 @@ body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
-  /* Layout-shift prevention: isolate reflows inside #app from the root */
-  isolation: isolate;
-  contain: layout style;
-  /* Reserve stable vertical space immediately — prevents height collapse
-     during the first render before child components paint */
   box-sizing: border-box;
 }
 

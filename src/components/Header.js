@@ -43,7 +43,7 @@ export function getEffectiveHeaderName() {
   return '';
 }
 
-// Direct DOM patching for header name & avatar â€” guarantees instant UI update
+// Direct DOM patching for header name & avatar — guarantees instant UI update
 // even if renderApp() hasn't re-run yet or reads stale cached data.
 function updateHeaderDOM() {
   try {
@@ -72,9 +72,9 @@ function updateHeaderDOM() {
         if (avatarImg) {
           if (avatarImg.src !== avatar) avatarImg.src = avatar;
         } else {
-          // Replace the ðŸ‘¤ placeholder span with an actual img element
+          // Replace the 👤 placeholder span with an actual img element
           const placeholder = headerBtn.querySelector('span:first-child');
-          if (placeholder && placeholder.textContent.includes('ðŸ‘¤')) {
+          if (placeholder && placeholder.textContent.includes('👤')) {
             const img = document.createElement('img');
             img.src = avatar;
             img.style.cssText = 'width: 22px; height: 22px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1; border: 1px solid rgba(16, 185, 129, 0.5);';
@@ -157,11 +157,11 @@ export function renderHeader(stateProp = null) {
         </button>
 
         <!-- User Profile / Login Button -->
-        <button type="button" onclick="if(window.appState){ window.appState.activeModal = 'login'; window.renderApp(); }" id="btn-header-user-account" class="btn-header-action" style="background: #1f2029; border: 1px solid ${hasUser ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; color: ${hasUser ? '#34d399' : '#a1a1aa'}; padding: 3px 8px; border-radius: 10px; display: flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;" title="ðŸ‘¤ حساب کاربری و مشخصات">
+        <button type="button" onclick="if(window.appState){ window.appState.activeModal = 'login'; window.renderApp(); }" id="btn-header-user-account" class="btn-header-action" style="background: #1f2029; border: 1px solid ${hasUser ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; color: ${hasUser ? '#34d399' : '#a1a1aa'}; padding: 3px 8px; border-radius: 10px; display: flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;" title="👤 حساب کاربری و مشخصات">
           ${avatar ? `
             <img src="${avatar}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; aspect-ratio: 1 / 1; border: 1px solid rgba(16, 185, 129, 0.5);" onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/avataaars/svg?seed=planex';" />
           ` : `
-            <span style="font-size: 0.85rem; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border-radius: 50%;">ðŸ‘¤</span>
+            <span style="font-size: 0.85rem; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border-radius: 50%;">👤</span>
           `}
           <span style="font-size: 0.74rem; font-weight: 700; max-width: 75px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayName}</span>
         </button>
