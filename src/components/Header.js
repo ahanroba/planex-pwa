@@ -140,7 +140,7 @@ export function renderHeader(stateProp = null) {
   const activeCount = getLivePresenceCount();
 
   return `
-    <header class="app-header" style="padding: 6px 12px; min-height: 44px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; width: 100%; box-sizing: border-box; gap: 8px;">
+    <header class="app-header" style="padding: max(env(safe-area-inset-top), 35px) 12px 6px 12px; min-height: 44px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; width: 100%; box-sizing: border-box; gap: 8px;">
       <div class="header-brand" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
         <img src="./logo-transparent.png" alt="PlanEx Logo" style="width: 24px; height: 24px; border-radius: 6px; object-fit: contain;" />
         <div class="header-title" style="font-weight: 800; font-size: 0.92rem; letter-spacing: -0.3px; color: #e4e4e7;">PlanEx</div>
