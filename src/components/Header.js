@@ -144,15 +144,15 @@ export function renderHeader(stateProp = null) {
       </div>
 
 <div class="header-actions-wrapper" style="display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-shrink: 0;">
-        <!-- â˜• Hamibash Support Link -->
+        <!-- ☕ Hamibash Support Link -->
         <a href="https://hamibash.com/planexmedicalaa" target="_blank" rel="noopener noreferrer" id="btn-hamibash-link" class="btn-header-action" style="background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; text-decoration: none; font-size: 0.74rem; font-weight: 700; flex-shrink: 0; transition: all 0.2s ease;" title="حمایت از ما در حامی‌باش">
-          <span style="font-size: 0.82rem;">â˜•</span>
+          <span style="font-size: 0.82rem;">☕</span>
           <span>حمایت از ما</span>
         </a>
 
-        <!-- â¤ï¸ Support Modal Trigger Button -->
+        <!-- 💡 Support Modal Trigger Button -->
         <button id="btn-support-modal" class="btn-header-action" onclick="if(window.appState){ window.appState.activeModal = 'support'; window.renderApp(); }" style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.3); color: #c084fc; padding: 4px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.74rem; font-weight: 700; flex-shrink: 0;" title="شبکه‌ها و راهنما">
-          <span style="font-size: 0.82rem;">â¤ï¸</span>
+          <span style="font-size: 0.82rem;">💡</span>
           <span>راهنما</span>
         </button>
 
