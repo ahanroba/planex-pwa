@@ -9,12 +9,12 @@ window.plannerNewTaskPriority = window.plannerNewTaskPriority || DEFAULT_PRIORIT
 
 window.setPlannerTaskViewMode = (mode) => {
   window.plannerTaskViewMode = (mode === 'matrix') ? 'matrix' : 'list';
-  if (window.renderApp) window.renderApp();
+  updateEisenhowerMatrixSectionDOM();
 };
 
 window.setPlannerPriorityFilter = (q) => {
   window.plannerPriorityFilter = q || 'ALL';
-  if (window.renderApp) window.renderApp();
+  updateEisenhowerMatrixSectionDOM();
 };
 
 window.setPlannerNewTaskPriority = (q) => {
@@ -26,7 +26,7 @@ window.selectPlannerDay = (idx) => {
   if (current) {
     current.selectedDayIndex = idx;
   }
-  if (window.renderApp) window.renderApp();
+  updateEisenhowerMatrixSectionDOM();
 };
 
 window.changeJalaliMonth = (offset) => {
@@ -49,6 +49,150 @@ window.changeJalaliMonth = (offset) => {
   if (window.renderApp) window.renderApp();
 };
 
+const escapeTaskText = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+/** سلکتور کوچک برای جابه‌جایی ربع یک تسک */
+function renderPriorityMoveSelect(plan) {
+  return `
+    <select onchange="window.movePlannerTaskPriority('${plan.id}', this.value)"
+      title="انتقال این کار به خانه دیگر ماتریس"
+      style="background: rgba(15,23,42,0.85); color: #e2e8f0; border: 1px solid rgba(148,163,184,0.3); border-radius: 9px; font-size: 0.68rem; padding: 3px 5px; cursor: pointer; font-family: inherit;">
+      ${EISENHOWER_QUADRANTS.map(q => `
+        <option value="${q.id}" ${plan.priority === q.id ? 'selected' : ''}>${q.emoji} ${q.id}</option>
+      `).join('')}
+    </select>`;
+}
+
+function renderSingleMatrixTaskItem(t, q) {
+  if (!q) q = getQuadrant(t.priority);
+  return `
+    <div id="planner-task-item-${t.id}" data-task-id="${t.id}" data-quadrant="${q.id}"
+      style="display: flex; align-items: center; gap: 7px; background: rgba(15,23,42,0.45); padding: 7px 9px; border-radius: 11px; border: 1px solid rgba(148,163,184,0.14);">
+      <input type="checkbox" onclick="window.togglePlannerTask('${t.id}', event)" ${t.isDone ? 'checked' : ''}
+        style="width: 16px; height: 16px; accent-color: ${q.color}; cursor: pointer; flex-shrink: 0;" />
+      <span class="task-text-span" style="font-size: 0.79rem; flex: 1; word-break: break-word; ${t.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(t.text)}</span>
+      ${renderPriorityMoveSelect(t)}
+      <button onclick="window.deletePlannerTask('${t.id}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;" title="حذف">✕</button>
+    </div>`;
+}
+
+function renderSingleListTaskItem(p) {
+  const q = getQuadrant(p.priority);
+  return `
+    <div id="planner-task-item-${p.id}" data-task-id="${p.id}" data-quadrant="${p.priority}"
+      style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: ${q.softBg}; padding: 10px 14px; border-radius: 12px; border: 1px solid ${q.borderColor};">
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;">
+        <input type="checkbox" class="chk-toggle-daily-plan" onclick="window.togglePlannerTask('${p.id}', event)" data-id="${p.id}" ${p.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: ${q.color}; flex-shrink: 0; cursor: pointer;" />
+        <span class="task-text-span" style="font-size: 0.92rem; word-break: break-word; ${p.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(p.text)}</span>
+      </label>
+      <span style="background: rgba(15,23,42,0.5); border: 1px solid ${q.borderColor}; color: ${q.color}; padding: 3px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 900; white-space: nowrap;" title="${q.subtitle}">
+        ${q.emoji} ${q.title}
+      </span>
+      ${renderPriorityMoveSelect(p)}
+      <button class="btn-delete-daily-plan" onclick="window.deletePlannerTask('${p.id}')" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; flex-shrink: 0;">✕</button>
+    </div>`;
+}
+
+function renderCommitmentScoreBanner(dayTasks) {
+  const totalTasksCount = dayTasks.length;
+  if (totalTasksCount === 0) return '';
+  const completedTasksCount = dayTasks.filter(t => t.isDone).length;
+  const commitmentRatio = Math.round((completedTasksCount / totalTasksCount) * 100);
+
+  return `
+    <div style="margin-bottom: 14px; padding: 14px 16px; border-radius: 16px; border: 1.5px solid ${commitmentRatio === 100 ? '#eab308' : (commitmentRatio >= 70 ? '#10b981' : 'rgba(56, 189, 248, 0.35)')}; background: ${commitmentRatio === 100 ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(168, 85, 247, 0.15) 100%)' : 'rgba(31, 32, 41, 0.8)'}; box-shadow: ${commitmentRatio === 100 ? '0 0 20px rgba(234, 179, 8, 0.25)' : 'none'}; direction: rtl; transition: all 0.3s ease;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 34px; height: 34px; border-radius: 12px; background: ${commitmentRatio === 100 ? 'rgba(234, 179, 8, 0.25)' : 'rgba(56, 189, 248, 0.15)'}; border: 1px solid ${commitmentRatio === 100 ? '#eab308' : '#38bdf8'}; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            ${commitmentRatio === 100 ? '🌟' : '📊'}
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <strong style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">نرخ پایبندی برنامه امروز</strong>
+              ${commitmentRatio === 100 ? `
+                <span style="background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; font-weight: 900; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4);">
+                  روز کامل و بی‌نقص 🌟
+                </span>
+              ` : ''}
+            </div>
+            <span style="font-size: 0.74rem; color: #a1a1aa; font-weight: 600;">
+              ${toPersianDigits(completedTasksCount)} از ${toPersianDigits(totalTasksCount)} کار برنامه‌ریزی‌شده انجام شده است
+            </span>
+          </div>
+        </div>
+
+        <div style="background: #16171d; border: 1px solid ${commitmentRatio === 100 ? '#eab308' : (commitmentRatio >= 70 ? '#10b981' : '#38bdf8')}; color: ${commitmentRatio === 100 ? '#fde047' : (commitmentRatio >= 70 ? '#34d399' : '#38bdf8')}; padding: 4px 12px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; font-family: 'Outfit', sans-serif;">
+          نرخ پایبندی: ${toPersianDigits(commitmentRatio)}٪
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.4); border-radius: 6px; overflow: hidden; margin-top: 10px;">
+        <div style="height: 100%; width: ${commitmentRatio}%; background: ${commitmentRatio === 100 ? 'linear-gradient(90deg, #eab308 0%, #a855f7 100%)' : (commitmentRatio >= 70 ? 'linear-gradient(90deg, #10b981 0%, #38bdf8 100%)' : 'linear-gradient(90deg, #38bdf8 0%, #6366f1 100%)')}; border-radius: 6px; transition: width 0.5s ease;"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPriorityFiltersInner(dayTasks, priorityFilter) {
+  return `
+    <div id="planner-priority-filters" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+      <button onclick="window.setPlannerPriorityFilter('ALL')"
+        style="padding: 5px 12px; font-size: 0.72rem; font-weight: 800; border-radius: 11px; cursor: pointer; border: 1px solid ${priorityFilter === 'ALL' ? '#38bdf8' : 'rgba(148,163,184,0.25)'}; background: ${priorityFilter === 'ALL' ? 'rgba(56,189,248,0.2)' : 'rgba(15,23,42,0.5)'}; color: ${priorityFilter === 'ALL' ? '#7dd3fc' : '#94a3b8'};">
+        همه (${toPersianDigits(dayTasks.length)})
+      </button>
+      ${EISENHOWER_QUADRANTS.map(q => {
+        const cnt = dayTasks.filter(t => t.priority === q.id).length;
+        const on = priorityFilter === q.id;
+        return `
+        <button onclick="window.setPlannerPriorityFilter('${q.id}')"
+          style="padding: 5px 12px; font-size: 0.72rem; font-weight: 800; border-radius: 11px; cursor: pointer; border: 1px solid ${on ? q.color : 'rgba(148,163,184,0.25)'}; background: ${on ? q.softBg : 'rgba(15,23,42,0.5)'}; color: ${on ? q.color : '#94a3b8'};"
+          title="${q.subtitle}">
+          ${q.emoji} ${q.title} (${toPersianDigits(cnt)})
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+
+function updatePlannerHeaderAndBadges(weekId, selectedDayIndex) {
+  const dailyPlans = db.getDailyPlans(weekId);
+  const dayTasks = dailyPlans.filter(p => p.dayIndex === selectedDayIndex);
+
+  // Accordion header count
+  const accCounter = document.getElementById('planner-accordion-daily-tasks-counter');
+  if (accCounter) {
+    accCounter.innerHTML = dayTasks.length > 0
+      ? `<strong style="color: #38bdf8; font-size: 0.8rem; margin-right: 4px;">(${toPersianDigits(dayTasks.length)} کار برای امروز)</strong>`
+      : '';
+  }
+
+  // Commitment banner
+  const bannerWrapper = document.getElementById('planner-commitment-score-banner-wrapper');
+  if (bannerWrapper) {
+    bannerWrapper.innerHTML = renderCommitmentScoreBanner(dayTasks);
+  }
+
+  // Filters count
+  const filtersContainer = document.getElementById('planner-priority-filters-container');
+  if (filtersContainer) {
+    const priorityFilter = window.plannerPriorityFilter || 'ALL';
+    filtersContainer.innerHTML = renderPriorityFiltersInner(dayTasks, priorityFilter);
+  }
+
+  // Quadrant badges
+  EISENHOWER_QUADRANTS.forEach(q => {
+    const qTasks = dayTasks.filter(t => t.priority === q.id);
+    const doneCount = qTasks.filter(t => t.isDone).length;
+    const badgeEl = document.getElementById(`quadrant-badge-${q.id}`);
+    if (badgeEl) {
+      badgeEl.textContent = `${toPersianDigits(doneCount)}/${toPersianDigits(qTasks.length)}`;
+    }
+  });
+}
+
 /** افزودن تسک مستقیماً داخل یک خانه ماتریس */
 window.addPlannerTaskToQuadrant = (quadrantId) => {
   const input = document.getElementById(`input-quadrant-task-${quadrantId}`);
@@ -58,10 +202,26 @@ window.addPlannerTaskToQuadrant = (quadrantId) => {
   const dayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
     ? window.appState.selectedDayIndex
     : (new Date().getDay() + 1) % 7;
-  db.addDailyPlan(weekId, dayIndex, input.value.trim(), quadrantId);
+  const newPlan = db.addDailyPlan(weekId, dayIndex, input.value.trim(), quadrantId);
   input.value = '';
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
-  if (window.renderApp) window.renderApp();
+
+  // Surgical DOM update
+  const quadTasksContainer = document.getElementById(`quadrant-tasks-${quadrantId}`);
+  if (quadTasksContainer && window.plannerTaskViewMode === 'matrix') {
+    const emptyMsg = quadTasksContainer.querySelector('.quadrant-empty-msg');
+    if (emptyMsg) emptyMsg.remove();
+
+    const tempDiv = document.createElement('div');
+    const q = getQuadrant(quadrantId);
+    tempDiv.innerHTML = renderSingleMatrixTaskItem(newPlan, q);
+    const itemEl = tempDiv.firstElementChild;
+    quadTasksContainer.appendChild(itemEl);
+
+    updatePlannerHeaderAndBadges(weekId, dayIndex);
+  } else {
+    updateEisenhowerMatrixSectionDOM();
+  }
 };
 
 /** افزودن تسک روزانه از فرم اصلی برنامه‌ریزی */
@@ -75,10 +235,45 @@ window.addPlannerDailyTask = () => {
   const dayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
     ? window.appState.selectedDayIndex
     : (new Date().getDay() + 1) % 7;
-  db.addDailyPlan(weekId, dayIndex, input.value.trim(), priority);
+  const newPlan = db.addDailyPlan(weekId, dayIndex, input.value.trim(), priority);
   input.value = '';
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
-  if (window.renderApp) window.renderApp();
+
+  const isMatrix = window.plannerTaskViewMode === 'matrix';
+  if (isMatrix) {
+    const quadTasksContainer = document.getElementById(`quadrant-tasks-${priority}`);
+    if (quadTasksContainer) {
+      const emptyMsg = quadTasksContainer.querySelector('.quadrant-empty-msg');
+      if (emptyMsg) emptyMsg.remove();
+
+      const tempDiv = document.createElement('div');
+      const q = getQuadrant(priority);
+      tempDiv.innerHTML = renderSingleMatrixTaskItem(newPlan, q);
+      const itemEl = tempDiv.firstElementChild;
+      quadTasksContainer.appendChild(itemEl);
+
+      updatePlannerHeaderAndBadges(weekId, dayIndex);
+      return;
+    }
+  } else {
+    const listContainer = document.getElementById('planner-list-tasks-container');
+    const priorityFilter = window.plannerPriorityFilter || 'ALL';
+    const isVisibleInFilter = (priorityFilter === 'ALL' || priorityFilter === priority);
+    if (listContainer && isVisibleInFilter) {
+      const emptyMsg = listContainer.querySelector('.list-empty-msg');
+      if (emptyMsg) emptyMsg.remove();
+
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = renderSingleListTaskItem(newPlan);
+      const itemEl = tempDiv.firstElementChild;
+      listContainer.appendChild(itemEl);
+
+      updatePlannerHeaderAndBadges(weekId, dayIndex);
+      return;
+    }
+  }
+
+  updateEisenhowerMatrixSectionDOM();
 };
 
 /** تیک انجام/عدم انجام کار روزانه */
@@ -88,6 +283,9 @@ window.togglePlannerTask = (planId, event = null) => {
   }
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
+  const dayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
+    ? window.appState.selectedDayIndex
+    : (new Date().getDay() + 1) % 7;
   const dailyPlans = db.getDailyPlans(weekId);
   const plan = dailyPlans.find(p => p.id == planId || String(p.id) === String(planId));
   const willBeDone = plan ? !plan.isDone : true;
@@ -98,24 +296,97 @@ window.togglePlannerTask = (planId, event = null) => {
     window.triggerCompletionBurst(event);
   }
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
-  if (window.renderApp) window.renderApp();
+
+  const itemEl = document.getElementById(`planner-task-item-${planId}`);
+  if (itemEl) {
+    const chk = itemEl.querySelector('input[type="checkbox"]');
+    if (chk) chk.checked = willBeDone;
+
+    const span = itemEl.querySelector('.task-text-span');
+    if (span) {
+      span.style.textDecoration = willBeDone ? 'line-through' : 'none';
+      span.style.opacity = willBeDone ? '0.5' : '1';
+    }
+
+    updatePlannerHeaderAndBadges(weekId, dayIndex);
+  } else {
+    updateEisenhowerMatrixSectionDOM();
+  }
 };
 
 window.deletePlannerTask = (planId) => {
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
+  const dayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
+    ? window.appState.selectedDayIndex
+    : (new Date().getDay() + 1) % 7;
+
   db.deleteDailyPlan(weekId, planId);
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
-  if (window.renderApp) window.renderApp();
+
+  const itemEl = document.getElementById(`planner-task-item-${planId}`);
+  if (itemEl) {
+    const parent = itemEl.parentElement;
+    itemEl.remove();
+
+    if (parent) {
+      const remainingItems = parent.querySelectorAll('[id^="planner-task-item-"]');
+      if (remainingItems.length === 0) {
+        if (parent.id && parent.id.startsWith('quadrant-tasks-')) {
+          parent.innerHTML = `<p class="quadrant-empty-msg" style="font-size: 0.74rem; color: var(--text-secondary); opacity: 0.75; margin: 6px 0;">کاری در این خانه ثبت نشده است.</p>`;
+        } else if (parent.id === 'planner-list-tasks-container') {
+          const priorityFilter = window.plannerPriorityFilter || 'ALL';
+          const msg = priorityFilter === 'ALL' ? 'برای این روز کاری ثبت نشده است.' : 'در این خانه از ماتریس کاری برای این روز ثبت نشده است.';
+          parent.innerHTML = `<p class="list-empty-msg" style="font-size: 0.85rem; color: var(--text-secondary);">${msg}</p>`;
+        }
+      }
+    }
+    updatePlannerHeaderAndBadges(weekId, dayIndex);
+  } else {
+    updateEisenhowerMatrixSectionDOM();
+  }
 };
 
 /** جابه‌جایی تسک بین چهار خانه ماتریس */
 window.movePlannerTaskPriority = (planId, quadrantId) => {
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
+  const dayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
+    ? window.appState.selectedDayIndex
+    : (new Date().getDay() + 1) % 7;
+
   db.setDailyPlanPriority(weekId, planId, quadrantId);
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
-  if (window.renderApp) window.renderApp();
+
+  const itemEl = document.getElementById(`planner-task-item-${planId}`);
+  const isMatrix = window.plannerTaskViewMode === 'matrix';
+  if (itemEl && isMatrix) {
+    const oldParent = itemEl.parentElement;
+    const newParent = document.getElementById(`quadrant-tasks-${quadrantId}`);
+    if (newParent) {
+      const emptyMsg = newParent.querySelector('.quadrant-empty-msg');
+      if (emptyMsg) emptyMsg.remove();
+
+      itemEl.setAttribute('data-quadrant', quadrantId);
+      const sel = itemEl.querySelector('select');
+      if (sel) sel.value = quadrantId;
+
+      const q = getQuadrant(quadrantId);
+      const chk = itemEl.querySelector('input[type="checkbox"]');
+      if (chk) chk.style.accentColor = q.color;
+
+      newParent.appendChild(itemEl);
+
+      if (oldParent && oldParent.querySelectorAll('[id^="planner-task-item-"]').length === 0) {
+        oldParent.innerHTML = `<p class="quadrant-empty-msg" style="font-size: 0.74rem; color: var(--text-secondary); opacity: 0.75; margin: 6px 0;">کاری در این خانه ثبت نشده است.</p>`;
+      }
+
+      updatePlannerHeaderAndBadges(weekId, dayIndex);
+      return;
+    }
+  }
+
+  updateEisenhowerMatrixSectionDOM();
 };
 
 /** مدیریت اهداف هفتگی (Weekly Goals) */
@@ -135,17 +406,50 @@ window.toggleWeeklyGoal = (goalId, event = null) => {
     window.triggerCompletionBurst(event);
   }
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+
+  const itemEl = document.getElementById(`weekly-goal-item-${goalId}`);
+  if (itemEl) {
+    const chk = itemEl.querySelector('input[type="checkbox"]');
+    if (chk) chk.checked = willBeDone;
+    const span = itemEl.querySelector('.weekly-goal-text');
+    if (span) {
+      span.style.textDecoration = willBeDone ? 'line-through' : 'none';
+      span.style.opacity = willBeDone ? '0.5' : '1';
+    }
+    return;
+  }
   if (window.renderApp) window.renderApp();
 };
+
+function renderSingleWeeklyGoalItem(g) {
+  return `
+    <div id="weekly-goal-item-${g.id}" style="display: flex; align-items: center; justify-content: space-between; background: #1f2029; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1;">
+        <input type="checkbox" class="chk-toggle-weekly-goal" onclick="window.toggleWeeklyGoal('${g.id}', event)" data-id="${g.id}" ${g.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #7c3aed; cursor: pointer;" />
+        <span class="weekly-goal-text" style="font-size: 0.92rem; ${g.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(g.text)}</span>
+      </label>
+      <button class="btn-delete-weekly-goal" onclick="window.deleteWeeklyGoal('${g.id}')" data-id="${g.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">✕</button>
+    </div>`;
+}
 
 window.addWeeklyGoal = () => {
   const input = document.getElementById('input-weekly-goal');
   if (!input || !input.value.trim()) return;
   const currentWeek = db.getCurrentWeek();
   const weekId = currentWeek ? currentWeek.id : 1;
-  db.addWeeklyGoal(weekId, input.value.trim());
+  const newGoal = db.addWeeklyGoal(weekId, input.value.trim());
   input.value = '';
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+
+  const container = document.getElementById('weekly-goals-list-container');
+  if (container) {
+    const emptyMsg = container.querySelector('.weekly-goals-empty-msg');
+    if (emptyMsg) emptyMsg.remove();
+    const div = document.createElement('div');
+    div.innerHTML = renderSingleWeeklyGoalItem(newGoal);
+    container.appendChild(div.firstElementChild);
+    return;
+  }
   if (window.renderApp) window.renderApp();
 };
 
@@ -154,6 +458,16 @@ window.deleteWeeklyGoal = (goalId) => {
   const weekId = currentWeek ? currentWeek.id : 1;
   db.deleteWeeklyGoal(weekId, goalId);
   if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+
+  const item = document.getElementById(`weekly-goal-item-${goalId}`);
+  if (item) {
+    const parent = item.parentElement;
+    item.remove();
+    if (parent && parent.querySelectorAll('[id^="weekly-goal-item-"]').length === 0) {
+      parent.innerHTML = '<p class="weekly-goals-empty-msg" style="font-size: 0.85rem; color: var(--text-secondary);">هیچ هدفی ثبت نشده است.</p>';
+    }
+    return;
+  }
   if (window.renderApp) window.renderApp();
 };
 
@@ -205,20 +519,161 @@ window.savePlannerTargets = () => {
   if (window.renderApp) window.renderApp();
 };
 
-const escapeTaskText = (s) => String(s == null ? '' : s)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export function renderDailyMatrixInnerContent(selectedDayIndex, weekId) {
+  const dailyPlans = db.getDailyPlans(weekId);
+  const taskViewMode = window.plannerTaskViewMode === 'matrix' ? 'matrix' : 'list';
+  const priorityFilter = window.plannerPriorityFilter || 'ALL';
+  const newTaskPriority = window.plannerNewTaskPriority || DEFAULT_PRIORITY;
+  const dayTasks = dailyPlans.filter(p => p.dayIndex === selectedDayIndex);
+  const visibleTasks = priorityFilter === 'ALL'
+    ? dayTasks
+    : dayTasks.filter(p => p.priority === priorityFilter);
 
-/** سلکتور کوچک برای جابه‌جایی ربع یک تسک */
-function renderPriorityMoveSelect(plan) {
   return `
-    <select onchange="window.movePlannerTaskPriority('${plan.id}', this.value)"
-      title="انتقال این کار به خانه دیگر ماتریس"
-      style="background: rgba(15,23,42,0.85); color: #e2e8f0; border: 1px solid rgba(148,163,184,0.3); border-radius: 9px; font-size: 0.68rem; padding: 3px 5px; cursor: pointer; font-family: inherit;">
-      ${EISENHOWER_QUADRANTS.map(q => `
-        <option value="${q.id}" ${plan.priority === q.id ? 'selected' : ''}>${q.emoji} ${q.id}</option>
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+      <div class="card-title" style="margin: 0; color: #e4e4e7;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <span>ماتریس آیزنهاور (${DAY_NAMES[selectedDayIndex]})</span>
+      </div>
+
+      <!-- سوییچ نمای لیستی / شبکه‌ای -->
+      <div style="display: flex; background: #1f2029; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 4px; gap: 4px;">
+        <button onclick="window.setPlannerTaskViewMode('list')"
+          style="padding: 6px 14px; font-size: 0.76rem; font-weight: 900; border: none; border-radius: 11px; cursor: pointer; background: ${taskViewMode === 'list' ? '#7c3aed' : 'transparent'}; color: ${taskViewMode === 'list' ? 'white' : '#94a3b8'};">
+          ☰ نمای لیستی
+        </button>
+        <button onclick="window.setPlannerTaskViewMode('matrix')"
+          style="padding: 6px 14px; font-size: 0.76rem; font-weight: 900; border: none; border-radius: 11px; cursor: pointer; background: ${taskViewMode === 'matrix' ? '#7c3aed' : 'transparent'}; color: ${taskViewMode === 'matrix' ? 'white' : '#94a3b8'};">
+          ⊞ ماتریس ۲×۲
+        </button>
+      </div>
+    </div>
+
+    <!-- 📊 COMMITMENT SCORE & PERFECT DAY CELEBRATION BADGE BANNER -->
+    <div id="planner-commitment-score-banner-wrapper">
+      ${renderCommitmentScoreBanner(dayTasks)}
+    </div>
+
+    <!-- Day Selector Pills -->
+    <div class="day-selector" style="margin-bottom: 14px;">
+      ${DAY_NAMES.map((name, idx) => `
+        <button class="day-pill planner-day-pill ${idx === selectedDayIndex ? 'active' : ''}" data-day="${idx}" onclick="window.selectPlannerDay(${idx})">
+          ${name}
+        </button>
       `).join('')}
-    </select>`;
+    </div>
+
+    <!-- Add Daily Plan Input + Priority Picker -->
+    <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+      <input type="text" id="input-daily-plan" onkeydown="if(event.key === 'Enter') window.addPlannerDailyTask()" class="form-input" placeholder="عنوان کار روز ${DAY_NAMES[selectedDayIndex]}..." style="flex: 2; min-width: 190px;" />
+      <select id="select-daily-plan-priority" class="form-input" onchange="window.setPlannerNewTaskPriority(this.value)"
+        title="اولویت این کار در ماتریس آیزنهاور" style="flex: 1; min-width: 190px; cursor: pointer;">
+        ${EISENHOWER_QUADRANTS.map(q => `
+          <option value="${q.id}" ${newTaskPriority === q.id ? 'selected' : ''}>${q.emoji} ${q.id}: ${q.title}</option>
+        `).join('')}
+      </select>
+      <button id="btn-add-daily-plan" onclick="window.addPlannerDailyTask()" class="btn-primary" style="width: auto; padding: 0 20px; white-space: nowrap;">افزودن به ${DAY_NAMES[selectedDayIndex]}</button>
+    </div>
+
+    <!-- فیلتر ربع‌ها -->
+    <div id="planner-priority-filters-container">
+      ${renderPriorityFiltersInner(dayTasks, priorityFilter)}
+    </div>
+
+    ${taskViewMode === 'matrix' ? `
+    <!-- ⊞ نمای ماتریس ۲×۲ آیزنهاور -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;" dir="rtl">
+      ${EISENHOWER_QUADRANTS.map(q => {
+        const qTasks = dayTasks.filter(t => t.priority === q.id);
+        const doneCount = qTasks.filter(t => t.isDone).length;
+        return `
+        <div style="background: ${q.softBg}; border: 1.5px solid ${q.borderColor}; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; min-height: 190px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
+            <div>
+              <strong style="font-size: 0.88rem; color: ${q.color}; display: block;">${q.emoji} ${q.id}: ${q.title}</strong>
+              <span style="font-size: 0.68rem; color: var(--text-secondary);">${q.subtitle}</span>
+            </div>
+            <span id="quadrant-badge-${q.id}" style="background: ${q.softBg}; border: 1px solid ${q.borderColor}; color: ${q.color}; padding: 3px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 900; white-space: nowrap;">
+              ${toPersianDigits(doneCount)}/${toPersianDigits(qTasks.length)}
+            </span>
+          </div>
+
+          <div id="quadrant-tasks-${q.id}" class="quadrant-task-list" style="display: flex; flex-direction: column; gap: 6px; flex: 1; margin-bottom: 10px; max-height: 350px; overflow-y: auto;">
+            ${qTasks.length === 0
+              ? `<p class="quadrant-empty-msg" style="font-size: 0.74rem; color: var(--text-secondary); opacity: 0.75; margin: 6px 0;">کاری در این خانه ثبت نشده است.</p>`
+              : qTasks.map(t => renderSingleMatrixTaskItem(t, q)).join('')}
+          </div>
+
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="input-quadrant-task-${q.id}" class="form-input"
+              placeholder="کار جدید در «${q.title}»..."
+              onkeydown="if(event.key === 'Enter') window.addPlannerTaskToQuadrant('${q.id}')"
+              style="flex: 1; min-width: 0; font-size: 0.76rem; padding: 7px 10px;" />
+            <button onclick="window.addPlannerTaskToQuadrant('${q.id}')"
+              style="padding: 7px 12px; font-size: 0.76rem; font-weight: 900; color: white; background: ${q.color}; border: none; border-radius: 11px; cursor: pointer; white-space: nowrap;"
+              title="افزودن کار به همین خانه">＋</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    ` : `
+    <!-- ☰ نمای لیستی با برچسب اولویت -->
+    <div id="planner-list-tasks-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 450px; overflow-y: auto;">
+      ${visibleTasks.length === 0
+        ? `<p class="list-empty-msg" style="font-size: 0.85rem; color: var(--text-secondary);">${priorityFilter === 'ALL' ? 'برای این روز کاری ثبت نشده است.' : 'در این خانه از ماتریس کاری برای این روز ثبت نشده است.'}</p>`
+        : visibleTasks.map(p => renderSingleListTaskItem(p)).join('')}
+    </div>
+    `}
+  `;
 }
+
+export function updateEisenhowerMatrixSectionDOM() {
+  const sectionEl = document.getElementById('eisenhower-matrix-section');
+  if (!sectionEl) {
+    if (window.renderApp) window.renderApp();
+    return;
+  }
+
+  // Preserve window scroll & sub-container scroll positions
+  const windowY = (typeof window !== 'undefined') ? (window.scrollY || window.pageYOffset || 0) : 0;
+  const scrollPositions = new Map();
+
+  const scrollables = sectionEl.querySelectorAll('.quadrant-task-list, #planner-list-tasks-container, [id^="quadrant-tasks-"]');
+  scrollables.forEach(el => {
+    if (el.id) {
+      scrollPositions.set(el.id, el.scrollTop);
+    }
+  });
+
+  const currentWeek = db.getCurrentWeek();
+  const weekId = currentWeek ? currentWeek.id : 1;
+  const selectedDayIndex = (window.appState && typeof window.appState.selectedDayIndex === 'number')
+    ? window.appState.selectedDayIndex
+    : (new Date().getDay() + 1) % 7;
+
+  sectionEl.innerHTML = renderDailyMatrixInnerContent(selectedDayIndex, weekId);
+
+  if (typeof window !== 'undefined') {
+    window.scrollTo(window.scrollX, windowY);
+  }
+  scrollPositions.forEach((scrollTopVal, key) => {
+    const el = document.getElementById(key);
+    if (el) el.scrollTop = scrollTopVal;
+  });
+
+  requestAnimationFrame(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(window.scrollX, windowY);
+    }
+    scrollPositions.forEach((scrollTopVal, key) => {
+      const el = document.getElementById(key);
+      if (el) el.scrollTop = scrollTopVal;
+    });
+  });
+}
+window.updateEisenhowerMatrixSectionDOM = updateEisenhowerMatrixSectionDOM;
 
 export function renderPlannerView(selectedDayIndex = 0, options = {}) {
   const { plannerAccordions = { countdowns: false, targets: false, weeklyGoals: false, dailyMatrix: false } } = options;
@@ -233,7 +688,6 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
   const [todayY, todayM, todayD] = db.getTodayJalali();
   const todayDayIdx = (new Date().getDay() + 1) % 7;
   const todayDayName = DAY_NAMES[todayDayIdx];
-  const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
   const currentJalaliMonthIdx = window.jalaliViewMonth !== undefined ? window.jalaliViewMonth : (todayM - 1);
   const currentJalaliYear = window.jalaliViewYear !== undefined ? window.jalaliViewYear : todayY;
@@ -245,18 +699,7 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
   const firstDayJdn = db.jalaliToJdn(currentJalaliYear, currentJalaliMonthIdx + 1, 1);
   const firstDayOffset = (firstDayJdn + 2) % 7;
 
-  // ── ماتریس آیزنهاور: تسک‌های روز انتخاب‌شده، نمای فعال و فیلتر ربع ──
-  const taskViewMode = window.plannerTaskViewMode === 'matrix' ? 'matrix' : 'list';
-  const priorityFilter = window.plannerPriorityFilter || 'ALL';
-  const newTaskPriority = window.plannerNewTaskPriority || DEFAULT_PRIORITY;
   const dayTasks = dailyPlans.filter(p => p.dayIndex === selectedDayIndex);
-  const visibleTasks = priorityFilter === 'ALL'
-    ? dayTasks
-    : dayTasks.filter(p => p.priority === priorityFilter);
-
-  const totalTasksCount = dayTasks.length;
-  const completedTasksCount = dayTasks.filter(t => t.isDone).length;
-  const commitmentRatio = totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
 
   return `
     <div class="main-container">
@@ -315,19 +758,15 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
               let badgeContent = '<div style="width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); margin: 3px auto 0;"></div>';
 
               if (hours >= 1 && hours < 3) {
-                // Tier 1: 1 - 3h (Low Tint)
                 bgStyle = 'background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7;';
                 badgeContent = `<div style="font-size: 0.68rem; margin-top: 2px; color: #6ee7b7; font-weight: 800;">${toPersianDigits(hoursFormatted)}h</div>`;
               } else if (hours >= 3 && hours < 6) {
-                // Tier 2: 3 - 6h (Medium Emerald)
                 bgStyle = 'background: rgba(16, 185, 129, 0.45); border: 1px solid rgba(16, 185, 129, 0.7); color: #a7f3d0; box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);';
                 badgeContent = `<div style="font-size: 0.68rem; margin-top: 2px; color: #a7f3d0; font-weight: 900;">${toPersianDigits(hoursFormatted)}h</div>`;
               } else if (hours >= 6) {
-                // Tier 3: 6h+ (Vibrant Emerald)
                 bgStyle = 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #34d399; color: #ffffff; box-shadow: 0 0 14px rgba(16, 185, 129, 0.5);';
                 badgeContent = `<div style="font-size: 0.68rem; margin-top: 2px; color: #ffffff; font-weight: 900; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">${toPersianDigits(hoursFormatted)}h</div>`;
               } else if (hours > 0 && hours < 1) {
-                // Sub-1 hour tint
                 bgStyle = 'background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #6ee7b7;';
                 badgeContent = `<div style="font-size: 0.68rem; margin-top: 2px; color: #6ee7b7; font-weight: 700;">${toPersianDigits(hoursFormatted)}h</div>`;
               }
@@ -480,17 +919,9 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
               <button id="btn-add-weekly-goal" onclick="window.addWeeklyGoal()" class="btn-primary" style="width: auto; padding: 0 20px; white-space: nowrap; background: #7c3aed;">افزودن</button>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              ${weeklyGoals.length === 0 ? '<p style="font-size: 0.85rem; color: var(--text-secondary);">هیچ هدفی ثبت نشده است.</p>' : ''}
-              ${weeklyGoals.map(g => `
-                <div style="display: flex; align-items: center; justify-content: space-between; background: #1f2029; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
-                  <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1;">
-                    <input type="checkbox" class="chk-toggle-weekly-goal" onclick="window.toggleWeeklyGoal('${g.id}', event)" data-id="${g.id}" ${g.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #7c3aed; cursor: pointer;" />
-                    <span style="font-size: 0.92rem; ${g.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(g.text)}</span>
-                  </label>
-                  <button class="btn-delete-weekly-goal" onclick="window.deleteWeeklyGoal('${g.id}')" data-id="${g.id}" style="background: none; border: none; color: #ef4444; cursor: pointer;">✕</button>
-                </div>
-              `).join('')}
+            <div id="weekly-goals-list-container" style="display: flex; flex-direction: column; gap: 8px;">
+              ${weeklyGoals.length === 0 ? '<p class="weekly-goals-empty-msg" style="font-size: 0.85rem; color: var(--text-secondary);">هیچ هدفی ثبت نشده است.</p>' : ''}
+              ${weeklyGoals.map(g => renderSingleWeeklyGoalItem(g)).join('')}
             </div>
           </div>
         ` : ''}
@@ -501,174 +932,14 @@ export function renderPlannerView(selectedDayIndex = 0, options = {}) {
         <button type="button" class="btn-planner-accordion-toggle" data-key="dailyMatrix" style="width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.02); border: none; color: #fff; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-align: right; font-family: inherit;">
           <div style="display: flex; align-items: center; gap: 8px; font-size: 0.92rem; font-weight: 800; color: #e4e4e7;">
             <span style="font-size: 1.1rem;">⚡</span>
-            <span>برنامه‌ریزی روزانه و ماتریس اولویت (آیزنهاور) ${dayTasks.length > 0 ? `<strong style="color: #38bdf8; font-size: 0.8rem; margin-right: 4px;">(${dayTasks.length} کار برای امروز)</strong>` : ''}</span>
+            <span>برنامه‌ریزی روزانه و ماتریس اولویت (آیزنهاور) <span id="planner-accordion-daily-tasks-counter">${dayTasks.length > 0 ? `<strong style="color: #38bdf8; font-size: 0.8rem; margin-right: 4px;">(${toPersianDigits(dayTasks.length)} کار برای امروز)</strong>` : ''}</span></span>
           </div>
           <span style="font-size: 0.75rem; color: #a1a1aa; transition: transform 0.2s ease; transform: rotate(${plannerAccordions.dailyMatrix ? '180deg' : '0deg'});">▼</span>
         </button>
 
         ${plannerAccordions.dailyMatrix ? `
-          <div style="padding: 16px 18px; border-top: 1px solid rgba(255, 255, 255, 0.06); animation: fadeIn 0.2s ease;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
-              <div class="card-title" style="margin: 0; color: #e4e4e7;">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                  </svg>
-                  <span>ماتریس آیزنهاور (${DAY_NAMES[selectedDayIndex]})</span>
-              </div>
-
-              <!-- سوییچ نمای لیستی / شبکه‌ای -->
-              <div style="display: flex; background: #1f2029; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 4px; gap: 4px;">
-                <button onclick="window.setPlannerTaskViewMode('list')"
-                  style="padding: 6px 14px; font-size: 0.76rem; font-weight: 900; border: none; border-radius: 11px; cursor: pointer; background: ${taskViewMode === 'list' ? '#7c3aed' : 'transparent'}; color: ${taskViewMode === 'list' ? 'white' : '#94a3b8'};">
-                  ☰ نمای لیستی
-                </button>
-                <button onclick="window.setPlannerTaskViewMode('matrix')"
-                  style="padding: 6px 14px; font-size: 0.76rem; font-weight: 900; border: none; border-radius: 11px; cursor: pointer; background: ${taskViewMode === 'matrix' ? '#7c3aed' : 'transparent'}; color: ${taskViewMode === 'matrix' ? 'white' : '#94a3b8'};">
-                  ⊞ ماتریس ۲×۲
-                </button>
-              </div>
-            </div>
-
-            <!-- 📊 COMMITMENT SCORE & PERFECT DAY CELEBRATION BADGE BANNER -->
-            ${totalTasksCount > 0 ? `
-              <div style="margin-bottom: 14px; padding: 14px 16px; border-radius: 16px; border: 1.5px solid ${commitmentRatio === 100 ? '#eab308' : (commitmentRatio >= 70 ? '#10b981' : 'rgba(56, 189, 248, 0.35)')}; background: ${commitmentRatio === 100 ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(168, 85, 247, 0.15) 100%)' : 'rgba(31, 32, 41, 0.8)'}; box-shadow: ${commitmentRatio === 100 ? '0 0 20px rgba(234, 179, 8, 0.25)' : 'none'}; direction: rtl; transition: all 0.3s ease;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 34px; height: 34px; border-radius: 12px; background: ${commitmentRatio === 100 ? 'rgba(234, 179, 8, 0.25)' : 'rgba(56, 189, 248, 0.15)'}; border: 1px solid ${commitmentRatio === 100 ? '#eab308' : '#38bdf8'}; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                      ${commitmentRatio === 100 ? '🌟' : '📊'}
-                    </div>
-                    <div>
-                      <div style="display: flex; align-items: center; gap: 6px;">
-                        <strong style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">نرخ پایبندی برنامه امروز</strong>
-                        ${commitmentRatio === 100 ? `
-                          <span style="background: linear-gradient(135deg, #eab308, #ca8a04); color: #000; font-weight: 900; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; box-shadow: 0 0 10px rgba(234, 179, 8, 0.4);">
-                            روز کامل و بی‌نقص 🌟
-                          </span>
-                        ` : ''}
-                      </div>
-                      <span style="font-size: 0.74rem; color: #a1a1aa; font-weight: 600;">
-                        ${toPersianDigits(completedTasksCount)} از ${toPersianDigits(totalTasksCount)} کار برنامه‌ریزی‌شده انجام شده است
-                      </span>
-                    </div>
-                  </div>
-
-                  <div style="background: #16171d; border: 1px solid ${commitmentRatio === 100 ? '#eab308' : (commitmentRatio >= 70 ? '#10b981' : '#38bdf8')}; color: ${commitmentRatio === 100 ? '#fde047' : (commitmentRatio >= 70 ? '#34d399' : '#38bdf8')}; padding: 4px 12px; border-radius: 12px; font-weight: 900; font-size: 0.9rem; font-family: 'Outfit', sans-serif;">
-                    نرخ پایبندی: ${toPersianDigits(commitmentRatio)}٪
-                  </div>
-                </div>
-
-                <!-- Progress bar -->
-                <div style="width: 100%; height: 8px; background: rgba(0, 0, 0, 0.4); border-radius: 6px; overflow: hidden; margin-top: 10px;">
-                  <div style="height: 100%; width: ${commitmentRatio}%; background: ${commitmentRatio === 100 ? 'linear-gradient(90deg, #eab308 0%, #a855f7 100%)' : (commitmentRatio >= 70 ? 'linear-gradient(90deg, #10b981 0%, #38bdf8 100%)' : 'linear-gradient(90deg, #38bdf8 0%, #6366f1 100%)')}; border-radius: 6px; transition: width 0.5s ease;"></div>
-                </div>
-              </div>
-            ` : ''}
-
-            <!-- Day Selector Pills -->
-            <div class="day-selector" style="margin-bottom: 14px;">
-              ${DAY_NAMES.map((name, idx) => `
-                <button class="day-pill planner-day-pill ${idx === selectedDayIndex ? 'active' : ''}" data-day="${idx}" onclick="window.selectPlannerDay(${idx})">
-                  ${name}
-                </button>
-              `).join('')}
-            </div>
-
-            <!-- Add Daily Plan Input + Priority Picker -->
-            <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
-              <input type="text" id="input-daily-plan" onkeydown="if(event.key === 'Enter') window.addPlannerDailyTask()" class="form-input" placeholder="عنوان کار روز ${DAY_NAMES[selectedDayIndex]}..." style="flex: 2; min-width: 190px;" />
-              <select id="select-daily-plan-priority" class="form-input" onchange="window.setPlannerNewTaskPriority(this.value)"
-                title="اولویت این کار در ماتریس آیزنهاور" style="flex: 1; min-width: 190px; cursor: pointer;">
-                ${EISENHOWER_QUADRANTS.map(q => `
-                  <option value="${q.id}" ${newTaskPriority === q.id ? 'selected' : ''}>${q.emoji} ${q.id}: ${q.title}</option>
-                `).join('')}
-              </select>
-              <button id="btn-add-daily-plan" onclick="window.addPlannerDailyTask()" class="btn-primary" style="width: auto; padding: 0 20px; white-space: nowrap;">افزودن به ${DAY_NAMES[selectedDayIndex]}</button>
-            </div>
-
-            <!-- فیلتر ربع‌ها -->
-            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
-              <button onclick="window.setPlannerPriorityFilter('ALL')"
-                style="padding: 5px 12px; font-size: 0.72rem; font-weight: 800; border-radius: 11px; cursor: pointer; border: 1px solid ${priorityFilter === 'ALL' ? '#38bdf8' : 'rgba(148,163,184,0.25)'}; background: ${priorityFilter === 'ALL' ? 'rgba(56,189,248,0.2)' : 'rgba(15,23,42,0.5)'}; color: ${priorityFilter === 'ALL' ? '#7dd3fc' : '#94a3b8'};">
-                همه (${toPersianDigits(dayTasks.length)})
-              </button>
-              ${EISENHOWER_QUADRANTS.map(q => {
-                const cnt = dayTasks.filter(t => t.priority === q.id).length;
-                const on = priorityFilter === q.id;
-                return `
-                <button onclick="window.setPlannerPriorityFilter('${q.id}')"
-                  style="padding: 5px 12px; font-size: 0.72rem; font-weight: 800; border-radius: 11px; cursor: pointer; border: 1px solid ${on ? q.color : 'rgba(148,163,184,0.25)'}; background: ${on ? q.softBg : 'rgba(15,23,42,0.5)'}; color: ${on ? q.color : '#94a3b8'};"
-                  title="${q.subtitle}">
-                  ${q.emoji} ${q.title} (${toPersianDigits(cnt)})
-                </button>`;
-              }).join('')}
-            </div>
-
-            ${taskViewMode === 'matrix' ? `
-            <!-- ⊞ نمای ماتریس ۲×۲ آیزنهاور -->
-            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;" dir="rtl">
-              ${EISENHOWER_QUADRANTS.map(q => {
-                const qTasks = dayTasks.filter(t => t.priority === q.id);
-                const doneCount = qTasks.filter(t => t.isDone).length;
-                return `
-                <div style="background: ${q.softBg}; border: 1.5px solid ${q.borderColor}; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; min-height: 190px;">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px;">
-                    <div>
-                      <strong style="font-size: 0.88rem; color: ${q.color}; display: block;">${q.emoji} ${q.id}: ${q.title}</strong>
-                      <span style="font-size: 0.68rem; color: var(--text-secondary);">${q.subtitle}</span>
-                    </div>
-                    <span style="background: ${q.softBg}; border: 1px solid ${q.borderColor}; color: ${q.color}; padding: 3px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 900; white-space: nowrap;">
-                      ${toPersianDigits(doneCount)}/${toPersianDigits(qTasks.length)}
-                    </span>
-                  </div>
-
-                  <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; margin-bottom: 10px;">
-                    ${qTasks.length === 0
-                      ? `<p style="font-size: 0.74rem; color: var(--text-secondary); opacity: 0.75; margin: 6px 0;">کاری در این خانه ثبت نشده است.</p>`
-                      : qTasks.map(t => `
-                        <div style="display: flex; align-items: center; gap: 7px; background: rgba(15,23,42,0.45); padding: 7px 9px; border-radius: 11px; border: 1px solid rgba(148,163,184,0.14);">
-                          <input type="checkbox" onclick="window.togglePlannerTask('${t.id}', event)" ${t.isDone ? 'checked' : ''}
-                            style="width: 16px; height: 16px; accent-color: ${q.color}; cursor: pointer; flex-shrink: 0;" />
-                          <span style="font-size: 0.79rem; flex: 1; word-break: break-word; ${t.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(t.text)}</span>
-                          ${renderPriorityMoveSelect(t)}
-                          <button onclick="window.deletePlannerTask('${t.id}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; flex-shrink: 0;" title="حذف">✕</button>
-                        </div>
-                      `).join('')}
-                  </div>
-
-                  <div style="display: flex; gap: 6px;">
-                    <input type="text" id="input-quadrant-task-${q.id}" class="form-input"
-                      placeholder="کار جدید در «${q.title}»..."
-                      onkeydown="if(event.key === 'Enter') window.addPlannerTaskToQuadrant('${q.id}')"
-                      style="flex: 1; min-width: 0; font-size: 0.76rem; padding: 7px 10px;" />
-                    <button onclick="window.addPlannerTaskToQuadrant('${q.id}')"
-                      style="padding: 7px 12px; font-size: 0.76rem; font-weight: 900; color: white; background: ${q.color}; border: none; border-radius: 11px; cursor: pointer; white-space: nowrap;"
-                      title="افزودن کار به همین خانه">＋</button>
-                  </div>
-                </div>`;
-              }).join('')}
-            </div>
-            ` : `
-            <!-- ☰ نمای لیستی با برچسب اولویت -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              ${visibleTasks.length === 0
-                ? `<p style="font-size: 0.85rem; color: var(--text-secondary);">${priorityFilter === 'ALL' ? 'برای این روز کاری ثبت نشده است.' : 'در این خانه از ماتریس کاری برای این روز ثبت نشده است.'}</p>`
-                : visibleTasks.map(p => {
-                  const q = getQuadrant(p.priority);
-                  return `
-                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: ${q.softBg}; padding: 10px 14px; border-radius: 12px; border: 1px solid ${q.borderColor};">
-                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;">
-                      <input type="checkbox" class="chk-toggle-daily-plan" onclick="window.togglePlannerTask('${p.id}', event)" data-id="${p.id}" ${p.isDone ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: ${q.color}; flex-shrink: 0; cursor: pointer;" />
-                      <span style="font-size: 0.92rem; word-break: break-word; ${p.isDone ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeTaskText(p.text)}</span>
-                    </label>
-                    <span style="background: rgba(15,23,42,0.5); border: 1px solid ${q.borderColor}; color: ${q.color}; padding: 3px 9px; border-radius: 10px; font-size: 0.68rem; font-weight: 900; white-space: nowrap;" title="${q.subtitle}">
-                      ${q.emoji} ${q.title}
-                    </span>
-                    ${renderPriorityMoveSelect(p)}
-                    <button class="btn-delete-daily-plan" onclick="window.deletePlannerTask('${p.id}')" data-id="${p.id}" style="background: none; border: none; color: #ef4444; cursor: pointer; flex-shrink: 0;">✕</button>
-                  </div>`;
-                }).join('')}
-            </div>
-            `}
+          <div id="eisenhower-matrix-section" style="padding: 16px 18px; border-top: 1px solid rgba(255, 255, 255, 0.06); animation: fadeIn 0.2s ease;">
+            ${renderDailyMatrixInnerContent(selectedDayIndex, weekId)}
           </div>
         ` : ''}
       </div>
