@@ -4441,6 +4441,10 @@ export function parseUrlSearchParameters() {
 
 export function initApp() {
   try {
+    const splashBar = typeof document !== 'undefined' ? document.getElementById('planex-splash-progress-bar') : null;
+    const splashText = typeof document !== 'undefined' ? document.getElementById('planex-splash-text') : null;
+    const splashScreen = typeof document !== 'undefined' ? document.getElementById('planex-splash-screen') : null;
+
     // 1. Apply global dark glass theme and saved Persian font family
     try {
       applyGlobalThemeSettings();
@@ -4466,6 +4470,7 @@ export function initApp() {
     } catch (e) { console.warn('Error in resumeTimerFromState:', e); }
 
     // 3.5. Synchronize & hydrate local database state (profile, study logs) before initial render
+    if (splashBar) splashBar.style.width = '40%';
     try {
       if (typeof db !== 'undefined' && typeof db.hydrateAndSyncState === 'function') {
         db.hydrateAndSyncState();
@@ -4473,6 +4478,7 @@ export function initApp() {
     } catch (_) {}
 
     // 4. Initial Render
+    if (splashBar) splashBar.style.width = '70%';
     renderApp();
 
     // 5. Initial fetch of user groups if authenticated
@@ -4497,6 +4503,20 @@ export function initApp() {
       if (typeof window.refreshLeaderboardData === 'function') {
         setTimeout(() => window.refreshLeaderboardData(true), 100);
       }
+    }
+
+    // 7. Complete loading & fade out splash screen
+    if (splashBar) splashBar.style.width = '100%';
+    if (splashText) splashText.textContent = 'خوش آمدید!';
+    if (splashScreen) {
+      setTimeout(() => {
+        splashScreen.style.opacity = '0';
+        setTimeout(() => {
+          try {
+            splashScreen.remove();
+          } catch (_) {}
+        }, 400);
+      }, 400);
     }
 
     console.log('[PlanEx] App initialized successfully with tab:', state.activeTab);

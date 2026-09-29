@@ -105,6 +105,17 @@
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body class="theme-oceanic font-sahel scale-xlarge mode-dark" data-theme="oceanic" data-theme-mode="dark">
+  <!-- Ultra-Fast Native Splash Screen -->
+  <div id="planex-splash-screen" style="position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9999; background-color: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; opacity: 1; transition: opacity 0.4s ease, visibility 0.4s ease; font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif; direction: rtl;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+      <img src="./logo-transparent.png" alt="PlanEx Logo" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));" />
+      <div id="planex-splash-text" style="font-size: 1.05rem; font-weight: 700; color: #f8fafc; letter-spacing: 0.3px;">در حال بارگذاری...</div>
+    </div>
+    <div style="width: 220px; max-width: 80%; height: 6px; background-color: rgba(255, 255, 255, 0.1); border-radius: 999px; overflow: hidden; position: relative;">
+      <div id="planex-splash-progress-bar" style="width: 10%; height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 999px; transition: width 0.3s ease;"></div>
+    </div>
+  </div>
+
   <div id="app">
     <!-- Tab View Containers (Pre-rendered DOM Shells for Instant Routing & Deep-Linking) -->
     <div id="tab-dashboard" class="tab-view-container" style="display: block;"></div>
