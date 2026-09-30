@@ -107,8 +107,14 @@ export const personalSyncService = {
 
   /**
    * Pushes complete personal data to Cloudflare backend under the user's Mobile Phone
+   * LOCAL-FIRST: Push is fire-and-forget. Local data is never overwritten by server response.
    */
+  _isPushingNow: false,
   async pushToCloud(customPhone = null, overrideName = null, overrideAvatar = null) {
+    // Re-entrancy guard: skip if a push is already in flight
+    if (this._isPushingNow) return { success: false, message: 'Push already in progress' };
+    this._isPushingNow = true;
+    try {
     let authUser = null;
     try {
       authUser = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || 'null');
@@ -246,119 +252,19 @@ export const personalSyncService = {
       } catch (e) {}
 
       if (res.ok && data && data.success) {
-        if (data.backupData && typeof data.backupData === 'object') {
-          this.importLocalState(data.backupData);
-        }
+        // LOCAL-FIRST: Do NOT import server backupData back into local storage.
+        // The local database is the absolute source of truth.
+        // Push is a one-way upload — we never let the server overwrite local state after a push.
 
-        // Extract returned name & avatar from server response
-        const returnedName = data.name || data.user?.name || data.backupData?.planex_user_nickname || activeName;
-        const returnedAvatar = data.avatar_url || data.avatar || data.user?.avatar_url || data.user?.avatar || data.backupData?.planex_user_avatar || activeAvatar;
-        const targetAvatar = (returnedAvatar && !returnedAvatar.includes('dicebear.com')) ? returnedAvatar : (activeAvatar || returnedAvatar);
-
-        // Force overwrite localStorage keys
-        if (returnedName) {
-          try {
-            localStorage.setItem('planex_user_nickname', returnedName);
-            localStorage.setItem('planex_leaderboard_nickname', returnedName);
-            localStorage.setItem('planex_nickname', returnedName);
-
-            let userAccount = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
-            userAccount.name = returnedName;
-            userAccount.full_name = returnedName;
-            userAccount.nickname = returnedName;
-            localStorage.setItem('planex_auth_user', JSON.stringify(userAccount));
-            localStorage.setItem('planex_user_account', JSON.stringify(userAccount));
-
-            let p = (db && typeof db.getUserProfile === 'function') ? (db.getUserProfile() || {}) : {};
-            p.name = returnedName;
-            p.nickname = returnedName;
-            if (db && typeof db.setUserProfile === 'function') {
-              db.setUserProfile(p);
-            }
-          } catch(e) {}
-        }
-
-        if (targetAvatar) {
-          try {
-            localStorage.setItem('planex_user_avatar', targetAvatar);
-            let userAccount = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
-            userAccount.avatar_url = targetAvatar;
-            userAccount.photo_url = targetAvatar;
-            userAccount.avatar = targetAvatar;
-            localStorage.setItem('planex_auth_user', JSON.stringify(userAccount));
-            localStorage.setItem('planex_user_account', JSON.stringify(userAccount));
-
-            let p = (db && typeof db.getUserProfile === 'function') ? (db.getUserProfile() || {}) : {};
-            p.avatar = targetAvatar;
-            p.avatar_url = targetAvatar;
-            p.photo = targetAvatar;
-            p.photoUrl = targetAvatar;
-            if (db && typeof db.setUserProfile === 'function') {
-              db.setUserProfile(p);
-            }
-          } catch(e) {}
-        }
         db.markPersonalSyncSuccess();
-
-        if (Array.isArray(data.rooms) && data.rooms.length > 0) {
-          localStorage.setItem('planex_my_groups', JSON.stringify(data.rooms));
-          localStorage.setItem('planex_my_rooms', JSON.stringify(data.rooms));
-          if (db && typeof db.setUserGroups === 'function') {
-            db.setUserGroups(data.rooms);
-          }
-        }
-
-        if (Array.isArray(data.study_logs) && data.study_logs.length > 0) {
-          if (db && typeof db.saveStudyLogs === 'function') {
-            db.saveStudyLogs(data.study_logs);
-          } else {
-            localStorage.setItem('planex_study_logs', JSON.stringify(data.study_logs));
-            localStorage.setItem('planex_recent_activity_sessions', JSON.stringify(data.study_logs));
-          }
-        }
 
         if (db) {
           db._breakdownMemoMap = {};
         }
 
-        // 3. Force UI Update: updateHeaderDOM + direct DOM element patch
+        // Surgical DOM update for header only (no renderApp, no event dispatches)
         if (typeof window !== 'undefined') {
           if (typeof window.updateHeaderDOM === 'function') window.updateHeaderDOM();
-
-          if (returnedName) {
-            document.querySelectorAll('#btn-header-user-account span:last-child, .user-nickname-display, #profile-display-name-val, .profile-name-text').forEach(el => {
-              if (el.tagName === 'INPUT') {
-                if (document.activeElement !== el && el.value !== returnedName) el.value = returnedName;
-              } else {
-                if (document.activeElement !== el && el.innerText !== returnedName) el.innerText = returnedName;
-              }
-            });
-            const profileInput = document.getElementById('profile-display-name');
-            if (profileInput && document.activeElement !== profileInput && profileInput.value !== returnedName) {
-              profileInput.value = returnedName;
-            }
-          }
-
-          if (targetAvatar) {
-            const cacheBuster = targetAvatar.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`;
-            const finalAvatarUrl = targetAvatar.startsWith('http') ? `${targetAvatar}${cacheBuster}` : targetAvatar;
-            document.querySelectorAll('#btn-header-user-account img, #main-header-avatar, #main-avatar-preview, .user-avatar-img').forEach(imgEl => {
-              if (imgEl && imgEl.tagName === 'IMG' && imgEl.src !== finalAvatarUrl) imgEl.src = finalAvatarUrl;
-            });
-          }
-
-          window.dispatchEvent(new CustomEvent('profileUpdated'));
-          window.dispatchEvent(new CustomEvent('auth-changed'));
-          window.dispatchEvent(new CustomEvent('study-logs-updated'));
-          window.dispatchEvent(new CustomEvent('sessions-updated'));
-          window.dispatchEvent(new CustomEvent('activity-saved', { detail: { sync: true } }));
-          if (window.dashboardChartInstances) window.dashboardChartInstances = null;
-          if (typeof window.updateCharts === 'function') window.updateCharts();
-          if (typeof window.renderApp === 'function') {
-            const savedScrollY = window.scrollY || 0;
-            window.renderApp();
-            window.scrollTo(0, savedScrollY);
-          }
         }
 
         return {
@@ -374,19 +280,28 @@ export const personalSyncService = {
         };
       }
     } catch (err) {
-      console.error('[Sync Error]', err.name, err.message);
-      alert(`Sync Error: ${err.message}`);
+      // LOCAL-FIRST: Fail silently — never revert or delete local data on network failure
+      console.warn('[Sync Push] Background push deferred:', err.message);
       return {
         success: false,
         message: 'خطا در ارتباط با سرور: ' + err.message
       };
     }
+    } finally {
+      this._isPushingNow = false;
+    }
   },
 
   /**
    * Pulls and recovers full personal data, study logs and study rooms from Cloudflare backend using Phone Number
+   * LOCAL-FIRST: Pull only merges genuinely new external data. Never overwrites newer local data.
    */
+  _isPullingNow: false,
   async pullFromCloud(inputPhone = null) {
+    // Re-entrancy guard: skip if a pull is already in flight
+    if (this._isPullingNow) return { success: false, message: 'Pull already in progress' };
+    this._isPullingNow = true;
+    try {
     if (typeof document !== 'undefined') {
       const active = document.activeElement;
       const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
@@ -639,18 +554,10 @@ export const personalSyncService = {
           }
 
           if (isDataChanged) {
-            window.dispatchEvent(new CustomEvent('profileUpdated'));
-            window.dispatchEvent(new CustomEvent('auth-changed'));
-            window.dispatchEvent(new CustomEvent('study-logs-updated'));
-            window.dispatchEvent(new CustomEvent('sessions-updated'));
-            window.dispatchEvent(new CustomEvent('activity-saved', { detail: { sync: true } }));
+            // LOCAL-FIRST: No renderApp() call — only surgical DOM + chart updates
+            // Do NOT dispatch events that would re-trigger pushToCloud (infinite loop)
             if (window.dashboardChartInstances) window.dashboardChartInstances = null;
             if (typeof window.updateCharts === 'function') window.updateCharts();
-            if (typeof window.renderApp === 'function') {
-              const savedScrollY = window.scrollY || 0;
-              window.renderApp();
-              window.scrollTo(0, savedScrollY);
-            }
           }
 
           if (typeof window !== 'undefined' && window._forceEbWipe) {
@@ -677,12 +584,15 @@ export const personalSyncService = {
         };
       }
     } catch (err) {
-      console.error('[Sync Error]', err.name, err.message);
-      alert(`Sync Error: ${err.message}`);
+      // LOCAL-FIRST: Fail silently — never revert or delete local data on network failure
+      console.warn('[Sync Pull] Background pull deferred:', err.message);
       return {
         success: false,
         message: 'خطا در بازیابی اطلاعات: ' + err.message
       };
+    }
+    } finally {
+      this._isPullingNow = false;
     }
   }
 };
