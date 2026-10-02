@@ -1,6 +1,6 @@
 // EditProfileModal.js — Tap-to-Edit User Profile Modal with Ready Cartoon Avatars, File Upload, and Telegram Auto-Sync
 import { leaderboardService, LEADERBOARD_STORAGE_KEYS } from '../services/leaderboardService.js';
-import { db } from '../db.js';
+import { db, isPlaceholderName } from '../db.js';
 
 export function renderEditProfileModal() {
   const profile = (leaderboardService && typeof leaderboardService.getUserProfile === 'function')
@@ -12,7 +12,8 @@ export function renderEditProfileModal() {
     authUser = JSON.parse(localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account') || '{}');
   } catch(e) {}
 
-  const currentName = profile.nickname || profile.name || authUser?.full_name || authUser?.name || '';
+  const rawName = profile.nickname || profile.name || authUser?.full_name || authUser?.name || '';
+  const currentName = (rawName && !isPlaceholderName(rawName)) ? rawName.trim() : '';
   const currentTarget = profile.target || profile.targetField || profile.major || '';
   const storedAvatar = localStorage.getItem('planex_user_avatar') || '';
   const currentAvatar = storedAvatar || profile.avatar_url || profile.avatarUrl || profile.avatar || profile.photo_url || authUser?.avatar_url || '';
@@ -269,7 +270,7 @@ window.handleSaveProfileSubmit = async function() {
   const newTarget = targetInput ? targetInput.value.trim() : '';
   const newAvatar = avatarInput ? avatarInput.value.trim() : '';
 
-  if (!newName) {
+  if (!newName || isPlaceholderName(newName)) {
     if (window.showToast) {
       window.showToast('لطفاً نام و نام خانوادگی خود را وارد کنید.', 'warning');
     } else {

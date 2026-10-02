@@ -2,7 +2,7 @@
 // Private Study Squads (اتاق‌های رقابت گروهی خصوصی با اعضای ماندگار و کد اختصاصی)
 // Pure manual synchronization, resilient local cache, and Cloudflare KV integration
 
-import { db } from '../db.js';
+import { db, isPlaceholderName } from '../db.js';
 import { isStudyCategory } from '../constants.js';
 import { API_BASE_URL } from '../config.js';
 
@@ -347,7 +347,7 @@ export const leaderboardService = {
         const tgName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ').trim();
         const tgAvatar = tgUser.photo_url || '';
         const currentName = localStorage.getItem(LEADERBOARD_STORAGE_KEYS.NICKNAME) || (authUser && (authUser.full_name || authUser.name)) || defaultProfile.name || '';
-        const isDefaultName = !currentName || currentName === 'دانش‌آموز پرتلاش' || currentName === 'کاربر' || currentName === 'X' || currentName === 'داوطلب پرتلاش';
+        const isDefaultName = !currentName || isPlaceholderName(currentName);
 
         if (isDefaultName && tgName) {
           localStorage.setItem(LEADERBOARD_STORAGE_KEYS.NICKNAME, tgName);
@@ -367,8 +367,15 @@ export const leaderboardService = {
 
     const storedAvatar = localStorage.getItem('planex_user_avatar') || '';
     const avatar = storedAvatar || (authUser && (authUser.avatar_url || authUser.avatarUrl || authUser.photo_url || authUser.avatar)) || defaultProfile.avatar || defaultProfile.avatar_url || defaultProfile.photo || defaultProfile.photoUrl || '';
-    const nickname = localStorage.getItem(LEADERBOARD_STORAGE_KEYS.NICKNAME) || (authUser && (authUser.full_name || authUser.name)) || defaultProfile.name || 'داوطلب پرتلاش';
-    const target = localStorage.getItem(LEADERBOARD_STORAGE_KEYS.TARGET) || defaultProfile.targetField || defaultProfile.major || 'کنکور سراسری ۱۴۰۶';
+    const rawNickname = localStorage.getItem(LEADERBOARD_STORAGE_KEYS.NICKNAME) ||
+                        localStorage.getItem('planex_user_nickname') ||
+                        localStorage.getItem('planex_nickname') ||
+                        (authUser && (authUser.full_name || authUser.name || authUser.nickname)) ||
+                        defaultProfile.nickname ||
+                        defaultProfile.name ||
+                        '';
+    const nickname = (rawNickname && !isPlaceholderName(rawNickname)) ? rawNickname.trim() : '';
+    const target = localStorage.getItem(LEADERBOARD_STORAGE_KEYS.TARGET) || defaultProfile.targetField || defaultProfile.major || defaultProfile.target || '';
     const uid = (authUser && (authUser.id || authUser.telegram_id || authUser.uid)) || this.getOrCreateUserId();
     const phone = (authUser && (authUser.phone || authUser.phone_number)) || defaultProfile.phone || '';
     
@@ -395,35 +402,61 @@ export const leaderboardService = {
    * Saves updated nickname, target, and avatar
    */
   saveUserProfile(nickname, target, avatarUrl) {
-    if (nickname) localStorage.setItem(LEADERBOARD_STORAGE_KEYS.NICKNAME, nickname.trim());
-    if (target !== undefined) localStorage.setItem(LEADERBOARD_STORAGE_KEYS.TARGET, target.trim());
+    const cleanName = nickname ? nickname.trim() : '';
+    const cleanTarget = target !== undefined ? target.trim() : '';
+
+    if (cleanName && !isPlaceholderName(cleanName)) {
+      localStorage.setItem(LEADERBOARD_STORAGE_KEYS.NICKNAME, cleanName);
+      localStorage.setItem('planex_user_nickname', cleanName);
+      localStorage.setItem('planex_nickname', cleanName);
+      localStorage.setItem('planex_leaderboard_nickname', cleanName);
+    }
+    if (cleanTarget) {
+      localStorage.setItem(LEADERBOARD_STORAGE_KEYS.TARGET, cleanTarget);
+    }
     if (avatarUrl) {
       try {
         localStorage.setItem('planex_user_avatar', avatarUrl);
       } catch(e) {}
+    }
 
-      try {
-        const authRaw = localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account');
-        let authUser = authRaw ? JSON.parse(authRaw) : {};
+    try {
+      const authRaw = localStorage.getItem('planex_auth_user') || localStorage.getItem('planex_user_account');
+      let authUser = authRaw ? JSON.parse(authRaw) : {};
+      if (cleanName && !isPlaceholderName(cleanName)) {
+        authUser.full_name = cleanName;
+        authUser.name = cleanName;
+        authUser.nickname = cleanName;
+      }
+      if (avatarUrl) {
         authUser.avatar_url = avatarUrl;
         authUser.photo_url = avatarUrl;
         authUser.avatar = avatarUrl;
-        localStorage.setItem('planex_auth_user', JSON.stringify(authUser));
-        localStorage.setItem('planex_user_account', JSON.stringify(authUser));
-      } catch(e) {}
+      }
+      localStorage.setItem('planex_auth_user', JSON.stringify(authUser));
+      localStorage.setItem('planex_user_account', JSON.stringify(authUser));
+    } catch(e) {}
 
-      try {
-        const profileRaw = localStorage.getItem('planex_user_profile');
-        let prof = profileRaw ? JSON.parse(profileRaw) : {};
+    try {
+      const profileRaw = localStorage.getItem('planex_user_profile');
+      let prof = profileRaw ? JSON.parse(profileRaw) : {};
+      if (cleanName && !isPlaceholderName(cleanName)) {
+        prof.name = cleanName;
+        prof.nickname = cleanName;
+      }
+      if (cleanTarget) {
+        prof.targetField = cleanTarget;
+        prof.major = cleanTarget;
+        prof.target = cleanTarget;
+      }
+      if (avatarUrl) {
         prof.avatar = avatarUrl;
         prof.avatar_url = avatarUrl;
         prof.photo = avatarUrl;
         prof.photoUrl = avatarUrl;
-        if (nickname) prof.name = nickname;
-        if (target) { prof.targetField = target; prof.major = target; }
-        localStorage.setItem('planex_user_profile', JSON.stringify(prof));
-      } catch(e) {}
-    }
+      }
+      localStorage.setItem('planex_user_profile', JSON.stringify(prof));
+    } catch(e) {}
   },
 
   // ────────────────────────────────────────────────────────────

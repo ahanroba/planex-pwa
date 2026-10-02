@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-  namespace = "com.example"
+  namespace = "ir.planexapp.pwa"
   compileSdk = 35
   buildToolsVersion = "35.0.0"
 
   defaultConfig {
-    applicationId = "com.aistudio.timemanager.vztqkw"
+    applicationId = "ir.planexapp.pwa"
     minSdk = 24
     targetSdk = 35
     versionCode = 1

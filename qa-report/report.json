@@ -1,0 +1,2998 @@
+{
+  "summary": {
+    "baseURL": "http://localhost:5173",
+    "counts": {
+      "HIGH": 51,
+      "MEDIUM": 31,
+      "LOW": 27,
+      "INFO": 0
+    },
+    "issues": [
+      {
+        "sev": "HIGH",
+        "area": "runner",
+        "msg": "Test crashed: page.goto: Timeout 20000ms exceeded.",
+        "count": 2,
+        "viewports": [
+          "iPhone-SE-320",
+          "iPhone-12-landscape"
+        ],
+        "steps": [
+          "load"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "console",
+        "msg": "Console errors/warnings on initial load",
+        "count": 4,
+        "viewports": [
+          "iPhone-12-390",
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "load"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Clicking tab \"🩺 آزمون پره‌اینترنی\" changed nothing (same content, same URL)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Clicking tab \"👨‍⚕️ آزمون دستیاری\" changed nothing (same content, same URL)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Clicking tab \"🧬 کنکور تجربی\" changed nothing (same content, same URL)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Clicking tab \"📐 کنکور ریاضی\" changed nothing (same content, same URL)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Clicking tab \"📚 کنکور انسانی\" changed nothing (same content, same URL)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Clicking tab \"⚖️ آزمون وکالت\" changed nothing (same content, same URL)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] button.nav-fab-btn is covered by button#btn-save-edit-profile.btn-primary \"💾 ذخیره تغییرات مشخصات\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=-610px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Clicking tab \"🌐 آزمون آیلتس / زبان\" changed nothing (same content, same URL)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] button.nav-fab-btn is covered by button#btn-save-edit-profile.btn-primary \"💾 ذخیره تغییرات مشخصات\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=-610px",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "console",
+        "msg": "Console errors after browser Back",
+        "count": 4,
+        "viewports": [
+          "iPhone-12-390",
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "tabs:back-button"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "pomodoro",
+        "msg": "Could not click start control button#btn-hero-focus-start.btn-primary \"⏱️ شروع پارت تمرکز (تایمر)\": locator.click: Timeout 3000ms exceeded.",
+        "count": 2,
+        "viewports": [
+          "iPhone-12-390",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "pomodoro:start"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "pomodoro",
+        "msg": "Timer does not count down after pressing Start",
+        "count": 2,
+        "viewports": [
+          "iPhone-12-390",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "pomodoro:start"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Tab \"📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼\" not clickable: locator.click: Timeout 3000ms exceeded.",
+        "count": 3,
+        "viewports": [
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "tab:📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Tab \"➕ ثبت دستی\" not clickable: locator.click: Timeout 3000ms exceeded.",
+        "count": 3,
+        "viewports": [
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "tab:➕ ثبت دستی"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "bottom-nav",
+        "msg": "Tab \"🎯 شروع\" not clickable: locator.click: Timeout 3000ms exceeded.",
+        "count": 3,
+        "viewports": [
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "tab:🎯 شروع"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "runner",
+        "msg": "Full-session test crashed: page.goto: Timeout 30000ms exceeded.",
+        "count": 1,
+        "viewports": [
+          "iPhone-12 (fake clock)"
+        ],
+        "steps": [
+          "pomodoro:full-session"
+        ]
+      },
+      {
+        "sev": "HIGH",
+        "area": "runner",
+        "msg": "PWA test crashed: page.goto: Timeout 20000ms exceeded.",
+        "count": 1,
+        "viewports": [
+          "Pixel-7 (PWA)"
+        ],
+        "steps": [
+          "pwa:manifest"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "bottom-nav",
+        "msg": "After clicking \"🎓 ارشد علوم پزشکی\" the highlighted tab is #5 instead of #6",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "bottom-nav",
+        "msg": "After clicking \"🌐 آزمون آیلتس / زبان\" the highlighted tab is #5 instead of #7",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "bottom-nav",
+        "msg": "Browser Back after tab navigation exits the app (tabs not in history)",
+        "count": 4,
+        "viewports": [
+          "iPhone-12-390",
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "tabs:back-button"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "pomodoro",
+        "msg": "No Pause/Stop button found while running",
+        "count": 2,
+        "viewports": [
+          "iPhone-12-390",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "pomodoro:pause"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "bottom-nav",
+        "msg": "Bottom nav sticks out below the screen (bottom 1403px > 839px)",
+        "count": 1,
+        "viewports": [
+          "Pixel-7-412"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "bottom-nav",
+        "msg": "Bottom nav sticks out below the screen (bottom 1238px > 1024px)",
+        "count": 1,
+        "viewports": [
+          "iPad-Mini-768"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "MEDIUM",
+        "area": "bottom-nav",
+        "msg": "Bottom nav sticks out below the screen (bottom 1057px > 900px)",
+        "count": 1,
+        "viewports": [
+          "Desktop-1440"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "perf",
+        "msg": "Network never went idle within 15s (polling or a hanging request)",
+        "count": 4,
+        "viewports": [
+          "iPhone-12-390",
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "load"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"🩺 آزمون پره‌اینترنی\" tap target is 98x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"👨‍⚕️ آزمون دستیاری\" tap target is 95x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"🧬 کنکور تجربی\" tap target is 88x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"📐 کنکور ریاضی\" tap target is 88x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"📚 کنکور انسانی\" tap target is 89x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"⚖️ آزمون وکالت\" tap target is 87x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"🎓 ارشد علوم پزشکی\" tap target is 107x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"🌐 آزمون آیلتس / زبان\" tap target is 113x28px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "No tab shows an active state after clicking \"🩺 آزمون پره‌اینترنی\"",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[🩺 آزمون پره‌اینترنی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🩺 آزمون پره‌اینترنی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "No tab shows an active state after clicking \"👨‍⚕️ آزمون دستیاری\"",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[👨‍⚕️ آزمون دستیاری] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:👨‍⚕️ آزمون دستیاری"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "No tab shows an active state after clicking \"🧬 کنکور تجربی\"",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[🧬 کنکور تجربی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🧬 کنکور تجربی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "No tab shows an active state after clicking \"📐 کنکور ریاضی\"",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[📐 کنکور ریاضی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📐 کنکور ریاضی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "No tab shows an active state after clicking \"📚 کنکور انسانی\"",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[📚 کنکور انسانی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:📚 کنکور انسانی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "No tab shows an active state after clicking \"⚖️ آزمون وکالت\"",
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[⚖️ آزمون وکالت] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:⚖️ آزمون وکالت"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[🎓 ارشد علوم پزشکی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🎓 ارشد علوم پزشکی"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "layout",
+        "msg": "[🌐 آزمون آیلتس / زبان] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ],
+        "count": 1,
+        "viewports": [
+          "iPhone-12-390"
+        ],
+        "steps": [
+          "tab:🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "pomodoro",
+        "msg": "No Reset button found",
+        "count": 2,
+        "viewports": [
+          "iPhone-12-390",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "pomodoro:reset"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"➕ ثبت دستی\" tap target is 57x40px (< 44px)",
+        "count": 2,
+        "viewports": [
+          "Pixel-7-412",
+          "iPad-Mini-768"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"🎯 شروع\" tap target is 90x40px (< 44px)",
+        "count": 2,
+        "viewports": [
+          "Pixel-7-412",
+          "iPad-Mini-768"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      },
+      {
+        "sev": "LOW",
+        "area": "bottom-nav",
+        "msg": "Tab \"📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼\" tap target is 577x27px (< 44px)",
+        "count": 1,
+        "viewports": [
+          "iPad-Mini-768"
+        ],
+        "steps": [
+          "tabs:detect"
+        ]
+      }
+    ],
+    "console": [
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "count": 12,
+        "viewports": [
+          "iPhone-12-390",
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440"
+        ],
+        "steps": [
+          "load",
+          "tabs:back-button",
+          "pomodoro:reload"
+        ]
+      }
+    ],
+    "network": [
+      {
+        "kind": "failed",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "count": 30,
+        "viewports": [
+          "iPhone-SE-320",
+          "iPhone-12-390",
+          "iPhone-12-landscape",
+          "Pixel-7-412",
+          "iPad-Mini-768",
+          "Desktop-1440",
+          "iPhone-12 (fake clock)",
+          "Pixel-7 (PWA)"
+        ],
+        "steps": [
+          "load",
+          "tabs:back-button",
+          "pomodoro:reload",
+          "pomodoro:full-session",
+          "pwa:manifest"
+        ]
+      }
+    ],
+    "tabs": [
+      {
+        "viewport": "iPhone-12-390",
+        "nav": "div \"رشته تحصیلی یا هدف آزمون 💡 ان\"",
+        "items": [
+          "🩺 آزمون پره‌اینترنی",
+          "👨‍⚕️ آزمون دستیاری",
+          "🧬 کنکور تجربی",
+          "📐 کنکور ریاضی",
+          "📚 کنکور انسانی",
+          "⚖️ آزمون وکالت",
+          "🎓 ارشد علوم پزشکی",
+          "🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "viewport": "Pixel-7-412",
+        "nav": "div.glass-panel \"📜 آخرین پارت‌های مطالعه و تست\"",
+        "items": [
+          "📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+          "➕ ثبت دستی",
+          "🎯 شروع"
+        ]
+      },
+      {
+        "viewport": "iPad-Mini-768",
+        "nav": "div.glass-panel \"📜 آخرین پارت‌های مطالعه و تست\"",
+        "items": [
+          "📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+          "➕ ثبت دستی",
+          "🎯 شروع"
+        ]
+      },
+      {
+        "viewport": "Desktop-1440",
+        "nav": "div.glass-panel \"📜 آخرین پارت‌های مطالعه و تست\"",
+        "items": [
+          "📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+          "➕ ثبت دستی",
+          "🎯 شروع"
+        ]
+      }
+    ],
+    "timer": [
+      {
+        "viewport": "iPhone-12-390",
+        "name": "initial",
+        "raw": "00:00",
+        "secs": 0
+      },
+      {
+        "viewport": "iPhone-12-390",
+        "name": "start +4s",
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "iPhone-12-390",
+        "name": "rapid start then +3s",
+        "clicks": 0,
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "iPhone-12-390",
+        "name": "after reload (info)",
+        "before": "00:00",
+        "after": "00:00",
+        "persisted": true
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "initial",
+        "raw": "00:00",
+        "secs": 0
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "start +4s",
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "rapid start then +3s",
+        "clicks": 0,
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "after reload (info)",
+        "before": "00:00",
+        "after": "00:00",
+        "persisted": true
+      }
+    ],
+    "pwa": {
+      "manifest": null
+    }
+  },
+  "raw": {
+    "baseURL": "http://localhost:5173",
+    "startedAt": "2026-10-01T13:26:09.795Z",
+    "issues": [
+      {
+        "severity": "HIGH",
+        "area": "runner",
+        "viewport": "iPhone-SE-320",
+        "step": "load",
+        "message": "Test crashed: page.goto: Timeout 20000ms exceeded."
+      },
+      {
+        "severity": "LOW",
+        "area": "perf",
+        "viewport": "iPhone-12-390",
+        "step": "load",
+        "message": "Network never went idle within 15s (polling or a hanging request)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "iPhone-12-390",
+        "step": "load",
+        "message": "Console errors/warnings on initial load"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"🩺 آزمون پره‌اینترنی\" tap target is 98x28px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"👨‍⚕️ آزمون دستیاری\" tap target is 95x28px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"🧬 کنکور تجربی\" tap target is 88x28px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"📐 کنکور ریاضی\" tap target is 88x28px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"📚 کنکور انسانی\" tap target is 89x28px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"⚖️ آزمون وکالت\" tap target is 87x28px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"🎓 ارشد علوم پزشکی\" tap target is 107x28px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:detect",
+        "message": "Tab \"🌐 آزمون آیلتس / زبان\" tap target is 113x28px (< 44px)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "Clicking tab \"🩺 آزمون پره‌اینترنی\" changed nothing (same content, same URL)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "No tab shows an active state after clicking \"🩺 آزمون پره‌اینترنی\""
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🩺 آزمون پره‌اینترنی",
+        "message": "[🩺 آزمون پره‌اینترنی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "Clicking tab \"👨‍⚕️ آزمون دستیاری\" changed nothing (same content, same URL)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "No tab shows an active state after clicking \"👨‍⚕️ آزمون دستیاری\""
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:👨‍⚕️ آزمون دستیاری",
+        "message": "[👨‍⚕️ آزمون دستیاری] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "Clicking tab \"🧬 کنکور تجربی\" changed nothing (same content, same URL)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "No tab shows an active state after clicking \"🧬 کنکور تجربی\""
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🧬 کنکور تجربی",
+        "message": "[🧬 کنکور تجربی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "Clicking tab \"📐 کنکور ریاضی\" changed nothing (same content, same URL)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "No tab shows an active state after clicking \"📐 کنکور ریاضی\""
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📐 کنکور ریاضی",
+        "message": "[📐 کنکور ریاضی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "Clicking tab \"📚 کنکور انسانی\" changed nothing (same content, same URL)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "No tab shows an active state after clicking \"📚 کنکور انسانی\""
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:📚 کنکور انسانی",
+        "message": "[📚 کنکور انسانی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "Clicking tab \"⚖️ آزمون وکالت\" changed nothing (same content, same URL)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "No tab shows an active state after clicking \"⚖️ آزمون وکالت\""
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by div \"ویرایش مشخصات من نام، رشته/هدف\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:⚖️ آزمون وکالت",
+        "message": "[⚖️ آزمون وکالت] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=365px"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "After clicking \"🎓 ارشد علوم پزشکی\" the highlighted tab is #5 instead of #6"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] button.nav-fab-btn is covered by button#btn-save-edit-profile.btn-primary \"💾 ذخیره تغییرات مشخصات\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🎓 ارشد علوم پزشکی",
+        "message": "[🎓 ارشد علوم پزشکی] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=-610px"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "Clicking tab \"🌐 آزمون آیلتس / زبان\" changed nothing (same content, same URL)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "After clicking \"🌐 آزمون آیلتس / زبان\" the highlighted tab is #5 instead of #7"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] a#btn-hamibash-link.btn-header-action \"☕ حمایت از ما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] button#btn-support-modal.btn-header-action \"💡 راهنما\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] button#btn-header-user-account.btn-header-action \"👤 ورود\" is covered by div#modal-edit-profile.modal-overlay.active \"✏️ ویرایش مشخصات من نام، رشته/\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] button.glass-panel \"⚡ رویدادها، سحرخیزان و تالار ر\" is covered by span#edit-profile-avatar-fallback \"👤\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" is covered by div \"👤 📷 📷 انتخاب از گالری 🔗 لی\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] button.nav-fab-btn is covered by button#btn-save-edit-profile.btn-primary \"💾 ذخیره تغییرات مشخصات\" (taps hit the wrong element)"
+      },
+      {
+        "severity": "LOW",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] 14 button(s) smaller than 40px tap target",
+        "details": [
+          "button#btn-support-modal.btn-header-action \"💡 راهنما\" 61x27",
+          "button#btn-header-user-account.btn-header-action \"👤 ورود\" 63x30",
+          "button#btn-open-daily-story.btn-story-trigger.btn-open-daily-story.btn-quick-story \"📸 استوری سریع\" 100x32",
+          "button#btn-open-daily-analysis.btn-story-trigger.btn-open-daily-analysis.btn-daily-report \"📊 کارنامه و تحلیل روز\" 119x32",
+          "button \"📷 انتخاب از گالری\" 113x32",
+          "button \"🔗 لینک عکس\" 96x32",
+          "button \"🩺 آزمون پره‌اینترنی\" 98x28",
+          "button \"👨‍⚕️ آزمون دستیاری\" 95x28"
+        ]
+      },
+      {
+        "severity": "HIGH",
+        "area": "layout",
+        "viewport": "iPhone-12-390",
+        "step": "tab:🌐 آزمون آیلتس / زبان",
+        "message": "[🌐 آزمون آیلتس / زبان] Content hidden behind bottom nav: span \"نمودار دایره‌ای و تفکیک ساعات \" ends at y=547px, nav starts at y=-610px"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:back-button",
+        "message": "Browser Back after tab navigation exits the app (tabs not in history)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:back-button",
+        "message": "Console errors after browser Back"
+      },
+      {
+        "severity": "HIGH",
+        "area": "pomodoro",
+        "viewport": "iPhone-12-390",
+        "step": "pomodoro:start",
+        "message": "Could not click start control button#btn-hero-focus-start.btn-primary \"⏱️ شروع پارت تمرکز (تایمر)\": locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "pomodoro",
+        "viewport": "iPhone-12-390",
+        "step": "pomodoro:start",
+        "message": "Timer does not count down after pressing Start"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "pomodoro",
+        "viewport": "iPhone-12-390",
+        "step": "pomodoro:pause",
+        "message": "No Pause/Stop button found while running"
+      },
+      {
+        "severity": "LOW",
+        "area": "pomodoro",
+        "viewport": "iPhone-12-390",
+        "step": "pomodoro:reset",
+        "message": "No Reset button found"
+      },
+      {
+        "severity": "HIGH",
+        "area": "runner",
+        "viewport": "iPhone-12-landscape",
+        "step": "load",
+        "message": "Test crashed: page.goto: Timeout 20000ms exceeded."
+      },
+      {
+        "severity": "LOW",
+        "area": "perf",
+        "viewport": "Pixel-7-412",
+        "step": "load",
+        "message": "Network never went idle within 15s (polling or a hanging request)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "Pixel-7-412",
+        "step": "load",
+        "message": "Console errors/warnings on initial load"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "Pixel-7-412",
+        "step": "tabs:detect",
+        "message": "Bottom nav sticks out below the screen (bottom 1403px > 839px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "Pixel-7-412",
+        "step": "tabs:detect",
+        "message": "Tab \"➕ ثبت دستی\" tap target is 57x40px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "Pixel-7-412",
+        "step": "tabs:detect",
+        "message": "Tab \"🎯 شروع\" tap target is 90x40px (< 44px)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "Pixel-7-412",
+        "step": "tab:📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+        "message": "Tab \"📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "Pixel-7-412",
+        "step": "tab:➕ ثبت دستی",
+        "message": "Tab \"➕ ثبت دستی\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "Pixel-7-412",
+        "step": "tab:🎯 شروع",
+        "message": "Tab \"🎯 شروع\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "Pixel-7-412",
+        "step": "tabs:back-button",
+        "message": "Browser Back after tab navigation exits the app (tabs not in history)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "Pixel-7-412",
+        "step": "tabs:back-button",
+        "message": "Console errors after browser Back"
+      },
+      {
+        "severity": "LOW",
+        "area": "perf",
+        "viewport": "iPad-Mini-768",
+        "step": "load",
+        "message": "Network never went idle within 15s (polling or a hanging request)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "iPad-Mini-768",
+        "step": "load",
+        "message": "Console errors/warnings on initial load"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:detect",
+        "message": "Bottom nav sticks out below the screen (bottom 1238px > 1024px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:detect",
+        "message": "Tab \"📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼\" tap target is 577x27px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:detect",
+        "message": "Tab \"➕ ثبت دستی\" tap target is 57x40px (< 44px)"
+      },
+      {
+        "severity": "LOW",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:detect",
+        "message": "Tab \"🎯 شروع\" tap target is 90x40px (< 44px)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tab:📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+        "message": "Tab \"📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tab:➕ ثبت دستی",
+        "message": "Tab \"➕ ثبت دستی\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tab:🎯 شروع",
+        "message": "Tab \"🎯 شروع\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:back-button",
+        "message": "Browser Back after tab navigation exits the app (tabs not in history)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:back-button",
+        "message": "Console errors after browser Back"
+      },
+      {
+        "severity": "LOW",
+        "area": "perf",
+        "viewport": "Desktop-1440",
+        "step": "load",
+        "message": "Network never went idle within 15s (polling or a hanging request)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "Desktop-1440",
+        "step": "load",
+        "message": "Console errors/warnings on initial load"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "Desktop-1440",
+        "step": "tabs:detect",
+        "message": "Bottom nav sticks out below the screen (bottom 1057px > 900px)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "Desktop-1440",
+        "step": "tab:📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+        "message": "Tab \"📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "Desktop-1440",
+        "step": "tab:➕ ثبت دستی",
+        "message": "Tab \"➕ ثبت دستی\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "bottom-nav",
+        "viewport": "Desktop-1440",
+        "step": "tab:🎯 شروع",
+        "message": "Tab \"🎯 شروع\" not clickable: locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "bottom-nav",
+        "viewport": "Desktop-1440",
+        "step": "tabs:back-button",
+        "message": "Browser Back after tab navigation exits the app (tabs not in history)"
+      },
+      {
+        "severity": "HIGH",
+        "area": "console",
+        "viewport": "Desktop-1440",
+        "step": "tabs:back-button",
+        "message": "Console errors after browser Back"
+      },
+      {
+        "severity": "HIGH",
+        "area": "pomodoro",
+        "viewport": "Desktop-1440",
+        "step": "pomodoro:start",
+        "message": "Could not click start control button#btn-hero-focus-start.btn-primary \"⏱️ شروع پارت تمرکز (تایمر)\": locator.click: Timeout 3000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "pomodoro",
+        "viewport": "Desktop-1440",
+        "step": "pomodoro:start",
+        "message": "Timer does not count down after pressing Start"
+      },
+      {
+        "severity": "MEDIUM",
+        "area": "pomodoro",
+        "viewport": "Desktop-1440",
+        "step": "pomodoro:pause",
+        "message": "No Pause/Stop button found while running"
+      },
+      {
+        "severity": "LOW",
+        "area": "pomodoro",
+        "viewport": "Desktop-1440",
+        "step": "pomodoro:reset",
+        "message": "No Reset button found"
+      },
+      {
+        "severity": "HIGH",
+        "area": "runner",
+        "viewport": "iPhone-12 (fake clock)",
+        "step": "pomodoro:full-session",
+        "message": "Full-session test crashed: page.goto: Timeout 30000ms exceeded."
+      },
+      {
+        "severity": "HIGH",
+        "area": "runner",
+        "viewport": "Pixel-7 (PWA)",
+        "step": "pwa:manifest",
+        "message": "PWA test crashed: page.goto: Timeout 20000ms exceeded."
+      }
+    ],
+    "console": [
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "iPhone-12-390",
+        "step": "load"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:back-button"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:back-button"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "iPhone-12-390",
+        "step": "pomodoro:reload"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "Pixel-7-412",
+        "step": "load"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "Pixel-7-412",
+        "step": "tabs:back-button"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "iPad-Mini-768",
+        "step": "load"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:back-button"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "Desktop-1440",
+        "step": "load"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "Desktop-1440",
+        "step": "tabs:back-button"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "Desktop-1440",
+        "step": "tabs:back-button"
+      },
+      {
+        "type": "warning",
+        "text": "Service Worker registration blocked by Playwright",
+        "at": "",
+        "viewport": "Desktop-1440",
+        "step": "pomodoro:reload"
+      }
+    ],
+    "network": [
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-SE-320",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-SE-320",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-SE-320",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-390",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-390",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-390",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:back-button"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-390",
+        "step": "tabs:back-button"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-390",
+        "step": "pomodoro:reload"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-landscape",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12-landscape",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Pixel-7-412",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Pixel-7-412",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Pixel-7-412",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Pixel-7-412",
+        "step": "tabs:back-button"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPad-Mini-768",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPad-Mini-768",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPad-Mini-768",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPad-Mini-768",
+        "step": "tabs:back-button"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Desktop-1440",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Desktop-1440",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Desktop-1440",
+        "step": "load"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Desktop-1440",
+        "step": "tabs:back-button"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Desktop-1440",
+        "step": "tabs:back-button"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Desktop-1440",
+        "step": "pomodoro:reload"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12 (fake clock)",
+        "step": "pomodoro:full-session"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "iPhone-12 (fake clock)",
+        "step": "pomodoro:full-session"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Pixel-7 (PWA)",
+        "step": "pwa:manifest"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Pixel-7 (PWA)",
+        "step": "pwa:manifest"
+      },
+      {
+        "kind": "failed",
+        "url": "https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css",
+        "error": "net::ERR_BLOCKED_BY_ORB",
+        "viewport": "Pixel-7 (PWA)",
+        "step": "pwa:manifest"
+      }
+    ],
+    "timer": [
+      {
+        "viewport": "iPhone-12-390",
+        "name": "initial",
+        "raw": "00:00",
+        "secs": 0
+      },
+      {
+        "viewport": "iPhone-12-390",
+        "name": "start +4s",
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "iPhone-12-390",
+        "name": "rapid start then +3s",
+        "clicks": 0,
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "iPhone-12-390",
+        "name": "after reload (info)",
+        "before": "00:00",
+        "after": "00:00",
+        "persisted": true
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "initial",
+        "raw": "00:00",
+        "secs": 0
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "start +4s",
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "rapid start then +3s",
+        "clicks": 0,
+        "from": "00:00",
+        "to": "00:00",
+        "delta": 0
+      },
+      {
+        "viewport": "Desktop-1440",
+        "name": "after reload (info)",
+        "before": "00:00",
+        "after": "00:00",
+        "persisted": true
+      }
+    ],
+    "tabs": [
+      {
+        "viewport": "iPhone-12-390",
+        "nav": "div \"رشته تحصیلی یا هدف آزمون 💡 ان\"",
+        "items": [
+          "🩺 آزمون پره‌اینترنی",
+          "👨‍⚕️ آزمون دستیاری",
+          "🧬 کنکور تجربی",
+          "📐 کنکور ریاضی",
+          "📚 کنکور انسانی",
+          "⚖️ آزمون وکالت",
+          "🎓 ارشد علوم پزشکی",
+          "🌐 آزمون آیلتس / زبان"
+        ]
+      },
+      {
+        "viewport": "Pixel-7-412",
+        "nav": "div.glass-panel \"📜 آخرین پارت‌های مطالعه و تست\"",
+        "items": [
+          "📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+          "➕ ثبت دستی",
+          "🎯 شروع"
+        ]
+      },
+      {
+        "viewport": "iPad-Mini-768",
+        "nav": "div.glass-panel \"📜 آخرین پارت‌های مطالعه و تست\"",
+        "items": [
+          "📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+          "➕ ثبت دستی",
+          "🎯 شروع"
+        ]
+      },
+      {
+        "viewport": "Desktop-1440",
+        "nav": "div.glass-panel \"📜 آخرین پارت‌های مطالعه و تست\"",
+        "items": [
+          "📜 آخرین پارت‌های مطالعه و تست‌ها 0 پارت ▼",
+          "➕ ثبت دستی",
+          "🎯 شروع"
+        ]
+      }
+    ],
+    "pwa": {}
+  }
+}

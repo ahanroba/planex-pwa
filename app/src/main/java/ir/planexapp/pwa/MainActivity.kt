@@ -1,4 +1,4 @@
-package com.example
+package ir.planexapp.pwa
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -47,13 +47,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Enable WebView debugging for remote debugging via chrome://inspect
+        // Enable WebView debugging ONLY in debug builds
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                WebView.setWebContentsDebuggingEnabled(true)
+                val isDebuggable = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                WebView.setWebContentsDebuggingEnabled(isDebuggable)
             }
         } catch (e: Throwable) {
-            Log.w(TAG, "Could not enable WebView debugging", e)
+            Log.w(TAG, "Could not set WebView debugging mode", e)
         }
 
         try {
@@ -77,15 +78,19 @@ class MainActivity : ComponentActivity() {
                 .build()
             this.assetLoader = loader
 
-            // 5. Configure WebSettings
+            // 5. Configure WebSettings with strict security parameters
             wv.settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
                 databaseEnabled = true
-                allowFileAccess = true
-                allowContentAccess = true
+                allowFileAccess = false
+                allowContentAccess = false
+                @Suppress("DEPRECATION")
+                allowFileAccessFromFileURLs = false
+                @Suppress("DEPRECATION")
+                allowUniversalAccessFromFileURLs = false
                 mediaPlaybackRequiresUserGesture = false
-                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
                 cacheMode = if (isNetworkAvailable()) {
                     WebSettings.LOAD_DEFAULT
                 } else {
@@ -99,6 +104,8 @@ class MainActivity : ComponentActivity() {
                 useWideViewPort = true
                 textZoom = 100
             }
+
+            // Note: No dangerous @JavascriptInterface is registered on this WebView.
 
             // 6. Setup WebViewClient
             wv.webViewClient = object : WebViewClient() {
@@ -127,15 +134,29 @@ class MainActivity : ComponentActivity() {
                     view: WebView?,
                     request: WebResourceRequest?
                 ): Boolean {
-                    val url = request?.url ?: return false
-                    val host = url.host ?: return false
+                    val url = request?.url ?: return true
+                    val scheme = url.scheme?.lowercase() ?: return true
+                    val host = url.host?.lowercase() ?: ""
 
-                    if (host == ASSET_DOMAIN) return false
-                    if (ALLOWED_HOSTS.any { host.endsWith(it) }) return false
+                    // Allow internal asset loader domain and target app domain inside WebView
+                    if (scheme == "https" || scheme == "http") {
+                        if (host == ASSET_DOMAIN || ALLOWED_HOSTS.any { host == it || host.endsWith(".$it") }) {
+                            return false
+                        }
+                    }
 
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, url))
-                    } catch (_: Throwable) { }
+                    // Allow standard explicit intent schemes (tel, mailto, sms)
+                    if (scheme == "tel" || scheme == "mailto" || scheme == "sms") {
+                        try {
+                            startActivity(Intent(Intent.ACTION_VIEW, url))
+                        } catch (e: Throwable) {
+                            Log.w(TAG, "Could not launch intent for scheme: $scheme", e)
+                        }
+                        return true
+                    }
+
+                    // Block all arbitrary external navigations and unknown schemes
+                    Log.w(TAG, "Blocked external navigation to: $url")
                     return true
                 }
 
