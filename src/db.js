@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   HOURLY_LOGS: 'planex_hourly_logs',
   CATEGORIES: 'planex_categories',
   HABITS: 'planex_habits',
+  ROUTINES: 'planex_routines',
   DAILY_PLANS: 'planex_daily_plans',
   WEEKLY_GOALS: 'planex_weekly_goals',
   STUDY_TARGETS: 'planex_study_targets',
@@ -37,11 +38,22 @@ import { ACTIVITY_PALETTE_24, DEFAULT_CATEGORIES, DEFAULT_NON_STUDY_CATEGORIES, 
 export function isPlaceholderName(n) {
   if (!n || typeof n !== 'string') return true;
   const clean = n.trim().replace(/\u200C/g, ' ').replace(/\s+/g, ' ');
-  return (
-    clean === '' ||
-    clean === 'کاربر' ||
-    clean.toLowerCase() === 'x'
-  );
+  const placeholders = [
+    '',
+    'کاربر',
+    'کاربر پلنکس',
+    'دانشجو',
+    'دانش آموز',
+    'دانش آموز پر تلاش',
+    'دانش آموز پرتلاش',
+    'دانش‌آموز پرتلاش',
+    'دانش‌آموز پر تلاش',
+    'داوطلب پرتلاش',
+    'داوطلب پر تلاش',
+    'x',
+    'X'
+  ];
+  return placeholders.includes(clean) || clean.toLowerCase() === 'x';
 }
 
 class DatabaseEngine {
@@ -125,6 +137,41 @@ class DatabaseEngine {
                 });
                 const merged = Array.from(map.values());
                 localStorage.setItem(key, JSON.stringify(merged));
+                return;
+              }
+            } catch (_) {}
+          }
+        }
+
+        // Never overwrite existing routines/habits with empty backup data; merge incoming data preserving local additions
+        if ((key === STORAGE_KEYS.HABITS || key === STORAGE_KEYS.ROUTINES || key === 'planex_habits' || key === 'planex_routines') && Array.isArray(val)) {
+          if (val.length === 0) {
+            const existing = this.getHabits();
+            if (existing && existing.length > 0) {
+              return;
+            }
+          } else {
+            try {
+              const existing = this.getHabits();
+              if (Array.isArray(existing) && existing.length > 0) {
+                const map = new Map();
+                existing.forEach(h => { if (h && (h.id || h.title)) map.set(String(h.id || h.title), h); });
+                val.forEach(h => {
+                  if (!h || typeof h !== 'object') return;
+                  const k = String(h.id || h.title);
+                  if (!map.has(k)) {
+                    map.set(k, h);
+                  } else {
+                    const prev = map.get(k);
+                    map.set(k, {
+                      ...h,
+                      ...prev,
+                      completedDays: { ...(h.completedDays || {}), ...(prev.completedDays || {}) }
+                    });
+                  }
+                });
+                const merged = Array.from(map.values());
+                this.saveRoutines(merged);
                 return;
               }
             } catch (_) {}
@@ -1075,12 +1122,38 @@ class DatabaseEngine {
     return Array.from(topicsSet);
   }
 
-  // Habits
+  // Habits & Routines Persistence Engine
+  getRoutines() {
+    return this.getHabits();
+  }
+
+  saveRoutines(routines) {
+    if (!Array.isArray(routines)) return [];
+    try {
+      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(routines));
+      localStorage.setItem(STORAGE_KEYS.ROUTINES, JSON.stringify(routines));
+    } catch (e) {
+      console.error('Error saving routines:', e);
+    }
+    if (typeof window !== 'undefined' && typeof window.triggerActionDrivenPush === 'function') {
+      window.triggerActionDrivenPush();
+    }
+    return routines;
+  }
+
   getHabits() {
-    let habits = JSON.parse(localStorage.getItem(STORAGE_KEYS.HABITS) || '[]');
+    let raw = localStorage.getItem(STORAGE_KEYS.HABITS) || localStorage.getItem(STORAGE_KEYS.ROUTINES);
+    let habits = [];
+    try {
+      habits = JSON.parse(raw || '[]');
+      if (!Array.isArray(habits)) habits = [];
+    } catch (e) {
+      habits = [];
+    }
     let changed = false;
     const seenIds = new Set();
     habits.forEach((h, index) => {
+      if (!h || typeof h !== 'object') return;
       if (!h.id || seenIds.has(h.id)) {
         h.id = Date.now().toString() + '_' + index + '_' + Math.random().toString(36).substr(2, 9);
         changed = true;
@@ -1089,6 +1162,7 @@ class DatabaseEngine {
     });
     if (changed) {
       localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
+      localStorage.setItem(STORAGE_KEYS.ROUTINES, JSON.stringify(habits));
     }
     return habits;
   }
@@ -1118,7 +1192,7 @@ class DatabaseEngine {
       completedDays: {} // monthKey -> {day: status} for 31-day matrix
     };
     habits.push(newHabit);
-    localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
+    this.saveRoutines(habits);
     return newHabit;
   }
 
@@ -1138,7 +1212,7 @@ class DatabaseEngine {
       if (updates.emoji !== undefined) habit.emoji = updates.emoji;
       if (updates.frequency !== undefined) habit.frequency = updates.frequency;
       if (updates.targetTime !== undefined) habit.targetTime = updates.targetTime;
-      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
+      this.saveRoutines(habits);
       return habit;
     }
     return null;
@@ -1150,7 +1224,7 @@ class DatabaseEngine {
     if (habit) {
       if (!habit.daysCompleted) habit.daysCompleted = [false, false, false, false, false, false, false];
       habit.daysCompleted[dayIndex] = !habit.daysCompleted[dayIndex];
-      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
+      this.saveRoutines(habits);
     }
   }
 
@@ -1166,7 +1240,7 @@ class DatabaseEngine {
       currentStatus = (currentStatus + 1) % 3;
       
       habit.completedDays[monthKey][day] = currentStatus;
-      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
+      this.saveRoutines(habits);
       return currentStatus;
     }
     return 0;
@@ -1175,7 +1249,7 @@ class DatabaseEngine {
   deleteHabit(habitId) {
     let habits = this.getHabits();
     habits = habits.filter(h => h.id != habitId && String(h.id) !== String(habitId));
-    localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
+    this.saveRoutines(habits);
   }
 
   // Daily & Weekly Plans
@@ -2986,13 +3060,22 @@ class DatabaseEngine {
       profile.photo = storedAvatar;
       profile.photoUrl = storedAvatar;
     }
+    const effectiveName = this.getEffectiveUserName();
+    if (effectiveName) {
+      profile.name = effectiveName;
+      profile.nickname = effectiveName;
+    } else if (isPlaceholderName(profile.name)) {
+      profile.name = '';
+      profile.nickname = '';
+    }
     return profile;
   }
 
   setUserProfile(profileObj) {
     if (!profileObj || typeof profileObj !== 'object') return {};
     try {
-      const existing = this.getUserProfile() || {};
+      let existing = {};
+      try { existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILE) || '{}'); } catch(e) {}
       const updated = { ...existing, ...profileObj };
       const av = profileObj.avatar || profileObj.avatar_url || profileObj.photo || profileObj.photoUrl || localStorage.getItem('planex_user_avatar');
       if (av) {
@@ -3001,6 +3084,13 @@ class DatabaseEngine {
         updated.avatar_url = av;
         updated.photo = av;
         updated.photoUrl = av;
+      }
+      if (profileObj.name && !isPlaceholderName(profileObj.name)) {
+        updated.name = profileObj.name;
+        updated.nickname = profileObj.name;
+        localStorage.setItem('planex_user_nickname', profileObj.name);
+        localStorage.setItem('planex_nickname', profileObj.name);
+        localStorage.setItem('planex_leaderboard_nickname', profileObj.name);
       }
       localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(updated));
       if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {

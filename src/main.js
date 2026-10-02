@@ -4559,11 +4559,14 @@ export function initApp() {
       }
     } catch (e) { console.warn('Error in resumeTimerFromState:', e); }
 
-    // 3.5. Synchronize & hydrate local database state (profile, study logs) before initial render
+    // 3.5. Synchronize & hydrate local database state (profile, study logs, routines) before initial render
     if (splashBar) splashBar.style.width = '40%';
     try {
       if (typeof db !== 'undefined' && typeof db.hydrateAndSyncState === 'function') {
         db.hydrateAndSyncState();
+      }
+      if (typeof db !== 'undefined' && typeof db.getRoutines === 'function') {
+        db.getRoutines();
       }
     } catch (_) {}
 

@@ -226,6 +226,7 @@ window.saveNewHabit = () => {
     db.addHabit(title, 'روزانه', '08:00', emoji);
   }
   
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   window.closeAddHabitModal();
   window.renderApp();
 };
@@ -233,6 +234,7 @@ window.saveNewHabit = () => {
 window.deleteHabitGlobal = (id) => {
   if (confirm('آیا از حذف این عادت اطمینان دارید؟')) {
     db.deleteHabit(id);
+    if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
     window.renderApp();
   }
 };
@@ -441,6 +443,7 @@ window.clonePreMadeRoutine = (id) => {
     db.addHabit(task);
   });
   
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
   alert(`✅ تمام تسک‌های روتین "${routine.title}" با موفقیت به لیست عادات شما اضافه شد!`);
   window.renderApp();
 };
