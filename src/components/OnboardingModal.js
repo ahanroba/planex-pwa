@@ -39,6 +39,9 @@ export function renderOnboardingModal(step = 1, currentData = {}) {
           <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 16px;">
             گام ${step} از ۳ • این اطلاعات برای پیشنهاد اتاق‌های مطالعه همرشته‌ای‌ها استفاده می‌شود
           </p>
+          <div style="font-size: 0.78rem; color: #fde68a; background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35); border-radius: 12px; padding: 8px 12px; margin-bottom: 16px; line-height: 1.7;">
+            💡 نکته برای همگام‌سازی پایدار: برای تبادل سریع‌تر داده‌ها با سرور ابری، لطفاً فیلترشکن (VPN) خود را خاموش کنید.
+          </div>
 
           <!-- Step Progress Bar -->
           <div style="display: flex; gap: 8px; justify-content: center;">

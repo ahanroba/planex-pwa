@@ -339,6 +339,10 @@ export const personalSyncService = {
         json = rawText ? JSON.parse(rawText) : null;
       } catch (e) {}
 
+      if (json && typeof json.backupData === 'string') {
+        try { json.backupData = JSON.parse(json.backupData); } catch (e) {}
+      }
+
       if (res.ok && json && json.success) {
         // Extract pulled name & avatar from server response
         const pulledName = json.user?.name 
@@ -558,6 +562,9 @@ export const personalSyncService = {
             // Do NOT dispatch events that would re-trigger pushToCloud (infinite loop)
             if (window.dashboardChartInstances) window.dashboardChartInstances = null;
             if (typeof window.updateCharts === 'function') window.updateCharts();
+            ['renderRoutines', 'updateLeitnerUI', 'renderDashboard'].forEach(fn => {
+              try { if (typeof window[fn] === 'function') window[fn](); } catch (_) {}
+            });
           }
 
           if (typeof window !== 'undefined' && window._forceEbWipe) {

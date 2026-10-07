@@ -410,6 +410,7 @@ function renderLeitnerBoxSection() {
               </span>
             </h3>
             <p style="margin: 3px 0 0 0; font-size: 0.7rem; color: #8e8e9c;">مرور فاصله‌دار ابینگهاوس در ۵ خانه هوشمند</p>
+            <a href="#flashcards" onclick="event.stopPropagation()" style="display: inline-block; margin-top: 4px; font-size: 0.68rem; color: #a78bfa; text-decoration: none;">صفحه کامل فلش‌کارت‌ها ↗</a>
           </div>
         </div>
 

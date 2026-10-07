@@ -163,9 +163,12 @@ class DatabaseEngine {
                     map.set(k, h);
                   } else {
                     const prev = map.get(k);
+                    const prevTs = Number(prev.updatedAt || prev.updated_at || 0);
+                    const inTs = Number(h.updatedAt || h.updated_at || 0);
+                    const localNewer = prevTs > inTs;
                     map.set(k, {
-                      ...h,
-                      ...prev,
+                      ...(localNewer ? h : prev),
+                      ...(localNewer ? prev : h),
                       completedDays: { ...(h.completedDays || {}), ...(prev.completedDays || {}) }
                     });
                   }

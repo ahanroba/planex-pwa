@@ -1871,6 +1871,7 @@ export function normalizeTab(tabId) {
   if (str === '3' || str === 'tools' || str === 'ابزارها' || str === 'tool') return 3;
   if (str === '4' || str === 'articles' || str === 'مقالات' || str === 'article' || str === 'questions' || str === 'questionbank' || str === 'آزمونها' || str === 'آزمون‌ها' || str === 'بانک سوالات' || str === 'exam') return 4;
   if (str === '5' || str === 'leaderboard' || str === 'competition' || str === 'رقابت' || str === 'لیدربرد' || str === 'compete' || str === 'ranking') return 'leaderboard';
+  if (str === 'flashcards' || str === 'leitner' || str === 'لایتنر' || str === 'فلش‌کارت') return 'flashcards';
   return tabId;
 }
 window.normalizeTab = normalizeTab;
@@ -1884,6 +1885,7 @@ window.switchTab = function(tabId, options = {}) {
   const isArticles = (normTab === 4 || normTab === '4' || normTab === 'articles');
 
   currentAppState.activeTab = normTab;
+  if (normTab !== 'flashcards' && window.location.hash) history.replaceState(null, '', window.location.pathname + window.location.search);
 
   if (isArticles) {
     if (options && options.article) {
@@ -2523,6 +2525,7 @@ import { renderUserGuideModal } from './components/UserGuideModal.js';
 import { renderActivityModal } from './components/ActivityModal.js';
 import { renderConsultationModal } from './components/ConsultationModal.js';
 import { renderConsultationView } from './views/ConsultationView.js';
+import { renderFlashcardsView } from './views/FlashcardsView.js';
 import { initTokenClient, backupDataToDrive, restoreDataFromDrive } from './services/googleDriveService.js';
 
 
@@ -3157,6 +3160,8 @@ export function renderApp() {
     let viewHTML = '';
     if (isConsultation) {
       viewHTML = renderConsultationView();
+    } else if (normTab === 'flashcards') {
+      viewHTML = `<div id="tab-flashcards" class="tab-view-container" style="display: block;">${renderFlashcardsView()}</div>`;
     } else {
       viewHTML = `
         <div id="tab-dashboard" class="tab-view-container" style="display: ${isDashboard ? 'block' : 'none'};">
@@ -4582,6 +4587,24 @@ export function initApp() {
           window.leaderboardService.fetchUserGroups(false).catch(() => {});
         }
       }
+    } catch (e) {}
+
+    // 5.5. Initial background pull so web-side changes are retrieved on launch
+    try {
+      if (typeof personalSyncService?.pullFromCloud === 'function') {
+        setTimeout(() => personalSyncService.pullFromCloud().catch(() => {}), 0);
+      }
+    } catch (e) {}
+
+    // 5.6. #flashcards hash route for the standalone Leitner view
+    try {
+      const applyHashRoute = () => {
+        if ((window.location.hash || '').toLowerCase() === '#flashcards') {
+          if (typeof window.switchTab === 'function') window.switchTab('flashcards');
+        }
+      };
+      applyHashRoute();
+      window.addEventListener('hashchange', applyHashRoute);
     } catch (e) {}
 
     // 6. If initial tab is Leaderboard, trigger data refresh
