@@ -1,9 +1,20 @@
 import { db } from '../db.js';
 import { API_BASE_URL } from '../config.js';
 
-const [todayY, todayM] = db.getTodayJalali();
-let currentYear = todayY;
-let currentMonth = todayM;
+const [initialY, initialM] = db.getTodayJalali();
+let currentYear = initialY;
+let currentMonth = initialM;
+
+window.getSelectedRoutinesDate = function() {
+  if (!window.selectedRoutinesDate) {
+    window.selectedRoutinesDate = db.getTodayJalali();
+  }
+  return window.selectedRoutinesDate;
+};
+window.setSelectedRoutinesDate = function(y, m, d) {
+  window.selectedRoutinesDate = [y, m, d];
+  if (window.renderApp) window.renderApp();
+};
 
 const PERSIAN_MONTHS = [
   "فروردین", "اردیبهشت", "خرداد",
@@ -107,7 +118,7 @@ window.toggleTodayHabit = (habitId, event = null) => {
   if (event && typeof event.stopPropagation === 'function') {
     event.stopPropagation();
   }
-  const [tY, tM, tD] = db.getTodayJalali();
+  const [tY, tM, tD] = window.getSelectedRoutinesDate();
   const todayMonthKey = `${tY}_${tM}`;
   const habits = db.getHabits();
   const habit = habits.find(h => h.id == habitId || String(h.id) === String(habitId));
@@ -473,6 +484,36 @@ function renderWeeklyDonuts(dailyProgress, totalHabits) {
   return html;
 }
 
+window.setJournalMood = function(mood) {
+  const [y, m, d] = window.getSelectedRoutinesDate();
+  const key = `${y}_${m}_${d}`;
+  const data = db.getJournalEntry ? db.getJournalEntry(key) : { mood: '', rating: 0, note: '' };
+  data.mood = mood;
+  if (db.saveJournalEntry) db.saveJournalEntry(key, data.mood, data.rating, data.note);
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+  if (window.renderApp) window.renderApp();
+};
+
+window.setJournalRating = function(rating) {
+  const [y, m, d] = window.getSelectedRoutinesDate();
+  const key = `${y}_${m}_${d}`;
+  const data = db.getJournalEntry ? db.getJournalEntry(key) : { mood: '', rating: 0, note: '' };
+  data.rating = rating;
+  if (db.saveJournalEntry) db.saveJournalEntry(key, data.mood, data.rating, data.note);
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+  if (window.renderApp) window.renderApp();
+};
+
+window.saveJournalNote = function(note) {
+  const [y, m, d] = window.getSelectedRoutinesDate();
+  const key = `${y}_${m}_${d}`;
+  const data = db.getJournalEntry ? db.getJournalEntry(key) : { mood: '', rating: 0, note: '' };
+  if (data.note === note) return;
+  data.note = note;
+  if (db.saveJournalEntry) db.saveJournalEntry(key, data.mood, data.rating, data.note);
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+};
+
 export function renderRoutinesView(options = {}) {
   const { routinesAccordions = { consultation: false, statsChart: false, habitTracker: false } } = options;
   const habits = db.getHabits();
@@ -498,8 +539,8 @@ export function renderRoutinesView(options = {}) {
 
   const overallPct = maxPossibleCells > 0 ? Math.round((doneCells / maxPossibleCells) * 100) : 0;
 
-  // Today's daily progress stats
-  const [todayY, todayM, todayD] = db.getTodayJalali();
+  // Selected day progress stats
+  const [todayY, todayM, todayD] = window.getSelectedRoutinesDate();
   const currentMonthKey = `${todayY}_${todayM}`;
   const toPersianDigits = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
@@ -510,14 +551,69 @@ export function renderRoutinesView(options = {}) {
   });
   const todayHabitsPct = totalHabits > 0 ? Math.round((todayDoneHabitsCount / totalHabits) * 100) : 0;
 
-  // Auto-fetch routines if not done yet (deferred to avoid re-render during render)
+  // Auto-fetch routines if not done yet
   if (!window.planexHasFetchedRoutines && localStorage.getItem('planex_jwt_token')) {
-    window.planexHasFetchedRoutines = true; // mark immediately to prevent repeated calls
+    window.planexHasFetchedRoutines = true;
     setTimeout(() => window.fetchPublicRoutines(), 500);
   }
 
+  // Generate Week Strip HTML
+  const todayDateObj = new Date();
+  const dayOfWeek = (todayDateObj.getDay() + 1) % 7;
+  let weekStripHTML = `<div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; scrollbar-width: none; direction: rtl;">`;
+  const dayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+  for (let i = 0; i < 7; i++) {
+    const dDate = new Date(todayDateObj);
+    dDate.setDate(todayDateObj.getDate() - dayOfWeek + i);
+    const [jy, jm, jd] = db.gregorianToJalali(dDate.getFullYear(), dDate.getMonth() + 1, dDate.getDate());
+    
+    const mKey = `${jy}_${jm}`;
+    let done = 0;
+    habits.forEach(h => { if (h.completedDays?.[mKey]?.[jd] === 1) done++; });
+    const pct = totalHabits > 0 ? (done / totalHabits) : 0;
+    
+    const isSelected = (jy === todayY && jm === todayM && jd === todayD);
+    
+    const bg = isSelected ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+    const border = isSelected ? 'rgba(56, 189, 248, 0.6)' : 'rgba(255, 255, 255, 0.1)';
+    const dotColor = pct === 1 && totalHabits > 0 ? '#10b981' : (pct > 0 ? '#f59e0b' : 'transparent');
+    
+    weekStripHTML += `
+      <div onclick="window.setSelectedRoutinesDate(${jy}, ${jm}, ${jd})"
+           style="flex: 1; min-width: 60px; padding: 10px 4px; border-radius: 14px; background: ${bg}; border: 1px solid ${border}; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.2s;">
+        <span style="font-size: 0.7rem; color: ${isSelected ? '#38bdf8' : '#9ca3af'}; margin-bottom: 4px;">${dayNames[i]}</span>
+        <span style="font-size: 1.2rem; font-weight: 800; color: ${isSelected ? '#fff' : '#d1d5db'}; font-family: 'Outfit'; margin-bottom: 8px;">${toPersianDigits(jd)}</span>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: ${dotColor}; border: 1px solid ${pct > 0 ? dotColor : 'rgba(255,255,255,0.1)'};"></div>
+      </div>
+    `;
+  }
+  weekStripHTML += `</div>`;
+
+  const dateKey = `${todayY}_${todayM}_${todayD}`;
+  const journalData = db.getJournalEntry ? db.getJournalEntry(dateKey) : { mood: '', rating: 0, note: '' };
+  const emojis = ['❤️', '💪', '😴', '😍', '😡', '😫', '😔', '😐', '🙂', '😄'];
+  let journalHTML = `
+    <div class="glass-panel" style="margin-bottom: 16px; border-radius: 18px; border: 1.5px solid rgba(255,255,255,0.1); padding: 16px; direction: rtl;">
+      <h3 style="margin: 0 0 12px 0; font-size: 1rem; color: #f8fafc; font-weight: 800;">حال و احساس امروز</h3>
+      <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none;">
+        ${emojis.map(e => `
+          <button onclick="window.setJournalMood('${e}')" style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: ${journalData.mood === e ? '2px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)'}; background: ${journalData.mood === e ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.05)'}; font-size: 1.2rem; cursor: pointer;">${e}</button>
+        `).join('')}
+      </div>
+      <h4 style="margin: 0 0 8px 0; font-size: 0.85rem; color: #cbd5e1;">نمره روز</h4>
+      <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none;">
+        ${[1,2,3,4,5,6,7,8,9,10].map(n => `
+          <button onclick="window.setJournalRating(${n})" style="flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; border: ${journalData.rating === n ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)'}; background: ${journalData.rating === n ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)'}; color: ${journalData.rating === n ? '#10b981' : '#fff'}; font-weight: 800; cursor: pointer;">${toPersianDigits(n)}</button>
+        `).join('')}
+      </div>
+      <h4 style="margin: 0 0 8px 0; font-size: 0.85rem; color: #cbd5e1;">ژورنال امروز</h4>
+      <textarea id="journal-note-input" rows="3" placeholder="امروز چطور گذشت؟ چی یاد گرفتی؟ چی حس کردی؟..." style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; color: #fff; font-family: inherit; font-size: 0.85rem; margin-bottom: 12px; resize: vertical;" onblur="window.saveJournalNote(this.value)">${journalData.note}</textarea>
+    </div>
+  `;
+
   return `
     <div class="main-container" style="padding-bottom: 100px;">
+      ${weekStripHTML}
       
       <!-- 🚀 TODAY'S ROUTINES DAILY PROGRESS BANNER -->
       <div class="glass-panel" style="margin-bottom: 16px; padding: 14px 18px; border-radius: 18px; border: 1.5px solid rgba(16, 185, 129, 0.4); background: linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(56, 189, 248, 0.12) 100%); direction: rtl; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
@@ -806,6 +902,29 @@ export function renderRoutinesView(options = {}) {
                     </div>
                   </div>
                 </div>
+
+                <!-- 3. Compact Habit Heatmaps -->
+                <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 15px; margin-top: 15px;">
+                  <h3 style="font-size: 0.95rem; color: #38bdf8; margin: 0 0 12px 0;">نقشه فعالیت عادت‌ها (ماه جاری)</h3>
+                  <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
+                    ${habits.map(h => {
+                      const mData = h.completedDays?.[currentMonthKey] || {};
+                      let boxes = '';
+                      for (let d = 1; d <= 31; d++) {
+                        const done = mData[d] === 1;
+                        boxes += \`<div style="width: 8px; height: 8px; border-radius: 2px; background: \${done ? '#10b981' : 'rgba(255,255,255,0.05)'}; border: 1px solid \${done ? '#059669' : 'rgba(255,255,255,0.1)'};" title="روز \${d}"></div>\`;
+                      }
+                      return \`
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; min-width: 150px; flex: 1;">
+                          <div style="font-size: 0.8rem; color: #e2e8f0; font-weight: 700; margin-bottom: 6px; text-align: center;">\${h.emoji || '✨'} \${h.title}</div>
+                          <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; justify-content: center;">
+                            \${boxes}
+                          </div>
+                        </div>
+                      \`;
+                    }).join('')}
+                  </div>
+                </div>
               `;
             })()}
           </div>
@@ -862,6 +981,7 @@ export function renderRoutinesView(options = {}) {
           `).join('')}
         </div>
       </details>
+      ${journalHTML}
     </div>
 
     <!-- Add / Edit Habit Modal -->

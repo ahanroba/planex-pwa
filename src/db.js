@@ -3113,6 +3113,21 @@ class DatabaseEngine {
   getProfile() {
     return this.getUserProfile();
   }
+
+  getJournalEntry(dateKey) {
+    try {
+      const entries = JSON.parse(localStorage.getItem('planex_journal_entries')) || {};
+      return entries[dateKey] || { mood: '', rating: 0, note: '' };
+    } catch (e) { return { mood: '', rating: 0, note: '' }; }
+  }
+
+  saveJournalEntry(dateKey, mood, rating, note) {
+    try {
+      const entries = JSON.parse(localStorage.getItem('planex_journal_entries')) || {};
+      entries[dateKey] = { mood, rating, note };
+      localStorage.setItem('planex_journal_entries', JSON.stringify(entries));
+    } catch (e) {}
+  }
 }
 
 export const db = new DatabaseEngine();
