@@ -912,16 +912,16 @@ export function renderRoutinesView(options = {}) {
                       let boxes = '';
                       for (let d = 1; d <= 31; d++) {
                         const done = mData[d] === 1;
-                        boxes += \`<div style="width: 8px; height: 8px; border-radius: 2px; background: \${done ? '#10b981' : 'rgba(255,255,255,0.05)'}; border: 1px solid \${done ? '#059669' : 'rgba(255,255,255,0.1)'};" title="روز \${d}"></div>\`;
+                        boxes += `<div style="width: 8px; height: 8px; border-radius: 2px; background: ${done ? '#10b981' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${done ? '#059669' : 'rgba(255,255,255,0.1)'};" title="روز ${d}"></div>`;
                       }
-                      return \`
+                      return `
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; min-width: 150px; flex: 1;">
-                          <div style="font-size: 0.8rem; color: #e2e8f0; font-weight: 700; margin-bottom: 6px; text-align: center;">\${h.emoji || '✨'} \${h.title}</div>
+                          <div style="font-size: 0.8rem; color: #e2e8f0; font-weight: 700; margin-bottom: 6px; text-align: center;">${h.emoji || '✨'} ${h.title}</div>
                           <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; justify-content: center;">
-                            \${boxes}
+                            ${boxes}
                           </div>
                         </div>
-                      \`;
+                      `;
                     }).join('')}
                   </div>
                 </div>
