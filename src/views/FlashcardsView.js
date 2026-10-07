@@ -60,7 +60,10 @@ function renderDeckManager() {
   const stats = db.getLeitnerStats();
   return `
     <div style="max-width:720px; margin:0 auto; padding:16px;">
-      <h2 style="color:#f8fafc; font-size:1.2rem; font-weight:800; margin:0 0 4px;">🧠 فلش‌کارت و جعبه لایتنر</h2>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 4px;">
+        <h2 style="color:#f8fafc; font-size:1.2rem; font-weight:800; margin:0;">🧠 فلش‌کارت و جعبه لایتنر</h2>
+        <button id="btn-fc-back-to-tools" type="button" onclick="window.switchTab('tools')" style="flex-shrink:0; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#e4e4e7; padding:7px 14px; border-radius:12px; font-size:0.78rem; font-weight:700; cursor:pointer;">→ بازگشت</button>
+      </div>
       <p style="color:#8e8e9c; font-size:0.78rem; margin:0 0 16px;">${toFa(stats.total)} کارت • ${toFa(stats.due)} آماده مرور • ${toFa(stats.mastered)} تثبیت‌شده</p>
 
       <button onclick="window.fcStartStudy('__all__')" ${stats.total ? '' : 'disabled'}
