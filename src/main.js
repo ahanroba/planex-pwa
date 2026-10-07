@@ -3368,6 +3368,11 @@ export function renderApp() {
     const scrollPos = headerWrapper ? headerWrapper.scrollLeft : 0;
 
     appEl.innerHTML = `
+      ${localStorage.getItem('planex_global_vpn_tip_dismissed') === '1' ? '' : `
+      <div id="global-vpn-sync-tip" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 16px; background: rgba(251,191,36,0.15); border-bottom: 1px solid rgba(251,191,36,0.3);">
+        <div style="flex: 1; font-size: 0.8rem; color: #fde68a; line-height: 1.5; text-align: center;">💡 نکته مهم: برای تبادل سریعتر اطلاعات و ذخیره مطمئن دادهها، لطفاً فیلترشکن (VPN) خود را خاموش کنید.</div>
+        <button type="button" title="بستن" onclick="localStorage.setItem('planex_global_vpn_tip_dismissed','1'); var el=document.getElementById('global-vpn-sync-tip'); if(el) el.remove(); if(typeof renderApp === 'function') renderApp();" style="background: none; border: none; color: #fbbf24; font-size: 1.1rem; cursor: pointer; padding: 0;">✕</button>
+      </div>`}
       ${renderHeader(state)}
       <main style="flex: 1;">
         ${viewHTML}

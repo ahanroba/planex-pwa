@@ -62,6 +62,7 @@ function renderDeckManager() {
     <div style="max-width:720px; margin:0 auto; padding:16px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 4px;">
         <h2 style="color:#f8fafc; font-size:1.2rem; font-weight:800; margin:0;">🧠 فلش‌کارت و جعبه لایتنر</h2>
+        <button id="btn-fc-new-card" type="button" onclick="window.fcOpenNewCardModal()" style="flex-shrink:0; margin-inline-start:auto; background:linear-gradient(135deg,#22c55e,#16a34a); border:none; color:white; padding:8px 16px; border-radius:12px; font-size:0.82rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(34,197,94,0.3);">+ کارت جدید</button>
         <button id="btn-fc-back-to-tools" type="button" onclick="window.switchTab('tools')" style="flex-shrink:0; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#e4e4e7; padding:7px 14px; border-radius:12px; font-size:0.78rem; font-weight:700; cursor:pointer;">→ بازگشت</button>
       </div>
       <p style="color:#8e8e9c; font-size:0.78rem; margin:0 0 16px;">${toFa(stats.total)} کارت • ${toFa(stats.due)} آماده مرور • ${toFa(stats.mastered)} تثبیت‌شده</p>
@@ -198,4 +199,63 @@ window.fcAnswer = function(isCorrect) {
 // Lets cloud pulls refresh this view via the existing dispatcher name
 window.updateLeitnerUI = window.updateLeitnerUI || function() {
   if (document.getElementById('flashcards-view') && !fcState.studyDeck) rerender();
+};
+
+// ── Create-card modal (mounted on <body> so renderApp() can't wipe it mid-typing) ──
+window.fcCloseNewCardModal = function() {
+  const m = document.getElementById('fc-new-card-modal');
+  if (m) m.remove();
+};
+
+window.fcOpenNewCardModal = function() {
+  window.fcCloseNewCardModal();
+  const decks = getDecks().map(d => d.name);
+  const input = 'width:100%; box-sizing:border-box; background:#0b0c10; border:1px solid rgba(255,255,255,0.12); color:#f8fafc; border-radius:12px; padding:10px 12px; font-size:0.85rem; font-family:inherit; margin-bottom:12px;';
+  const label = 'display:block; color:#cbd5e1; font-size:0.75rem; font-weight:700; margin-bottom:6px;';
+  const wrap = document.createElement('div');
+  wrap.id = 'fc-new-card-modal';
+  wrap.style.cssText = 'position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.65); display:flex; align-items:center; justify-content:center; padding:16px; direction:rtl;';
+  wrap.innerHTML = `
+    <form id="fc-new-card-form" style="width:100%; max-width:440px; background:#16171d; border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="margin:0; color:#f8fafc; font-size:1rem; font-weight:800;">افزودن فلش‌کارت جدید</h3>
+        <button type="button" onclick="window.fcCloseNewCardModal()" style="background:none; border:none; color:#8e8e9c; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <label style="${label}">صورت سوال / مفهوم</label>
+      <textarea id="fc-new-front" rows="3" required style="${input} resize:vertical;"></textarea>
+      <label style="${label}">پاسخ / توضیح</label>
+      <textarea id="fc-new-back" rows="3" required style="${input} resize:vertical;"></textarea>
+      <label style="${label}">دسته (انتخاب یا نوشتن نام دسته)</label>
+      <input id="fc-new-category" list="fc-deck-options" placeholder="عمومی" value="${esc(decks[0] || '')}" style="${input}">
+      <datalist id="fc-deck-options">${decks.map(d => `<option value="${esc(d)}"></option>`).join('')}</datalist>
+      <div id="fc-new-error" style="color:#fca5a5; font-size:0.72rem; min-height:1em; margin-bottom:8px;"></div>
+      <button type="submit" style="width:100%; padding:12px; border:none; border-radius:14px; background:linear-gradient(135deg,#6366f1,#a855f7); color:white; font-weight:800; font-size:0.9rem; cursor:pointer;">ذخیره کارت</button>
+    </form>`;
+  wrap.addEventListener('click', (e) => { if (e.target === wrap) window.fcCloseNewCardModal(); });
+  wrap.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    window.fcSubmitNewCard();
+  });
+  document.body.appendChild(wrap);
+  setTimeout(() => document.getElementById('fc-new-front')?.focus(), 30);
+};
+
+window.fcSubmitNewCard = function() {
+  const front = (document.getElementById('fc-new-front')?.value || '').trim();
+  const back = (document.getElementById('fc-new-back')?.value || '').trim();
+  const category = (document.getElementById('fc-new-category')?.value || '').trim() || 'عمومی';
+  if (!front || !back) {
+    const err = document.getElementById('fc-new-error');
+    if (err) err.textContent = 'لطفاً سوال و پاسخ را وارد کنید.';
+    return;
+  }
+  // db.addFlashcard signature is (question, answer, deck)
+  const card = db.addFlashcard(front, back, category);
+  if (!card) return;
+  try {
+    if (typeof window.triggerActionDrivenPush === 'function') window.triggerActionDrivenPush();
+  } catch (_) {}
+  window.fcCloseNewCardModal();
+  if (typeof window.showToast === 'function') window.showToast('کارت جدید اضافه شد', '✅');
+  rerender();
 };

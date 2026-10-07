@@ -232,13 +232,6 @@ export function renderToolsView() {
       <!-- 🎴 Flashcards Promo Card (opens standalone #flashcards view) -->
       ${renderLeitnerBoxSection()}
 
-      <!-- 💡 Dismissible VPN / sync tip -->
-      ${localStorage.getItem('planex_vpn_tip_dismissed') === '1' ? '' : `
-      <div id="vpn-sync-tip" style="display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; margin-bottom: 12px; border-radius: 14px; background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.25);">
-        <div style="flex: 1; font-size: 0.72rem; color: #fde68a; line-height: 1.6;">💡 برای همگام‌سازی سریع‌تر با سرور ابری، لطفاً فیلترشکن (VPN) را خاموش کنید.</div>
-        <button type="button" title="بستن" onclick="localStorage.setItem('planex_vpn_tip_dismissed','1'); var el=document.getElementById('vpn-sync-tip'); if(el) el.remove();" style="background: none; border: none; color: #fbbf24; font-size: 0.85rem; cursor: pointer; padding: 0 2px;">✕</button>
-      </div>`}
-
       <!-- 🔄 Cloud Sync Box (Kept intact) -->
       ${(function() {
         let authUser = null;
