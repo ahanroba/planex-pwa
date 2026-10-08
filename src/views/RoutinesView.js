@@ -580,9 +580,9 @@ export function renderRoutinesView(options = {}) {
     
     weekStripHTML += `
       <div onclick="window.setSelectedRoutinesDate(${jy}, ${jm}, ${jd})"
-           style="flex: 1; min-width: 60px; padding: 10px 4px; border-radius: 14px; background: ${bg}; border: 1px solid ${border}; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.2s;">
+           style="flex: 1; min-width: 60px; padding: 6px 4px; border-radius: 14px; background: ${bg}; border: 1px solid ${border}; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.2s ease-in-out;">
         <span style="font-size: 0.7rem; color: ${isSelected ? '#38bdf8' : '#9ca3af'}; margin-bottom: 4px;">${dayNames[i]}</span>
-        <span style="font-size: 1.2rem; font-weight: 800; color: ${isSelected ? '#fff' : '#d1d5db'}; font-family: 'Outfit'; margin-bottom: 8px;">${toPersianDigits(jd)}</span>
+        <span style="font-size: 1.2rem; font-weight: 800; color: ${isSelected ? '#fff' : '#d1d5db'}; margin-bottom: 8px;">${toPersianDigits(jd)}</span>
         <div style="width: 8px; height: 8px; border-radius: 50%; background: ${dotColor}; border: 1px solid ${pct > 0 ? dotColor : 'rgba(255,255,255,0.1)'};"></div>
       </div>
     `;
