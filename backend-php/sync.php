@@ -1,15 +1,37 @@
 <?php
+ob_start();
+
 // ─── CORS Headers ───
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    if (ob_get_length()) {
+        ob_clean();
+    }
     http_response_code(200);
     exit();
 }
 
 require_once __DIR__ . '/db.php';
+
+/**
+ * Output clean JSON response and exit immediately
+ */
+function sendJsonResponse(array $data, int $statusCode = 200): void
+{
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    http_response_code($statusCode);
+    header('Content-Type: application/json; charset=UTF-8');
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    exit();
+}
 
 // ─── Read Request ───
 $method = $_SERVER['REQUEST_METHOD'];
@@ -60,11 +82,10 @@ switch ($action) {
         break;
 
     default:
-        http_response_code(400);
-        echo json_encode([
+        sendJsonResponse([
             'success' => false,
             'message' => 'Invalid or missing action. Use: login, get, save'
-        ]);
+        ], 400);
         break;
 }
 
@@ -83,9 +104,7 @@ function handleLogin(PDO $pdo, array $input): void
     $password = trim($input['password'] ?? '');
 
     if (empty($phone)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Phone number is required']);
-        return;
+        sendJsonResponse(['success' => false, 'message' => 'Phone number is required'], 400);
     }
 
     // Check if user exists
@@ -119,7 +138,7 @@ function handleLogin(PDO $pdo, array $input): void
         $userName = $storedData['name'] ?? $input['name'] ?? 'کاربر پلنکس';
         $userAvatar = $storedData['avatar_url'] ?? $storedData['avatar'] ?? $input['avatar_url'] ?? '';
 
-        echo json_encode([
+        sendJsonResponse([
             'success'    => true,
             'message'    => 'Login successful',
             'user'       => [
@@ -150,7 +169,7 @@ function handleLogin(PDO $pdo, array $input): void
 
         $newId = $pdo->lastInsertId();
 
-        echo json_encode([
+        sendJsonResponse([
             'success'    => true,
             'message'    => 'User registered successfully',
             'user'       => [
@@ -176,9 +195,7 @@ function handleGet(PDO $pdo): void
     $phone = trim($_GET['phone'] ?? '');
 
     if (empty($phone)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Phone number is required']);
-        return;
+        sendJsonResponse(['success' => false, 'message' => 'Phone number is required'], 400);
     }
 
     $stmt = $pdo->prepare("SELECT id, phone, data, created_at, updated_at FROM users WHERE phone = :phone LIMIT 1");
@@ -223,7 +240,7 @@ function handleGet(PDO $pdo): void
             ?? ($storedData['backupData']['planex_user_profile']['avatar_url'] ?? null)
             ?? '';
 
-        echo json_encode([
+        sendJsonResponse([
             'success'    => true,
             'name'       => $userName,
             'avatar'     => $userAvatar,
@@ -240,8 +257,7 @@ function handleGet(PDO $pdo): void
             'rooms'      => $storedData['rooms'] ?? []
         ]);
     } else {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'message' => 'User not found']);
+        sendJsonResponse(['success' => false, 'message' => 'User not found'], 404);
     }
 }
 
@@ -265,9 +281,7 @@ function handleSave(PDO $pdo, array $input): void
     }
 
     if (empty($phone)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Phone number is required']);
-        return;
+        sendJsonResponse(['success' => false, 'message' => 'Phone number is required'], 400);
     }
 
     // Check if user exists
@@ -276,9 +290,7 @@ function handleSave(PDO $pdo, array $input): void
     $user = $stmt->fetch();
 
     if (!$user) {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'message' => 'User not found. Please login first.']);
-        return;
+        sendJsonResponse(['success' => false, 'message' => 'User not found. Please login first.'], 404);
     }
 
     // 2. Force Save & Return: Explicitly extract name and avatar from incoming JSON
@@ -346,7 +358,7 @@ function handleSave(PDO $pdo, array $input): void
     $savedAvatar = $mergedData['avatar_url'] ?? ($mergedData['avatar'] ?? null) ?? ($mergedData['backupData']['planex_user_avatar'] ?? null) ?? '';
 
     // Explicitly return name and avatar in JSON response
-    echo json_encode([
+    sendJsonResponse([
         'success'    => true,
         'message'    => 'Data saved successfully',
         'name'       => $savedName,

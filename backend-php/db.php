@@ -1,12 +1,17 @@
 <?php
 // ─── CORS Headers ───
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-header("Content-Type: application/json; charset=UTF-8");
+if (!headers_sent()) {
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+    header("Content-Type: application/json; charset=UTF-8");
+}
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    if (ob_get_length()) {
+        ob_clean();
+    }
     http_response_code(200);
     exit();
 }
@@ -32,12 +37,19 @@ try {
     ];
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
 } catch (PDOException $e) {
-    header("Access-Control-Allow-Origin: *");
-    header("Content-Type: application/json; charset=UTF-8");
+    if (ob_get_length()) {
+        ob_clean();
+    }
+    if (!headers_sent()) {
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+        header("Content-Type: application/json; charset=UTF-8");
+    }
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'message' => 'Database connection failed: ' . $e->getMessage()
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
     exit();
 }
