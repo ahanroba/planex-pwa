@@ -1,4 +1,4 @@
-// Cloudflare Pages Function: /api/auth/login
+// Cloudflare Pages Function: /auth/login
 // Password & Phone Authentication Endpoint for PlanEx
 
 const corsHeaders = {
