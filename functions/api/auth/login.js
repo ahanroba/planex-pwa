@@ -9,10 +9,6 @@ const corsHeaders = {
   'Content-Type': 'application/json; charset=utf-8'
 };
 
-export async function onRequestOptions() {
-  return new Response(null, { status: 204, headers: corsHeaders });
-}
-
 function normalizePhone(rawPhone) {
   if (!rawPhone) return '';
   let p = String(rawPhone).trim();
@@ -45,9 +41,30 @@ function getPhoneVariants(cleanPhone) {
   return Array.from(variants);
 }
 
-export async function onRequestPost(context) {
+// Single onRequest export to avoid 405 conflicts with the [[path]].js catch-all.
+// Handles OPTIONS preflight and POST; rejects other methods explicitly.
+export async function onRequest(context) {
+  const { request, env } = context;
+  const method = request.method.toUpperCase();
+
+  // --- OPTIONS preflight ---
+  if (method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  // --- Reject non-POST methods ---
+  if (method !== 'POST') {
+    return new Response(JSON.stringify({
+      success: false,
+      message: `Method ${method} not allowed. Use POST.`
+    }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Allow': 'POST, OPTIONS' }
+    });
+  }
+
+  // --- POST handler ---
   try {
-    const { request, env } = context;
     const body = await request.json().catch(() => ({}));
 
     const rawPhone = body?.phone || body?.phone_number || body?.mobile || '';
