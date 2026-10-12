@@ -192,49 +192,13 @@ if (typeof window !== 'undefined') {
     }
 
     try {
-      let studyLogs = [];
-      try {
-        studyLogs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
-      } catch (e) {}
-
-      let myGroups = [];
-      try {
-        myGroups = JSON.parse(localStorage.getItem('planex_my_groups') || '[]');
-      } catch (e) {}
-
-      const backupData = (typeof window.personalSyncService !== 'undefined' && typeof window.personalSyncService.exportLocalState === 'function')
-        ? window.personalSyncService.exportLocalState()
-        : {};
-
-      let profile = {};
-      try {
-        profile = (db && typeof db.getUserProfile === 'function')
-          ? db.getUserProfile()
-          : JSON.parse(localStorage.getItem('planex_user_profile') || '{}');
-      } catch (e) {
-        profile = {};
-      }
-      if (!profile || typeof profile !== 'object') profile = {};
-
-      const storedAvatar = localStorage.getItem('planex_user_avatar') || profile.avatar || profile.avatar_url || profile.photo || '';
-      if (storedAvatar && backupData && typeof backupData === 'object') {
-        backupData.planex_user_avatar = storedAvatar;
-      }
-
       const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'login',
           phone: phone,
-          password: password,
-          study_logs: studyLogs,
-          rooms: myGroups,
-          backupData: backupData,
-          name: profile.name || profile.nickname || 'کاربر پلنکس',
-          avatar: storedAvatar,
-          avatar_url: storedAvatar,
-          planex_user_avatar: storedAvatar
+          password: password
         })
       });
 
