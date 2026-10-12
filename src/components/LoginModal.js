@@ -2,6 +2,7 @@
 import { db } from '../db.js';
 import { personalSyncService } from '../services/personalSyncService.js';
 import { leaderboardService } from '../services/leaderboardService.js';
+import { API_BASE_URL } from '../config.js';
 
 
 export function normalizePhone(rawPhone) {
@@ -220,12 +221,20 @@ if (typeof window !== 'undefined') {
         backupData.planex_user_avatar = storedAvatar;
       }
 
-      const res = await fetch('/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'login',
           phone: phone,
-          password: password
+          password: password,
+          study_logs: studyLogs,
+          rooms: myGroups,
+          backupData: backupData,
+          name: profile.name || profile.nickname || 'کاربر پلنکس',
+          avatar: storedAvatar,
+          avatar_url: storedAvatar,
+          planex_user_avatar: storedAvatar
         })
       });
 
@@ -291,7 +300,7 @@ if (typeof window !== 'undefined') {
         localStorage.setItem('planex_auth_user', JSON.stringify(authPayload));
         localStorage.setItem('planex_user_account', JSON.stringify(authPayload));
 
-        // Store auth token from Cloudflare /auth/login endpoint
+        // Store auth token if provided by backend
         if (data.token) {
           localStorage.setItem('planex_auth_token', data.token);
         }
