@@ -40,16 +40,20 @@ try {
     if (ob_get_length()) {
         ob_clean();
     }
+    $errJson = json_encode([
+        'success' => false,
+        'message' => 'Database connection failed: ' . $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
     if (!headers_sent()) {
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
         header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
         header("Content-Type: application/json; charset=UTF-8");
+        header('Content-Length: ' . strlen($errJson));
+        header('Connection: close');
     }
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Database connection failed: ' . $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    echo $errJson;
+    flush();
     exit();
 }

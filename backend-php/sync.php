@@ -24,12 +24,16 @@ function sendJsonResponse(array $data, int $statusCode = 200): void
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=UTF-8');
+    header('Content-Length: ' . strlen($json));
+    header('Connection: close');
     header("Access-Control-Allow-Origin: *");
     header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
     header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    echo $json;
+    flush();
     exit();
 }
 
