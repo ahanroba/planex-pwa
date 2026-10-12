@@ -37,6 +37,11 @@ try {
     ];
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
 } catch (PDOException $e) {
+    if (function_exists('apache_setenv')) {
+        @apache_setenv('no-gzip', '1');
+    }
+    @ini_set('zlib.output_compression', 'Off');
+
     if (ob_get_length()) {
         ob_clean();
     }
@@ -49,11 +54,8 @@ try {
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
         header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
         header("Content-Type: application/json; charset=UTF-8");
-        header('Content-Length: ' . strlen($errJson));
-        header('Connection: close');
     }
     http_response_code(500);
     echo $errJson;
-    flush();
     exit();
 }

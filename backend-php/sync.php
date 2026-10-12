@@ -21,19 +21,21 @@ require_once __DIR__ . '/db.php';
  */
 function sendJsonResponse(array $data, int $statusCode = 200): void
 {
+    if (function_exists('apache_setenv')) {
+        @apache_setenv('no-gzip', '1');
+    }
+    @ini_set('zlib.output_compression', 'Off');
+
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
     $json = json_encode($data, JSON_UNESCAPED_UNICODE);
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=UTF-8');
-    header('Content-Length: ' . strlen($json));
-    header('Connection: close');
     header("Access-Control-Allow-Origin: *");
     header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
     header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
     echo $json;
-    flush();
     exit();
 }
 
