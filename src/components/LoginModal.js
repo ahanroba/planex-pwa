@@ -2,7 +2,7 @@
 import { db } from '../db.js';
 import { personalSyncService } from '../services/personalSyncService.js';
 import { leaderboardService } from '../services/leaderboardService.js';
-import { API_BASE_URL } from '../config.js';
+
 
 export function normalizePhone(rawPhone) {
   if (!rawPhone) return '';
@@ -220,20 +220,12 @@ if (typeof window !== 'undefined') {
         backupData.planex_user_avatar = storedAvatar;
       }
 
-      const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'login',
           phone: phone,
-          password: password,
-          study_logs: studyLogs,
-          rooms: myGroups,
-          backupData: backupData,
-          name: profile.name || profile.nickname || 'کاربر پلنکس',
-          avatar: storedAvatar,
-          avatar_url: storedAvatar,
-          planex_user_avatar: storedAvatar
+          password: password
         })
       });
 
@@ -298,6 +290,11 @@ if (typeof window !== 'undefined') {
 
         localStorage.setItem('planex_auth_user', JSON.stringify(authPayload));
         localStorage.setItem('planex_user_account', JSON.stringify(authPayload));
+
+        // Store auth token from Cloudflare /api/auth/login endpoint
+        if (data.token) {
+          localStorage.setItem('planex_auth_token', data.token);
+        }
 
         // Store nickname explicitly so Header.js picks it up as primary display name
         if (name && name !== 'کاربر پلنکس' && name !== 'کاربر مهمان') {
