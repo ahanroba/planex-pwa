@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planex-v-force-12345-' + Date.now();
+const CACHE_NAME = 'planex-v-gh-root-' + Date.now();
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -6,13 +6,16 @@ const ASSETS_TO_CACHE = [
   '/logo-transparent.png'
 ];
 
-// Install Event - Pre-caching core shell
+// Install Event - Pre-caching core shell & skipping waiting immediately
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[ServiceWorker] Pre-caching offline PWA shell');
       return Promise.allSettled(
-        ASSETS_TO_CACHE.map((url) => cache.add(url).catch((err) => console.warn('[ServiceWorker] Cache failed for', url, err)))
+        ASSETS_TO_CACHE.map((url) =>
+          cache.add(url).catch((err) => console.warn('[ServiceWorker] Cache failed for', url, err))
+        )
       );
     })
   );
@@ -31,20 +34,21 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keyList) => {
       return Promise.all(
         keyList.map((key) => {
-          console.log('[ServiceWorker] Removing old cache:', key);
-          return caches.delete(key);
+          if (key !== CACHE_NAME) {
+            console.log('[ServiceWorker] Removing old cache:', key);
+            return caches.delete(key);
+          }
         })
       );
     }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch Event - Network-First for index.html / navigation, Stale-While-Revalidate / Network-First for other assets
+// Fetch Event - Network-First for navigation & JS assets to prevent stale blank screens
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Skip cross-origin requests & cloudflare backend API requests
+  // Skip cross-origin requests & backend API requests
   if (!event.request.url.startsWith(self.location.origin) || event.request.url.includes('/api/')) {
     return;
   }
@@ -56,7 +60,6 @@ self.addEventListener('fetch', (event) => {
                         (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
 
   if (isHtmlRequest) {
-    // Network-First strategy for index.html / navigation so users never get served a stale HTML referencing old JS chunks
     event.respondWith(
       fetch(event.request)
         .then((networkResponse) => {
@@ -79,7 +82,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-First with Cache fallback for static assets
+  // Network-First with Cache fallback for assets
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
@@ -105,7 +108,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Notification Click Event - focus or open app window
+// Notification Click Event
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
