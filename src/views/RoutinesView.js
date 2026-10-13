@@ -160,7 +160,7 @@ window.addRoutineChecklistItem = () => {
 
 window.deleteRoutineChecklistItem = (id) => {
   db.deleteRoutineChecklistItem(id);
-  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+  if (window.triggerActionDrivenPush) window.triggerActionDrivenPush(0);
   if (window.renderApp) window.renderApp();
 };
 
@@ -245,7 +245,7 @@ window.saveNewHabit = () => {
 window.deleteHabitGlobal = (id) => {
   if (confirm('آیا از حذف این عادت اطمینان دارید؟')) {
     db.deleteHabit(id);
-    if (window.triggerActionDrivenPush) window.triggerActionDrivenPush();
+    if (window.triggerActionDrivenPush) window.triggerActionDrivenPush(0);
     window.renderApp();
   }
 };

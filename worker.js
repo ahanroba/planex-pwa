@@ -1403,11 +1403,17 @@ function mergeAppData(cloudData = {}, incomingData = {}) {
     'planex_study_parts',
     'study_sessions',
     'planex_tasks',
-    'planex_habits',
     'planex_flashcards',
-    'planex_routines',
     'planex_my_groups'
   ];
+
+  // For habits & routines, respect client state directly so deletions are honored and not resurrected
+  if (incomingData.planex_habits !== undefined) {
+    result.planex_habits = incomingData.planex_habits;
+  }
+  if (incomingData.planex_routines !== undefined) {
+    result.planex_routines = incomingData.planex_routines;
+  }
 
   for (const arrKey of arrayKeys) {
     const cArr = Array.isArray(cloudData[arrKey]) ? cloudData[arrKey] : [];

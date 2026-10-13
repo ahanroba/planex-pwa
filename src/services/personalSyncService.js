@@ -110,9 +110,13 @@ export const personalSyncService = {
    * LOCAL-FIRST: Push is fire-and-forget. Local data is never overwritten by server response.
    */
   _isPushingNow: false,
+  _hasPendingPush: false,
   async pushToCloud(customPhone = null, overrideName = null, overrideAvatar = null) {
-    // Re-entrancy guard: skip if a push is already in flight
-    if (this._isPushingNow) return { success: false, message: 'Push already in progress' };
+    // Re-entrancy guard: skip if a push is already in flight, but queue follow-up to ensure latest state is saved
+    if (this._isPushingNow) {
+      this._hasPendingPush = true;
+      return { success: false, message: 'Push already in progress' };
+    }
     this._isPushingNow = true;
     try {
     let authUser = null;
@@ -289,6 +293,10 @@ export const personalSyncService = {
     }
     } finally {
       this._isPushingNow = false;
+      if (this._hasPendingPush) {
+        this._hasPendingPush = false;
+        setTimeout(() => this.pushToCloud(), 50);
+      }
     }
   },
 
@@ -300,6 +308,10 @@ export const personalSyncService = {
   async pullFromCloud(inputPhone = null) {
     // Re-entrancy guard: skip if a pull is already in flight
     if (this._isPullingNow) return { success: false, message: 'Pull already in progress' };
+    // Skip pull if a local push is in flight or pending to avoid pulling stale server state before local changes are saved
+    if (this._isPushingNow || this._hasPendingPush) {
+      return { success: false, message: 'همگام‌سازی ابری به تعویق افتاد: تغییرات محلی در حال ذخیره‌سازی ابری هستند.' };
+    }
     this._isPullingNow = true;
     try {
     if (typeof document !== 'undefined') {
@@ -408,7 +420,7 @@ export const personalSyncService = {
           const cleanTimestamps = (obj) => {
             if (!obj || typeof obj !== 'object') return obj;
             const cloned = JSON.parse(JSON.stringify(obj));
-            const volatileKeys = ['updatedAt', 'updated_at', 'last_sync', 'lastSync', 'timestamp', 'early_bird_daily_status'];
+            const volatileKeys = ['updatedAt', 'updated_at', 'last_sync', 'lastSync', 'timestamp', 'early_bird_daily_status', 'planex_routines_updated_at'];
             
             const deepClean = (target) => {
               if (Array.isArray(target)) {
@@ -722,6 +734,12 @@ let _actionPushDebounceTimeout = null;
  * Throttled to at most once per 2 seconds (unless forced) to prevent rapid redundant calls.
  */
 export function handleFocusDrivenSync(force = false) {
+  // If a local push is already active or queued (e.g. from deleting/updating an item),
+  // do NOT pull from server to prevent pulling stale data before changes reach the cloud.
+  if (personalSyncService._isPushingNow || personalSyncService._hasPendingPush) {
+    return;
+  }
+
   if (typeof document !== 'undefined') {
     const active = document.activeElement;
     const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
@@ -759,6 +777,7 @@ export function startSmartSyncInterval() {
   if (_smartSyncInterval) clearInterval(_smartSyncInterval);
 
   _smartSyncInterval = setInterval(() => {
+    if (personalSyncService._isPushingNow || personalSyncService._hasPendingPush) return;
     if (typeof document !== 'undefined') {
       const active = document.activeElement;
       const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
@@ -781,12 +800,22 @@ export function startSmartSyncInterval() {
 
 /**
  * 3. Action-driven Sync:
- * Automatically triggers pushToCloud() (debounced by default 150ms) when user completes an action
- * (e.g. room created/joined, profile saved, study session completed).
+ * Automatically triggers pushToCloud() (immediate when delayMs <= 0, or debounced by default 150ms)
+ * when user completes an action (e.g. routine created/deleted, room created/joined, profile saved).
  */
 export function triggerActionDrivenPush(delayMs = 150) {
   if (typeof window === 'undefined') return;
   if (_actionPushDebounceTimeout) clearTimeout(_actionPushDebounceTimeout);
+
+  if (delayMs <= 0) {
+    if (window.navigator && !window.navigator.onLine) return;
+    if (typeof personalSyncService !== 'undefined' && typeof personalSyncService.pushToCloud === 'function') {
+      personalSyncService.pushToCloud().catch(err => {
+        console.warn('[SmartSync] Action-driven immediate push deferred:', err);
+      });
+    }
+    return;
+  }
 
   _actionPushDebounceTimeout = setTimeout(() => {
     if (window.navigator && !window.navigator.onLine) return;
@@ -820,6 +849,7 @@ if (typeof window !== 'undefined') {
   // - Profile saves
   // - Study timer completion & log creation
   // - Room / Group creation, joining, modification
+  // - Routines & Habits additions, modifications, and deletions
   const autoPushEvents = [
     'activity-saved',
     'study-logs-updated',
@@ -831,12 +861,16 @@ if (typeof window !== 'undefined') {
     'groups-updated',
     'room-created',
     'room-joined',
-    'room-modified'
+    'room-modified',
+    'routines-updated',
+    'routine-deleted',
+    'habits-updated'
   ];
 
   autoPushEvents.forEach(evtName => {
-    window.addEventListener(evtName, () => {
-      triggerActionDrivenPush(150);
+    window.addEventListener(evtName, (e) => {
+      const delay = (evtName === 'routine-deleted' || e?.detail?.immediate) ? 0 : 150;
+      triggerActionDrivenPush(delay);
     });
   });
 
@@ -849,7 +883,10 @@ if (typeof window !== 'undefined') {
       e.key === 'planex_my_groups' ||
       e.key === 'planex_my_rooms' ||
       e.key === 'planex_study_logs' ||
-      e.key === 'planex_recent_activity_sessions'
+      e.key === 'planex_recent_activity_sessions' ||
+      e.key === 'planex_habits' ||
+      e.key === 'planex_routines' ||
+      e.key === 'planex_deleted_habit_ids'
     ) {
       triggerActionDrivenPush(200);
     }
