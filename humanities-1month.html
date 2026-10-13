@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامه مطالعاتی جامع یک‌ماهه کنکور انسانی | PlanEx & @medicalaa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a855f7;
+            --primary-dark: #1e1b4b;
+            --secondary: #38bdf8;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-page: #0b1120;
+            --card-bg: #0f172a;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 20px;
+            position: relative;
+        }
+
+        .watermark-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.035;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+            overflow: hidden;
+        }
+
+        .watermark-item {
+            font-size: 22px;
+            font-weight: 900;
+            transform: rotate(-30deg);
+            color: #2e1065;
+            user-select: none;
+            margin: 50px 30px;
+            white-space: nowrap;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2e1065 0%, #5b21b6 50%, #0284c7 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.85rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.92;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .meta-badges {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .content {
+            padding: 35px 30px;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            border-right: 5px solid var(--primary-light);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 30px;
+        }
+
+        .intro-box h2 {
+            font-size: 1.25rem;
+            color: #c4b5fd;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 35px;
+        }
+
+        .subject-card {
+            background: #1e293b;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-light);
+        }
+
+        .subject-card h3 {
+            font-size: 1rem;
+            color: #38bdf8;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .subject-card ul {
+            padding-right: 18px;
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 35px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+            font-size: 0.88rem;
+            background-color: #0b1120;
+        }
+
+        th {
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 14px 16px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+            color: #e2e8f0;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #1e293b;
+        }
+
+        tr:nth-child(even) {
+            background-color: #0f172a;
+        }
+
+        tr:hover {
+            background-color: #1e293b;
+        }
+
+        .week-header {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin: 30px 0 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+
+        .tag-heavy { background: #fee2e2; color: #dc2626; }
+        .tag-medium { background: #fef3c7; color: #d97706; }
+        .tag-light { background: #dcfce7; color: #16a34a; }
+
+        .tips-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .tips-box h3 {
+            color: #b45309;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #f1f5f9;
+            border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header h1 { font-size: 1.4rem; }
+            .content { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Watermark Background -->
+    <div class="watermark-bg">
+        <div class="watermark-item">PlanEx • @medicalaa</div>
+        <div class="watermark-item">کنکور انسانی • پلن جامع ۳۰ روزه</div>
+        <div class="watermark-item">PlanEx • @medicalaa</div>
+        <div class="watermark-item">کنکور انسانی • پلن جامع ۳۰ روزه</div>
+        <div class="watermark-item">PlanEx • @medicalaa</div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📚 برنامه مطالعاتی جامع و راهبردی ۱ ماهه کنکور انسانی</h1>
+            <p>برنامه فشرده، موضوعی و تشریحی ۳۰ روزه ویژه داوطلبان کنکور سراسری و فرهنگیان با هدف تسلط بر دروس با ضریب بالا و تثبیت تست‌های کلیدی</p>
+            
+            <div class="meta-badges">
+                <span class="badge">⏱️ مدت زمان: ۳۰ روز (۴ هفته)</span>
+                <span class="badge">🎯 سطح برنامه: جمع‌بندی و تسلط تضمینی</span>
+                <span class="badge">⚖️ رشته: علوم انسانی و فرهنگیان</span>
+                <span class="badge">⚡ ساعت مطالعه روزانه: ۷ تا ۹ ساعت</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            
+            <div class="intro-box">
+                <h2>🎯 اصول طلایی و ساختار اجرایی برنامه</h2>
+                <p>این برنامه بر اساس اصل <strong>«توازن میان دروس رتبه‌ساز و مهارتی»</strong> طراحی شده است. در کنکور انسانی، دروسی مثل <strong>فنون ادبی (عروض و آرایه)</strong>، <strong>عربی تخصصی</strong> و <strong>ریاضی و آمار</strong> در کنار حفظیات حجیم (تاریخ، جغرافیا، جامعه‌شناسی و روانشناسی) نیازمند روتین روزانه و مرورهای زنجیره‌ای هستند.</p>
+            </div>
+
+            <!-- Subject Breakdown -->
+            <h2 style="font-size: 1.25rem; color: var(--primary-dark); margin-bottom: 16px;">📖 سرفصل‌ها و بودجه‌بندی دروس تخصصی در این دوره</h2>
+            <div class="subjects-grid">
+                <div class="subject-card">
+                    <h3>🎭 علوم و فنون ادبی</h3>
+                    <ul>
+                        <li>عروض و قافیه (سماع و تقطیع هجایی)</li>
+                        <li>آرایه‌های ادبی با تیپ‌بندی تستی</li>
+                        <li>تاریخ ادبیات و سبک‌شناسی ۳ پایه</li>
+                        <li>قرابت معنایی متون کهن و معاصر</li>
+                    </ul>
+                </div>
+                <div class="subject-card">
+                    <h3>🕋 عربی تخصصی</h3>
+                    <ul>
+                        <li>ترجمه، تعریب و تعاریف مفهومی</li>
+                        <li>قواعد اعراب، منصوبات و نواسخ</li>
+                        <li>تحلیل صرفی و ضبط الحرکات</li>
+                        <li>درک مطلب و متون کلوزتست</li>
+                    </ul>
+                </div>
+                <div class="subject-card">
+                    <h3>📐 ریاضی و آمار</h3>
+                    <ul>
+                        <li>معادلات درجه ۲ و تابع دهم و یازدهم</li>
+                        <li>آمار توصیفی، شاخص‌های پراکندگی</li>
+                        <li>احتمال و الگوهای خطی دوازدهم</li>
+                        <li>شمارش و آنالیز ترکیبی</li>
+                    </ul>
+                </div>
+                <div class="subject-card">
+                    <h3>🧠 روانشناسی و اقتصاد</h3>
+                    <ul>
+                        <li>روانشناسی: رشد، حافظه، تفکر، سلامت</li>
+                        <li>اقتصاد: بخش مسائل مالیات و سود</li>
+                        <li>اقتصاد کلان: تورم، فقر، تولید ناخالص</li>
+                        <li>نمودارهای عرضه و تقاضا</li>
+                    </ul>
+                </div>
+                <div class="subject-card">
+                    <h3>🏛️ جامعه‌شناسی</h3>
+                    <ul>
+                        <li>جامعه‌شناسی ۱ (جهان‌های اجتماعی)</li>
+                        <li>جامعه‌شناسی ۲ (فرهنگ و تمدن)</li>
+                        <li>جامعه‌شناسی ۳ (هویت و نابرابری)</li>
+                        <li>مفاهیم کلیدی و تست‌های ترکیبی</li>
+                    </ul>
+                </div>
+                <div class="subject-card">
+                    <h3>🧭 فلسفه و منطق</h3>
+                    <ul>
+                        <li>منطق دهم: احکام قضایا و قیاس</li>
+                        <li>فلسفه یازدهم: وجود، ماهیت و علیت</li>
+                        <li>فلسفه دوازدهم: سیر مکاتب فلسفی</li>
+                        <li>مغالطات و تست‌های تحلیلی</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Week 1 -->
+            <div class="week-header">
+                <span>🗓️ هفته اول: استارت پرقدرت، پایه‌ریزی دروس مهارتی و تسلط بر پایه دهم</span>
+                <span class="badge">هدف: تثبیت ۳۵٪ کل مباحث</span>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>روز</th>
+                            <th>بلاک ۱ (۸:۰۰ - ۱۰:۰۰)</th>
+                            <th>بلاک ۲ (۱۰:۳۰ - ۱۲:۳۰)</th>
+                            <th>بلاک ۳ (۱۴:۳۰ - ۱۶:۳۰)</th>
+                            <th>بلاک ۴ (۱۷:۰۰ - ۱۹:۰۰)</th>
+                            <th>روتین شبانه (۲۰:۳۰ - ۲۲:۰۰)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>شنبه</strong></td>
+                            <td>فنون دهم (فصل ۱ + عروض سماعی) <span class="tag-pill tag-heavy">سنگین</span></td>
+                            <td>عربی تخصصی (ترجمه و تعریب پایه)</td>
+                            <td>ریاضی و آمار (معادله درجه اول و دوم)</td>
+                            <td>اقتصاد (بخش ۱: اصول و مسائل پایه)</td>
+                            <td>مرور لغات عربی + ۲۰ تست قرابت</td>
+                        </tr>
+                        <tr>
+                            <td><strong>یکشنبه</strong></td>
+                            <td>منطق دهم (درس ۱ تا ۳: مفاهیم و تصدیقات)</td>
+                            <td>جامعه‌شناسی ۱ (درس ۱ تا ۴)</td>
+                            <td>تاریخ ۱ (ایران باستان: دروس منتخب)</td>
+                            <td>روانشناسی (درس ۱ و ۲: تعریف و رشد)</td>
+                            <td>۱۰ تست عروض + مرور تاریخ ادبیات</td>
+                        </tr>
+                        <tr>
+                            <td><strong>دوشنبه</strong></td>
+                            <td>فنون دهم (فصل ۲: تشبیه و مجاز)</td>
+                            <td>عربی تخصصی (قواعد ثلاثی مجرد و مزید)</td>
+                            <td>ریاضی و آمار (تابع و نمودارها)</td>
+                            <td>اقتصاد (بخش ۲: بازار و تعادل قیمت)</td>
+                            <td>حل مسائل اقتصاد + تست ترجمه</td>
+                        </tr>
+                        <tr>
+                            <td><strong>سه‌شنبه</strong></td>
+                            <td>منطق دهم (درس ۴ تا ۶: تعریف و استدلال)</td>
+                            <td>جامعه‌شناسی ۱ (درس ۵ تا ۸)</td>
+                            <td>جغرافیا ۱ (اصول و نقشه‌خوانی)</td>
+                            <td>روانشناسی (درس ۳ و ۴: حافظه و تفکر)</td>
+                            <td>۱۵ تست آرایه + مرور فرمول‌های ریاضی</td>
+                        </tr>
+                        <tr>
+                            <td><strong>چهارشنبه</strong></td>
+                            <td>فنون دهم (فصل ۳ و ۴ + تاریخ ادبیات)</td>
+                            <td>عربی تخصصی (معتل و انواع آن)</td>
+                            <td>ریاضی و آمار (آمار توصیفی و پراکندگی)</td>
+                            <td>اقتصاد (بخش ۳: مسائل مالیات و توزیع)</td>
+                            <td>تست زمان‌دار فنون + مرور لغات</td>
+                        </tr>
+                        <tr>
+                            <td><strong>پنج‌شنبه</strong></td>
+                            <td>منطق دهم (درس ۷ تا ۱۰: قیاس و مغالطات)</td>
+                            <td>جامعه‌شناسی ۱ (درس ۹ تا ۱۲)</td>
+                            <td>تاریخ و جغرافیا (مرور ترکیبی دهم)</td>
+                            <td>روانشناسی (درس ۵ و ۶: یادگیری)</td>
+                            <td>جمع‌بندی یادداشت‌ها و فلش‌کارت‌ها</td>
+                        </tr>
+                        <tr>
+                            <td><strong>جمعه</strong></td>
+                            <td colspan="4" style="text-align: center; background: #faf5ff; font-weight: 700; color: #6b21a8;">
+                                🏁 آزمون جامع ایستگاهی اول از مباحث هفته اول + تحلیل کامل کارنامه و رفع اشکال
+                            </td>
+                            <td>استراحت و بازپروری ذهنی ☕</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Week 2 -->
+            <div class="week-header">
+                <span>🗓️ هفته دوم: پیشروی عمیق در پایه یازدهم و تسلط بر مباحث مسئله‌محور</span>
+                <span class="badge">هدف: تثبیت ۶۵٪ کل مباحث</span>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>روز</th>
+                            <th>بلاک ۱ (۸:۰۰ - ۱۰:۰۰)</th>
+                            <th>بلاک ۲ (۱۰:۳۰ - ۱۲:۳۰)</th>
+                            <th>بلاک ۳ (۱۴:۳۰ - ۱۶:۳۰)</th>
+                            <th>بلاک ۴ (۱۷:۰۰ - ۱۹:۰۰)</th>
+                            <th>روتین شبانه (۲۰:۳۰ - ۲۲:۰۰)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>شنبه</strong></td>
+                            <td>فنون ۱۱ (عروض همسان و ناهمسان)</td>
+                            <td>عربی ۱۱ (معرفه و نکره + ترجمه)</td>
+                            <td>ریاضی ۱۱ (توابع نمایی و لگاریتمی)</td>
+                            <td>اقتصاد (بخش ۴: فقر و توزیع درآمد)</td>
+                            <td>تست مهارتی عروض + روتین لغت</td>
+                        </tr>
+                        <tr>
+                            <td><strong>یکشنبه</strong></td>
+                            <td>فلسفه ۱۱ (درس ۱ تا ۳: چیستی فلسفه)</td>
+                            <td>جامعه‌شناسی ۲ (درس ۱ تا ۵)</td>
+                            <td>تاریخ ۲ (ایران اسلامی: بخش اول)</td>
+                            <td>روانشناسی (درس ۷ و ۸: انگیزش و هیجان)</td>
+                            <td>تست فلسفه یازدهم + مرور عروض</td>
+                        </tr>
+                        <tr>
+                            <td><strong>دوشنبه</strong></td>
+                            <td>فنون ۱۱ (استعاره و کنایه + سبک عراقی)</td>
+                            <td>عربی ۱۱ (منصوبات: مفعول‌ها)</td>
+                            <td>ریاضی ۱۱ (آمار و احتمال یازدهم)</td>
+                            <td>اقتصاد (بخش ۵: تجارت بین‌الملل)</td>
+                            <td>حل ۱۰ تیپ مسئله اقتصاد + قواعد عربی</td>
+                        </tr>
+                        <tr>
+                            <td><strong>سه‌شنبه</strong></td>
+                            <td>فلسفه ۱۱ (درس ۴ تا ۷: آغاز تفکر فلسفی)</td>
+                            <td>جامعه‌شناسی ۲ (درس ۶ تا ۱۰)</td>
+                            <td>جغرافیا ۲ (نواحی و پراکندگی‌ها)</td>
+                            <td>روانشناسی (مرور جامع و تست‌های ترکیبی)</td>
+                            <td>۱۵ تست آرایه ترکیبی + واژگان</td>
+                        </tr>
+                        <tr>
+                            <td><strong>چهارشنبه</strong></td>
+                            <td>فنون ۱۱ (سبک هندی + اوزان دولختی)</td>
+                            <td>عربی ۱۱ (نواسخ: حروف مشبهه و لای نفی جنس)</td>
+                            <td>ریاضی ۱۱ (احتمال و سری‌های حسابی)</td>
+                            <td>اقتصاد (جمع‌بندی کامل مسائل و نمودارها)</td>
+                            <td>آزمون مبحثی اقتصاد + قرابت</td>
+                        </tr>
+                        <tr>
+                            <td><strong>پنج‌شنبه</strong></td>
+                            <td>فلسفه ۱۱ (درس ۸ تا ۱۱: معرفت و شناخت)</td>
+                            <td>جامعه‌شناسی ۲ (درس ۱۱ تا ۱۵)</td>
+                            <td>تاریخ و جغرافیا ۲ (جمع‌بندی پایه ۱۱)</td>
+                            <td>مرور پوششی منطق دهم</td>
+                            <td>تحلیل اشتباهات طول هفته</td>
+                        </tr>
+                        <tr>
+                            <td><strong>جمعه</strong></td>
+                            <td colspan="4" style="text-align: center; background: #faf5ff; font-weight: 700; color: #6b21a8;">
+                                🏁 آزمون جامع پایه دهم و یازدهم + تحلیل دقیق گزینه‌به‌گزینه
+                            </td>
+                            <td>استراحت و شارژ انرژی برای نیمه دوم</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Week 3 & 4 Highlights -->
+            <div class="week-header">
+                <span>🗓️ هفته سوم و چهارم: ورود به سال دوازدهم، آزمون‌های سراسری و جمع‌بندی کنکوری</span>
+                <span class="badge">هدف: ۱۰۰٪ آمادگی تستی و شبیه‌سازی کنکور</span>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>مرحله</th>
+                            <th>عناوین کلیدی و برنامه‌ریزی تخصصی</th>
+                            <th>هدف تستی و استراتژی</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>هفته سوم (روز ۱۵ تا ۲۱)</strong></td>
+                            <td>
+                                • <strong>فنون دوازدهم:</strong> سبک بازگشت و معاصر، اختیارات شاعری (زبانی و وزنی)<br>
+                                • <strong>فلسفه دوازدهم:</strong> درس ۱ تا ۶ (حکمت، عقل و اراده، مکاتب وجودی)<br>
+                                • <strong>عربی دوازدهم:</strong> حال، استثنا، حصر، اسلوب شرط و تحلیل صرفی<br>
+                                • <strong>جامعه‌شناسی ۳:</strong> هویت فرهنگی، علوم اجتماعی و نظام‌های نوین<br>
+                                • <strong>ریاضی دوازدهم:</strong> الگوهای خطی، احتمال شرطی و رگرسیون
+                            </td>
+                            <td>روزانه حداقل ۱۸۰ تا ۲۲۰ تست ترکیبی با اولویت سوالات کنکورهای ۵ سال اخیر</td>
+                        </tr>
+                        <tr>
+                            <td><strong>هفته چهارم (روز ۲۲ تا ۳۰)</strong></td>
+                            <td>
+                                • <strong>شبیه‌سازی ۵ دوره کنکور سراسری داخل و خارج کشور</strong> در شرایط استاندارد زمانی<br>
+                                • مرور خط به خط نکات طلایی و جدول‌های مقایسه‌ای فلسفه، منطق و تاریخ<br>
+                                • روتین روزانه ۳۰ تست قرابت معنایی + ۲۰ تست عروض ناهمسان + ۲ درک مطلب عربی<br>
+                                • مرور دفترچه بی‌دقتی‌ها و نکات نشان‌دار شده طول دوره
+                            </td>
+                            <td>افزایش سرعت عمل، مدیریت زمان با تکنیک ضربدر منها و کاهش درصد خطای منفی</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Strategy Tips -->
+            <div class="tips-box">
+                <h3>💡 ۵ توصیه مشاوره‌ای سرنوشت‌ساز برای داوطلبان انسانی</h3>
+                <ol style="padding-right: 20px; line-height: 1.9; font-size: 0.9rem; color: #78350f;">
+                    <li><strong>عروض و ترجمه عربی را به روتین شبانه تبدیل کنید:</strong> این مباحث با یک‌بار خواندن تثبیت نمی‌شوند؛ هر شب ۲۰ دقیقه مطالعه مستمر معجزه می‌کند.</li>
+                    <li><strong>مسائل اقتصاد را دست‌کم نگیرید:</strong> حدود ۵ تا ۷ تست کنکور مستقیماً مسئله است؛ با تمرین الگوریتم‌های حل مسئله، درصد بالای ۸۰٪ تضمینی است.</li>
+                    <li><strong>منطق و فلسفه را مفهومی بخوانید نه حفظی:</strong> طراحان کنکور روی روابط منطقی و کاربرد اصطلاحات در مثال‌های روزمره تاکید دارند.</li>
+                    <li><strong>خلاصه‌نویسی نموداری در جامعه‌شناسی و تاریخ:</strong> برای پیوند رویدادهای تاریخی و نظریه‌های جامعه‌شناسی، از جداول درختی استفاده کنید.</li>
+                    <li><strong>ثبت دقیق زمان در PlanEx:</strong> در طول اجرای این ۳۰ روز، تک‌تک سشن‌های مطالعه و تعداد تست‌ها را در جدول پلنکس ثبت کنید تا منحنی پیشرفت خود را ببینید.</li>
+                </ol>
+            </div>
+
+        </div>
+
+        <!-- Navigation Actions -->
+        <div class="nav-actions">
+            <button onclick="window.print()" class="btn-action" style="background: #0284c7;">
+                🖨️ چاپ یا ذخیره PDF برنامه
+            </button>
+            <button onclick="if(window.opener){ window.close(); } else { window.location.href = '/'; }" class="btn-action">
+                🏠 بازگشت به برنامه PlanEx
+            </button>
+        </div>
+    </div>
+
+</body>
+</html>
