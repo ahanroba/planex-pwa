@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planex-app-v2.3.0';
+const CACHE_NAME = 'planex-app-v2.3.1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -47,7 +47,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event - Network-First for navigation & JS assets to prevent stale blank screens
+// Fetch Event
+// - HTML/navigation: Cache-First با timeout 3s → fallback به کش (برای شبکه‌های فیلتر‌شده ایران)
+// - Static assets (JS/CSS/fonts/images): Cache-First → در پس‌زمینه revalidate می‌کند
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -63,51 +65,68 @@ self.addEventListener('fetch', (event) => {
                         (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
 
   if (isHtmlRequest) {
+    // Cache-First برای HTML با network timeout 3 ثانیه
+    // اگر کش موجود باشد فوراً سرویس می‌دهد و در پس‌زمینه آپدیت می‌کند (Stale-While-Revalidate)
     event.respondWith(
-      fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseForReq = networkResponse.clone();
-            const responseForIndex = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseForReq);
-              cache.put('/index.html', responseForIndex);
-            }).catch((err) => console.warn('[ServiceWorker] Cache put failed:', err));
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          return caches.match(event.request).then((cachedResponse) => {
+      caches.match(event.request).then((cachedResponse) => {
+        const networkFetch = (async () => {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const networkResponse = await fetch(event.request, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (networkResponse && networkResponse.status === 200) {
+              const responseForReq = networkResponse.clone();
+              const responseForIndex = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseForReq);
+                cache.put('/index.html', responseForIndex);
+              }).catch((err) => console.warn('[ServiceWorker] Cache put failed:', err));
+            }
+            return networkResponse;
+          } catch (err) {
             return cachedResponse || caches.match('/index.html') || caches.match('/');
-          });
-        })
+          }
+        })();
+
+        if (cachedResponse) {
+          networkFetch.catch(() => {});
+          return cachedResponse;
+        }
+        return networkFetch;
+      })
     );
     return;
   }
 
-  // Network-First with Cache fallback for assets
+  // Cache-First با Stale-While-Revalidate برای فایل‌های استاتیک (JS، CSS، fonts، images)
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || (networkResponse.type !== 'basic' && networkResponse.type !== 'cors')) {
+    caches.match(event.request).then((cachedResponse) => {
+      const networkUpdate = (async () => {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const networkResponse = await fetch(event.request, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (networkResponse && networkResponse.status === 200 &&
+              (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            }).catch((err) => console.warn('[ServiceWorker] Cache put failed:', err));
+          }
           return networkResponse;
+        } catch (err) {
+          return cachedResponse;
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        }).catch((err) => console.warn('[ServiceWorker] Cache put failed:', err));
-        return networkResponse;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html') || caches.match('/');
-          }
-        });
-      })
+      })();
+
+      if (cachedResponse) {
+        networkUpdate.catch(() => {});
+        return cachedResponse;
+      }
+      return networkUpdate;
+    })
   );
 });
 

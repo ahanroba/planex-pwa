@@ -12,14 +12,7 @@
   <link rel="canonical" href="https://planexapp.ir/">
   <meta name="robots" content="index, follow">
 
-  <!-- Network Preconnect & DNS Prefetch for Fast Cold Start -->
-  <link rel="preconnect" href="https://telegram.org">
-  <link rel="dns-prefetch" href="https://telegram.org">
-
-  <!-- Telegram WebApp SDK (deferred to prevent render-blocking on filtered networks) -->
-  <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Open Graph / Telegram / Social Preview -->
+  <!-- Open Graph / Social Preview -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="پلنکس | مدیریت هوشمند زمان و تالار رقابت مطالعه">
   <meta property="og:description" content="برنامه‌ریزی ۲۴ ساعته، ردیابی تست‌ها و رقابت در لیدربرد آنلاین داوطلبان.">
@@ -30,17 +23,6 @@
   <!-- Google Search Console Verification -->
   <meta name="google-site-verification" content="faM7rPUzEMqGygC-SkB54-vlXSD5ZIa9h7z08JoHlBo" />
   <script>
-    // Immediate Telegram WebApp initialization to eliminate blank screen delay
-    (function() {
-      if (window.Telegram && window.Telegram.WebApp) {
-        try {
-          window.Telegram.WebApp.ready();
-          window.Telegram.WebApp.expand();
-        } catch (e) {
-          console.warn('[Telegram WebApp] Init warning:', e);
-        }
-      }
-    })();
 
     // Immediate Nuke Cache & Service Worker Cleanup for iOS Safari / Stale SW
     (function nukeCache() {
@@ -114,7 +96,7 @@
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#0c0d11" />
 
-  <script type="module" crossorigin src="/assets/index-CgaNs4ev.js"></script>
+  <script type="module" crossorigin src="/assets/index-CVnC1b-D.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/articles-data-CLaiOG3O.js">
   <link rel="modulepreload" crossorigin href="/assets/exam-1405-khordad-UJ5dc-GN.js">
   <link rel="modulepreload" crossorigin href="/assets/exam-1404-azar-USfog2PY.js">
@@ -129,7 +111,7 @@
   <link rel="modulepreload" crossorigin href="/assets/view-question-bank-Cfu9mnX2.js">
   <link rel="modulepreload" crossorigin href="/assets/traps-analysis-data-CBLkF90D.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-html2canvas-BfYXEYrK.js">
-  <link rel="modulepreload" crossorigin href="/assets/app-ui-BfctREgj.js">
+  <link rel="modulepreload" crossorigin href="/assets/app-ui-Dao8B5V1.js">
   <link rel="modulepreload" crossorigin href="/assets/view-consultation-B7nGdTpc.js">
   <link rel="stylesheet" crossorigin href="/assets/index-DJI-aUhx.css">
 </head>
@@ -160,14 +142,18 @@
   </div>
 
   <script>
+    // Fallback safety timer: dismiss splash screen after 5 seconds if main.js render was delayed
     setTimeout(function() {
       var splash = document.getElementById('planex-splash-screen');
-      if (splash && splash.style.display !== 'none') {
+      if (splash && splash.style.display !== 'none' && splash.style.visibility !== 'hidden') {
+        splash.style.transition = 'opacity 0.4s ease, visibility 0.4s ease';
         splash.style.opacity = '0';
         splash.style.pointerEvents = 'none';
-        setTimeout(function() { splash.style.display = 'none'; }, 400);
+        setTimeout(function() {
+          try { splash.remove(); } catch (e) { splash.style.display = 'none'; }
+        }, 400);
       }
-    }, 2500);
+    }, 5000);
   </script>
 </body>
 </html>
