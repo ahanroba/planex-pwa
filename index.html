@@ -22,8 +22,8 @@
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="dns-prefetch" href="https://telegram.org">
 
-  <!-- Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Telegram WebApp SDK (deferred to prevent render-blocking on filtered networks) -->
+  <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <!-- Open Graph / Telegram / Social Preview -->
   <meta property="og:type" content="website">
@@ -52,26 +52,52 @@
     (function nukeCache() {
       try {
         var CACHE_FLAG = 'app_cache_busted_v1';
-        if (typeof localStorage !== 'undefined' && !localStorage.getItem(CACHE_FLAG)) {
-          localStorage.setItem(CACHE_FLAG, 'true');
+        var SESSION_FLAG = 'nuke_cache_attempted';
 
-          var unregisterSW = (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof navigator.serviceWorker.getRegistrations === 'function')
-            ? navigator.serviceWorker.getRegistrations().then(function(regs) {
-                return Promise.all(regs.map(function(r) { return r.unregister(); }));
-              }).catch(function(err) { console.warn('[NukeCache] SW error:', err); })
-            : Promise.resolve();
+        var isLocalStorageDone = false;
+        try {
+          isLocalStorageDone = typeof localStorage !== 'undefined' && !!localStorage.getItem(CACHE_FLAG);
+        } catch (e) {}
 
-          var clearCaches = (typeof window !== 'undefined' && 'caches' in window && typeof caches.keys === 'function')
-            ? caches.keys().then(function(keys) {
-                return Promise.all(keys.map(function(k) { return caches.delete(k); }));
-              }).catch(function(err) { console.warn('[NukeCache] Cache error:', err); })
-            : Promise.resolve();
+        var isSessionDone = false;
+        try {
+          isSessionDone = typeof sessionStorage !== 'undefined' && !!sessionStorage.getItem(SESSION_FLAG);
+        } catch (e) {}
 
-          Promise.all([unregisterSW, clearCaches]).finally(function() {
-            console.log('[NukeCache] Reloading...');
-            window.location.reload(true);
-          });
+        if (isLocalStorageDone || isSessionDone) {
+          return;
         }
+
+        try { if (typeof localStorage !== 'undefined') localStorage.setItem(CACHE_FLAG, 'true'); } catch (e) {}
+        try { if (typeof sessionStorage !== 'undefined') sessionStorage.setItem(SESSION_FLAG, 'true'); } catch (e) {}
+
+        var hadWorkers = false;
+        var hadCaches = false;
+
+        var unregisterSW = (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof navigator.serviceWorker.getRegistrations === 'function')
+          ? navigator.serviceWorker.getRegistrations().then(function(regs) {
+              if (regs && regs.length > 0) {
+                hadWorkers = true;
+                return Promise.all(regs.map(function(r) { return r.unregister(); }));
+              }
+            }).catch(function(err) { console.warn('[NukeCache] SW error:', err); })
+          : Promise.resolve();
+
+        var clearCaches = (typeof window !== 'undefined' && 'caches' in window && typeof caches.keys === 'function')
+          ? caches.keys().then(function(keys) {
+              if (keys && keys.length > 0) {
+                hadCaches = true;
+                return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+              }
+            }).catch(function(err) { console.warn('[NukeCache] Cache error:', err); })
+          : Promise.resolve();
+
+        Promise.all([unregisterSW, clearCaches]).finally(function() {
+          if (hadWorkers || hadCaches) {
+            console.log('[NukeCache] Cleaned stale workers/caches. Reloading once...');
+            window.location.reload();
+          }
+        });
       } catch (e) {
         console.error('[NukeCache] Error:', e);
       }
@@ -97,35 +123,35 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/samim-font@v4.0.5/dist/font-face.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css">
 
-  <link rel="icon" type="image/png" href="./assets/logo-transparent-Dpu1Zcfy.png" />
-  <link rel="apple-touch-icon" href="./assets/logo-transparent-Dpu1Zcfy.png" />
-  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" href="/assets/logo-transparent-Dpu1Zcfy.png" />
+  <link rel="apple-touch-icon" href="/assets/logo-transparent-Dpu1Zcfy.png" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#0c0d11" />
 
-  <script type="module" crossorigin src="./assets/index-B6-z40sv.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/articles-data-CLaiOG3O.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1405-khordad-UJ5dc-GN.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1404-azar-USfog2PY.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1404-Cj8l4Cc7.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1403-azar-Cn4pGcDT.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1403-esfand-Na4KXspq.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1403-shahrivar-DLDWPaoU.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1403-khordad-Qpf6Oe3q.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1402-esfand-7cenTHy_.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1402-shahrivar-B3H_MPVJ.js">
-  <link rel="modulepreload" crossorigin href="./assets/exam-1402-khordad-HM-OSe9T.js">
-  <link rel="modulepreload" crossorigin href="./assets/view-question-bank-Cfu9mnX2.js">
-  <link rel="modulepreload" crossorigin href="./assets/traps-analysis-data-CBLkF90D.js">
-  <link rel="modulepreload" crossorigin href="./assets/vendor-html2canvas-BfYXEYrK.js">
-  <link rel="modulepreload" crossorigin href="./assets/app-ui-DshFlI8N.js">
-  <link rel="modulepreload" crossorigin href="./assets/view-consultation-B7nGdTpc.js">
-  <link rel="stylesheet" crossorigin href="./assets/index-C7rBw_Au.css">
+  <script type="module" crossorigin src="/assets/index-DpGeMTIh.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/articles-data-CLaiOG3O.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1405-khordad-UJ5dc-GN.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1404-azar-USfog2PY.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1404-Cj8l4Cc7.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1403-azar-Cn4pGcDT.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1403-esfand-Na4KXspq.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1403-shahrivar-DLDWPaoU.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1403-khordad-Qpf6Oe3q.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1402-esfand-7cenTHy_.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1402-shahrivar-B3H_MPVJ.js">
+  <link rel="modulepreload" crossorigin href="/assets/exam-1402-khordad-HM-OSe9T.js">
+  <link rel="modulepreload" crossorigin href="/assets/view-question-bank-Cfu9mnX2.js">
+  <link rel="modulepreload" crossorigin href="/assets/traps-analysis-data-CBLkF90D.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-html2canvas-BfYXEYrK.js">
+  <link rel="modulepreload" crossorigin href="/assets/app-ui-DshFlI8N.js">
+  <link rel="modulepreload" crossorigin href="/assets/view-consultation-B7nGdTpc.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-C7rBw_Au.css">
 </head>
 <body class="theme-oceanic font-vazir scale-xlarge mode-dark" data-theme="oceanic" data-theme-mode="dark"><div id="pwa-update-banner" style="display:none; width:100%; background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color:#ffffff; text-align:center; padding:10px 16px; font-size:0.84rem; font-weight:800; cursor:pointer; z-index:10000; direction:rtl; box-sizing:border-box; border-bottom:1px solid rgba(255,255,255,0.15); transition:all 0.2s ease;">نسخه جدید در دسترس است. برای بروزرسانی کلیک کنید 🔄</div>
   <!-- Ultra-Fast Native Splash Screen -->
   <div id="planex-splash-screen" style="position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9999; background-color: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; opacity: 1; transition: opacity 0.4s ease, visibility 0.4s ease; font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif; direction: rtl;">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-      <img src="./assets/logo-transparent-Dpu1Zcfy.png" alt="PlanEx Logo" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));" />
+      <img src="/assets/logo-transparent-Dpu1Zcfy.png" alt="PlanEx Logo" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));" />
       <div id="planex-splash-text" style="font-size: 1.05rem; font-weight: 700; color: #f8fafc; letter-spacing: 0.3px;">در حال بارگذاری...</div>
     </div>
     <div style="width: 220px; max-width: 80%; height: 6px; background-color: rgba(255, 255, 255, 0.1); border-radius: 999px; overflow: hidden; position: relative;">

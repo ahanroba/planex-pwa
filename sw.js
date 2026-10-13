@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planex-v-gh-root-' + Date.now();
+const CACHE_NAME = 'planex-app-v2.2.0';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
