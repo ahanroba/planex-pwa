@@ -114,7 +114,7 @@
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#0c0d11" />
 
-  <script type="module" crossorigin src="/assets/index-lHFFuE6A.js"></script>
+  <script type="module" crossorigin src="/assets/index-CgaNs4ev.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/articles-data-CLaiOG3O.js">
   <link rel="modulepreload" crossorigin href="/assets/exam-1405-khordad-UJ5dc-GN.js">
   <link rel="modulepreload" crossorigin href="/assets/exam-1404-azar-USfog2PY.js">
@@ -159,6 +159,16 @@
     </div>
   </div>
 
+  <script>
+    setTimeout(function() {
+      var splash = document.getElementById('planex-splash-screen');
+      if (splash && splash.style.display !== 'none') {
+        splash.style.opacity = '0';
+        splash.style.pointerEvents = 'none';
+        setTimeout(function() { splash.style.display = 'none'; }, 400);
+      }
+    }, 2500);
+  </script>
 </body>
 </html>
 
