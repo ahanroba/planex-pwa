@@ -1,9 +1,12 @@
-const CACHE_NAME = 'planex-app-v2.2.0';
+const CACHE_NAME = 'planex-app-v2.3.0';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/logo-transparent.png'
+  '/logo-transparent.png',
+  '/fonts/Yekan.css',
+  '/fonts/Yekan.woff2',
+  '/fonts/Yekan.woff'
 ];
 
 // Install Event - Pre-caching core shell & skipping waiting immediately
