@@ -1,9 +1,12 @@
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 @import url('https://cdn.jsdelivr.net/npm/sahel-font@3.4.0/dist/font-face.min.css');
 
 :root, html {
   font-size: 85% !important;
   line-height: 1.35;
-  --font-fa: 'Sahel', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, Tahoma, sans-serif;
+  --font-family: 'Vazirmatn', sans-serif;
+  --font-main: var(--font-family);
+  --font-fa: var(--font-family);
   --font-en: 'Outfit', -apple-system, sans-serif;
 
   /* Luxury Dark AMOLED Glassmorphism System */
@@ -133,8 +136,9 @@ body.font-monospace {
   user-select: none;
 }
 
-html, body, button, input, select, textarea, table, h1, h2, h3, h4, h5, h6, th, td, span, div, p, a {
-  font-family: 'Sahel', 'Vazirmatn', system-ui, sans-serif !important;
+html, body, button, input, select, textarea, table, h1, h2, h3, h4, h5, h6, th, td, span, div, p, a,
+.modal-card, .modal-content, .card, .glass-panel {
+  font-family: var(--font-family) !important;
 }
 
 html, body {
@@ -146,15 +150,53 @@ html, body {
 }
 
 body {
-  font-family: var(--font-fa);
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.85;
   background: var(--bg-main);
   color: var(--text-primary);
   min-height: 100vh;
   direction: rtl;
   overflow-x: hidden;
-  line-height: 1.35;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings Typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* Buttons & Navigation Typography */
+button,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.bottom-nav,
+.nav-item,
+.nav-link,
+.nav-btn,
+.app-header {
+  font-family: var(--font-family);
+  font-weight: 500;
+}
+
+/* Strong / Bold Elements */
+strong, b, .font-bold, .bold {
+  font-weight: 600;
+}
+
+/* Inputs & Textareas Typography */
+input, textarea, select,
+.form-input, .form-textarea, .form-select {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 /* Glass Panels utility */
