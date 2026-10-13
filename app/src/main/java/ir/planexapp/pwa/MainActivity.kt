@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.webkit.WebViewAssetLoader
 import java.io.ByteArrayInputStream
+import java.io.InputStream
 
 class MainActivity : ComponentActivity() {
 
@@ -38,6 +39,7 @@ class MainActivity : ComponentActivity() {
 
         private val ALLOWED_HOSTS = hashSetOf(
             "planexapp.ir",
+            "www.planexapp.ir",
             "api.planexapp.ir",
             "planexapp.pages.dev",
             "fonts.googleapis.com",
@@ -79,7 +81,7 @@ class MainActivity : ComponentActivity() {
             insets
         }
 
-        // 2. WebSettings & Persistence Configuration - Optimized for instant 0ms offline launch
+        // 2. WebSettings & Persistence Configuration - 100% Offline & Instant Loading
         val settings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
@@ -90,7 +92,7 @@ class MainActivity : ComponentActivity() {
         settings.allowUniversalAccessFromFileURLs = true
         settings.javaScriptCanOpenWindowsAutomatically = true
 
-        // Offline and cache optimization
+        // Cache mode: LOAD_DEFAULT with our interceptor ensures instant offline loading
         settings.cacheMode = WebSettings.LOAD_DEFAULT
         settings.loadsImagesAutomatically = true
         settings.blockNetworkImage = false
@@ -98,7 +100,7 @@ class MainActivity : ComponentActivity() {
         settings.savePassword = false
         settings.setGeolocationEnabled(false)
 
-        // Disable Google Safe Browsing checks to eliminate network lookup delay in Iranian network
+        // Disable Google Safe Browsing checks to eliminate network lookup delay in Iran
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             settings.safeBrowsingEnabled = false
         }
@@ -108,7 +110,7 @@ class MainActivity : ComponentActivity() {
         cookieManager.setAcceptCookie(true)
         cookieManager.setAcceptThirdPartyCookies(webView, true)
 
-        // 3. Configure WebViewAssetLoader pointing directly to APK assets
+        // 3. Configure WebViewAssetLoader
         assetLoader = WebViewAssetLoader.Builder()
             .setDomain(ASSET_DOMAIN)
             .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(this))
@@ -143,7 +145,6 @@ class MainActivity : ComponentActivity() {
                         startActivity(intent)
                         return true
                     } catch (e: Exception) {
-                        // If Telegram app isn't installed, open in browser
                         val fallbackUrl = url.replace("tg://resolve?domain=", "https://t.me/")
                         try {
                             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl))
@@ -156,10 +157,10 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val uri = request?.url ?: return false
-                val host = uri.host
+                val host = uri.host ?: ""
 
-                // Strict Domain Restriction for in-app WebView
-                if (host != null && (ALLOWED_HOSTS.contains(host) || host.endsWith("planexapp.ir") || host == ASSET_DOMAIN)) {
+                // Keep local domain and web domain inside WebView so they are served from APK assets
+                if (host == ASSET_DOMAIN || host == "planexapp.ir" || host == "www.planexapp.ir" || host == "planexapp.pages.dev" || host == "api.planexapp.ir") {
                     return false
                 }
 
@@ -206,12 +207,62 @@ class MainActivity : ComponentActivity() {
         webView.loadUrl(LOCAL_BASE_URL)
     }
 
+    private fun getAssetMimeType(path: String): String {
+        val lower = path.lowercase()
+        return when {
+            lower.endsWith(".html") || lower.endsWith(".htm") -> "text/html"
+            lower.endsWith(".js") || lower.endsWith(".mjs") -> "application/javascript"
+            lower.endsWith(".css") -> "text/css"
+            lower.endsWith(".json") -> "application/json"
+            lower.endsWith(".png") -> "image/png"
+            lower.endsWith(".jpg") || lower.endsWith(".jpeg") -> "image/jpeg"
+            lower.endsWith(".svg") -> "image/svg+xml"
+            lower.endsWith(".webp") -> "image/webp"
+            lower.endsWith(".ico") -> "image/x-icon"
+            lower.endsWith(".woff2") -> "font/woff2"
+            lower.endsWith(".woff") -> "font/woff"
+            lower.endsWith(".ttf") -> "font/ttf"
+            lower.endsWith(".txt") -> "text/plain"
+            lower.endsWith(".apk") -> "application/vnd.android.package-archive"
+            else -> "application/octet-stream"
+        }
+    }
+
+    private fun openDirectAsset(relativePath: String): WebResourceResponse? {
+        val cleanPath = relativePath.trimStart('/')
+        val actualAssetFile = if (cleanPath.isEmpty() || cleanPath == "/" || cleanPath == "index.html") {
+            "index.html"
+        } else {
+            cleanPath
+        }
+
+        return try {
+            val inputStream: InputStream = assets.open(actualAssetFile)
+            val mimeType = getAssetMimeType(actualAssetFile)
+            val encoding = if (mimeType.startsWith("text/") || mimeType == "application/javascript" || mimeType == "application/json") "UTF-8" else null
+            WebResourceResponse(
+                mimeType,
+                encoding,
+                200,
+                "OK",
+                mapOf(
+                    "Access-Control-Allow-Origin" to "*",
+                    "Cache-Control" to "no-cache, no-store, must-revalidate"
+                ),
+                inputStream
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     private fun handleIntercept(uri: Uri): WebResourceResponse? {
         val host = uri.host ?: ""
-        val path = uri.path ?: ""
+        val rawPath = uri.path ?: ""
+        val cleanPath = rawPath.trimStart('/')
 
         // A. Immediately stub out Telegram WebApp SDK without waiting for blocked connection
-        if (host == "telegram.org" || host.endsWith(".telegram.org") || path.endsWith("telegram-web-app.js")) {
+        if (host == "telegram.org" || host.endsWith(".telegram.org") || rawPath.endsWith("telegram-web-app.js")) {
             return WebResourceResponse(
                 "application/javascript",
                 "UTF-8",
@@ -234,22 +285,37 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-        // C. If request is directed to the live domain (planexapp.ir / planexapp.pages.dev) for static assets,
-        // map it directly to the local APK asset loader
-        if (host == "planexapp.ir" || host == "www.planexapp.ir" || host == "planexapp.pages.dev") {
-            if (path.startsWith("/assets/") || path == "/" || path == "/index.html" ||
-                path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".svg") ||
-                path.endsWith(".css") || path.endsWith(".js") || path.endsWith(".json")) {
-                val assetUri = Uri.parse("https://$ASSET_DOMAIN$path")
-                val localResponse = assetLoader.shouldInterceptRequest(assetUri)
-                if (localResponse != null) return localResponse
+        // C. CRITICAL BUG FIX: DIRECT ASSET RESOLUTION FOR ROOT "/" AND STATIC FILES
+        // When host is local domain (appassets.androidplatform.net) OR web domain (planexapp.ir / planexapp.pages.dev)
+        val isInternalDomain = (
+            host == ASSET_DOMAIN ||
+            host == "planexapp.ir" ||
+            host == "www.planexapp.ir" ||
+            host == "planexapp.pages.dev" ||
+            host.isEmpty()
+        )
+
+        if (isInternalDomain) {
+            // 1. Explicitly intercept root "/" or empty or "/index.html" -> return assets/index.html directly!
+            if (cleanPath.isEmpty() || cleanPath == "index.html") {
+                val indexResponse = openDirectAsset("index.html")
+                if (indexResponse != null) return indexResponse
             }
+
+            // 2. Direct lookup in assets for relative paths (e.g. assets/app-ui-*.js, logo-transparent.png)
+            val directResponse = openDirectAsset(cleanPath)
+            if (directResponse != null) return directResponse
+
+            // 3. Fallback to WebViewAssetLoader
+            val assetUri = Uri.parse("https://$ASSET_DOMAIN${if (rawPath.startsWith("/")) rawPath else "/$rawPath"}")
+            val loaderResponse = assetLoader.shouldInterceptRequest(assetUri)
+            if (loaderResponse != null) return loaderResponse
         }
 
-        // D. Normal local asset resolution from APK assets folder
-        val assetResponse = assetLoader.shouldInterceptRequest(uri)
-        if (assetResponse != null) {
-            return assetResponse
+        // D. Normal local asset resolution from APK assets folder for ASSET_DOMAIN
+        val defaultLoaderResponse = assetLoader.shouldInterceptRequest(uri)
+        if (defaultLoaderResponse != null) {
+            return defaultLoaderResponse
         }
 
         return null

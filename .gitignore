@@ -19,3 +19,12 @@ debug.keystore
 node_modules/
 .wrangler/
 dist/
+
+# Security & Release Assets - Never upload APKs or Signing Keystores to Git
+*.apk
+*.aab
+*.jks
+*.keystore
+keystore.properties
+*.idsig
+*.base64
