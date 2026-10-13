@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دانلود فایل‌های نهایی PlanEx</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 28px; max-width: 600px; width: 100%; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); text-align: center; }
+    .logo { width: 80px; height: 80px; border-radius: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+    p.subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 20px; border-radius: 12px; font-weight: 600; font-size: 15px; text-decoration: none; transition: all 0.2s ease; cursor: pointer; border: none; }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5); }
+    .btn-secondary { background: #334155; color: #cbd5e1; border: 1px solid #475569; }
+    .btn-secondary:hover { background: #475569; color: #fff; }
+    .details { background: #0f172a; border-radius: 12px; padding: 16px; text-align: right; font-size: 13px; color: #94a3b8; line-height: 1.8; border: 1px solid #1e293b; }
+    .details strong { color: #e2e8f0; }
+    .code-box { background: #020617; color: #38bdf8; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; word-break: break-all; margin-top: 8px; text-align: left; direction: ltr; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="/logo-transparent.png" alt="PlanEx Logo" class="logo" onerror="this.style.display='none'">
+    <h1>دانلود خروجی رسمی PlanEx</h1>
+    <p class="subtitle">نسخه پروداکشن نهایی جهت انتشار در کافه‌بازار و مایکت<br>امضاشده با طرح‌های v1 و v2 توسط کلید رسمی</p>
+
+    <div class="btn-group">
+      <a href="/PlanEx.apk" download="PlanEx.apk" class="btn btn-primary">
+        <span>📱</span>
+        <span>دانلود فایل نصبی (PlanEx.apk - حجم ۶.۵ مگابایت)</span>
+      </a>
+      <a href="/planex-release.jks" download="planex-release.jks" class="btn btn-secondary">
+        <span>🔑</span>
+        <span>دانلود فایل کلید امضا (planex-release.jks)</span>
+      </a>
+    </div>
+
+    <div class="details">
+      <div><strong>مشخصات کلید اختصاصی:</strong></div>
+      <div>نام مستعار (Alias): <code>planex</code></div>
+      <div>رمز عبور (Password): <code>PlanEx@2026Secure</code></div>
+      <div>استاندارد امضا: <strong>v1 (JAR) + v2 (APK Signature) + Zipalign 4-byte</strong></div>
+      <div style="margin-top: 8px;"><strong>اثر انگشت SHA-256:</strong></div>
+      <div class="code-box">40:64:68:E2:D0:9D:6E:D4:25:EB:ED:8C:CD:FE:78:9C:59:A8:F2:74:1E:5B:DB:B5:A4:84:CD:ED:F2:E1:BB:4A</div>
+    </div>
+  </div>
+</body>
+</html>

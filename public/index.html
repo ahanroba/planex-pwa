@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="oceanic" data-theme-mode="dark">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    // Universal fetch timeout guard: 3000ms max for api.planexapp.ir to prevent UI freezing in Iran
+    (function() {
+      if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
+        var _nativeFetch = window.fetch;
+        window.fetch = function(input, init) {
+          init = init || {};
+          var url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+          if (url && (url.indexOf('api.planexapp.ir') !== -1 || url.indexOf('planexapp.ir') !== -1)) {
+            if (!init.signal && typeof AbortController !== 'undefined') {
+              var controller = new AbortController();
+              var tid = setTimeout(function() {
+                try { controller.abort(); } catch(e) {}
+              }, 3000);
+              init.signal = controller.signal;
+              return _nativeFetch.call(this, input, init).finally(function() {
+                clearTimeout(tid);
+              });
+            }
+          }
+          return _nativeFetch.call(this, input, init);
+        };
+      }
+    })();
+  </script>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>پلنکس (PlanEx) | پلتفرم هوشمند مدیریت زمان و برنامه‌ریزی مطالعه</title>
+  <meta name="description" content="پلنکس پلتفرم آنلاین برنامه‌ریزی، ثبت روتین ۲۴ ساعته، پایش تست‌ها و تالار رقابت آنلاین مطالعه مناسب دانشجویان، داوطلبان کنکور و آزمون‌های پزشکی.">
+  <meta name="keywords" content="برنامه‌ریزی درسی, جدول مدیریت زمان, لیدربرد مطالعه, ماتریس زمان, ثبت ساعت مطالعه, پره‌انترنی, کنکور">
+  <link rel="canonical" href="https://planexapp.ir/">
+  <meta name="robots" content="index, follow">
+
+  <!-- Telegram WebApp SDK (asynchronous & non-blocking) -->
+  <script>
+    (function() {
+      var isTg = (window.name === 'WebApp' || (typeof location !== 'undefined' && location.hash.indexOf('tgWebAppData') !== -1) || (navigator.userAgent && navigator.userAgent.indexOf('Telegram') !== -1));
+      if (isTg) {
+        var s = document.createElement('script');
+        s.src = 'https://telegram.org/js/telegram-web-app.js';
+        s.async = true;
+        s.onload = function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            try { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); } catch(e) {}
+          }
+        };
+        document.head.appendChild(s);
+      }
+    })();
+  </script>
+
+  <!-- Open Graph / Telegram / Social Preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="پلنکس | مدیریت هوشمند زمان و تالار رقابت مطالعه">
+  <meta property="og:description" content="برنامه‌ریزی ۲۴ ساعته، ردیابی تست‌ها و رقابت در لیدربرد آنلاین داوطلبان.">
+  <meta property="og:url" content="https://planexapp.ir/">
+  <meta property="og:site_name" content="PlanEx">
+  <meta property="og:image" content="./logo-transparent.png">
+
+  <!-- Google Search Console Verification -->
+  <meta name="google-site-verification" content="faM7rPUzEMqGygC-SkB54-vlXSD5ZIa9h7z08JoHlBo" />
+  <script>
+    // Immediate Telegram WebApp initialization to eliminate blank screen delay
+    (function() {
+      if (window.Telegram && window.Telegram.WebApp) {
+        try {
+          window.Telegram.WebApp.ready();
+          window.Telegram.WebApp.expand();
+        } catch (e) {
+          console.warn('[Telegram WebApp] Init warning:', e);
+        }
+      }
+    })();
+
+    // Immediate Nuke Cache & Service Worker Cleanup
+    (function nukeCache() {
+      try {
+        var isAndroid = typeof window !== 'undefined' && (
+          window.location.hostname === 'appassets.androidplatform.net' ||
+          window.location.protocol === 'file:'
+        );
+
+        if (isAndroid) {
+          // Inside Android WebView: always unregister Service Workers & clear cache storage
+          if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof navigator.serviceWorker.getRegistrations === 'function') {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              regs.forEach(function(r) { r.unregister(); });
+            }).catch(function(err) {});
+          }
+          if (typeof window !== 'undefined' && 'caches' in window && typeof caches.keys === 'function') {
+            caches.keys().then(function(keys) {
+              keys.forEach(function(k) { caches.delete(k); });
+            }).catch(function(err) {});
+          }
+        }
+
+        var CACHE_FLAG = 'app_cache_busted_v1_0_3';
+        if (typeof localStorage !== 'undefined' && !localStorage.getItem(CACHE_FLAG)) {
+          localStorage.setItem(CACHE_FLAG, 'true');
+
+          var unregisterSW = (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof navigator.serviceWorker.getRegistrations === 'function')
+            ? navigator.serviceWorker.getRegistrations().then(function(regs) {
+                return Promise.all(regs.map(function(r) { return r.unregister(); }));
+              }).catch(function(err) { console.warn('[NukeCache] SW error:', err); })
+            : Promise.resolve();
+
+          var clearCaches = (typeof window !== 'undefined' && 'caches' in window && typeof caches.keys === 'function')
+            ? caches.keys().then(function(keys) {
+                return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+              }).catch(function(err) { console.warn('[NukeCache] Cache error:', err); })
+            : Promise.resolve();
+
+          Promise.all([unregisterSW, clearCaches]).finally(function() {
+            console.log('[NukeCache] Reloading...');
+            window.location.reload(true);
+          });
+        }
+      } catch (e) {
+        console.error('[NukeCache] Error:', e);
+      }
+    })();
+
+    // Lightweight error handler to prevent screen freeze
+    window.addEventListener('error', function (e) {
+      console.error('[Global Error]', e.message || e, e.error);
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      console.error('[Global Promise Error]', e.reason);
+    });
+  </script>
+
+  <!-- Google Fonts & JSDelivr CDN: Non-render-blocking font loading with fallback to system Sahel/Vazirmatn -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Lalezar&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sahel-font@3.4.0/dist/font-face.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font@v5.0.0/dist/font-face.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/sahel-font@v3.4.0/dist/font-face.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/samim-font@v4.0.5/dist/font-face.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/iran-nastaliq-font@v1.0.0/dist/font-face.css" media="print" onload="this.media='all'">
+
+  <link rel="icon" type="image/png" href="./assets/logo-transparent-Dpu1Zcfy.png" />
+  <link rel="apple-touch-icon" href="./assets/logo-transparent-Dpu1Zcfy.png" />
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#0c0d11" />
+
+  <script type="module" crossorigin src="./assets/index-C_QRCUTL.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/articles-data-CLaiOG3O.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1405-khordad-UJ5dc-GN.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1404-azar-USfog2PY.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1404-Cj8l4Cc7.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1403-azar-Cn4pGcDT.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1403-esfand-Na4KXspq.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1403-shahrivar-DLDWPaoU.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1403-khordad-Qpf6Oe3q.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1402-esfand-7cenTHy_.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1402-shahrivar-B3H_MPVJ.js">
+  <link rel="modulepreload" crossorigin href="./assets/exam-1402-khordad-HM-OSe9T.js">
+  <link rel="modulepreload" crossorigin href="./assets/view-question-bank-Cfu9mnX2.js">
+  <link rel="modulepreload" crossorigin href="./assets/traps-analysis-data-CBLkF90D.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-html2canvas-BfYXEYrK.js">
+  <link rel="modulepreload" crossorigin href="./assets/app-ui-BJNoxM5R.js">
+  <link rel="modulepreload" crossorigin href="./assets/view-consultation-B7nGdTpc.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-D-LkE6mf.css">
+</head>
+<body class="theme-oceanic font-sahel scale-xlarge mode-dark" data-theme="oceanic" data-theme-mode="dark"><div id="pwa-update-banner" style="display:none; width:100%; background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color:#ffffff; text-align:center; padding:10px 16px; font-size:0.84rem; font-weight:800; cursor:pointer; z-index:10000; direction:rtl; box-sizing:border-box; border-bottom:1px solid rgba(255,255,255,0.15); transition:all 0.2s ease;">نسخه جدید در دسترس است. برای بروزرسانی کلیک کنید 🔄</div>
+  <!-- Ultra-Fast Native Splash Screen -->
+  <div id="planex-splash-screen" style="position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9999; background-color: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; opacity: 1; transition: opacity 0.4s ease, visibility 0.4s ease; font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif; direction: rtl;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+      <img src="./assets/logo-transparent-Dpu1Zcfy.png" alt="PlanEx Logo" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));" />
+      <div id="planex-splash-text" style="font-size: 1.05rem; font-weight: 700; color: #f8fafc; letter-spacing: 0.3px;">در حال بارگذاری...</div>
+    </div>
+    <div style="width: 220px; max-width: 80%; height: 6px; background-color: rgba(255, 255, 255, 0.1); border-radius: 999px; overflow: hidden; position: relative;">
+      <div id="planex-splash-progress-bar" style="width: 10%; height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 999px; transition: width 0.3s ease;"></div>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- Tab View Containers (Pre-rendered DOM Shells for Instant Routing & Deep-Linking) -->
+    <div id="tab-dashboard" class="tab-view-container" style="display: block;"></div>
+    <div id="tab-planning" class="tab-view-container" style="display: none;"></div>
+    <div id="tab-routines" class="tab-view-container" style="display: none;"></div>
+    <div id="tab-tools" class="tab-view-container" style="display: none;"></div>
+    <div id="tab-leaderboard" class="tab-view-container" style="display: none;">
+      <div id="leaderboard-view"></div>
+    </div>
+    <div id="tab-articles" class="tab-view-container" style="display: none;">
+      <div id="articles-view"></div>
+    </div>
+  </div>
+
+
+  <script>
+  
+// ═══════════════════════════════════════════════════════════════
+// PlanEx Flashcards (Leitner) & Routines Persistence Engine
+// ═══════════════════════════════════════════════════════════════
+window.flipLeitnerCard = function() {
+  if (!window.leitnerState) {
+    window.leitnerState = { activeIndex: 0, isFlipped: false, filterBox: 'all', showAddForm: false };
+  }
+  window.leitnerState.isFlipped = !window.leitnerState.isFlipped;
+  var card = document.getElementById('leitner-active-card');
+  if (card) {
+    if (window.leitnerState.isFlipped) card.classList.add('flipped');
+    else card.classList.remove('flipped');
+  }
+  var ans = document.getElementById('leitner-answer-container');
+  if (ans) {
+    ans.style.display = window.leitnerState.isFlipped ? 'block' : 'none';
+  }
+  var flipBtn = document.getElementById('btn-flip-active-card');
+  if (flipBtn) {
+    flipBtn.innerText = window.leitnerState.isFlipped ? '🙈 پنهان' : '👁️ مشاهده پاسخ';
+  }
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.saveRoutines = function() {
+  try {
+    if (typeof window.triggerActionDrivenPush === 'function') {
+      window.triggerActionDrivenPush();
+    } else if (window.personalSyncService && typeof window.personalSyncService.pushToCloud === 'function') {
+      window.personalSyncService.pushToCloud();
+    }
+  } catch (e) {
+    console.warn('[Routines] Save error:', e);
+  }
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.answerLeitnerCard = function(id, isCorrect) {
+  try {
+    var raw = localStorage.getItem('planex_flashcards');
+    var list = raw ? JSON.parse(raw) : [];
+    var card = list.find(function(c) { return String(c.id) === String(id); });
+    if (card) {
+      var intervals = [1, 2, 4, 8, 16];
+      if (isCorrect) {
+        card.box = Math.min(5, (card.box || 1) + 1);
+        card.streak = (card.streak || 0) + 1;
+      } else {
+        card.box = 1;
+        card.streak = 0;
+      }
+      card.lastReviewed = Date.now();
+      card.reviewCount = (card.reviewCount || 0) + 1;
+      var days = intervals[(card.box || 1) - 1] || 1;
+      card.nextReviewDate = Date.now() + (days * 24 * 60 * 60 * 1000);
+      localStorage.setItem('planex_flashcards', JSON.stringify(list));
+    }
+    if (!window.leitnerState) window.leitnerState = { activeIndex: 0, isFlipped: false, filterBox: 'all', showAddForm: false };
+    window.leitnerState.isFlipped = false;
+    window.leitnerState.activeIndex = 0;
+    window.saveRoutines();
+    if (typeof window.renderApp === 'function') window.renderApp();
+  } catch (e) {
+    console.error('[Leitner] Answer error:', e);
+  }
+};
+
+window.toggleAddFlashcardForm = function() {
+  if (!window.leitnerState) window.leitnerState = { activeIndex: 0, isFlipped: false, filterBox: 'all', showAddForm: false };
+  window.leitnerState.showAddForm = !window.leitnerState.showAddForm;
+  var form = document.getElementById('form-add-flashcard-container');
+  if (form) form.style.display = window.leitnerState.showAddForm ? 'block' : 'none';
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.saveManualFlashcard = function() {
+  var qEl = document.getElementById('input-new-fc-question');
+  var aEl = document.getElementById('input-new-fc-answer');
+  var dEl = document.getElementById('input-new-fc-deck');
+  if (!qEl || !aEl) return;
+  var q = qEl.value.trim();
+  var a = aEl.value.trim();
+  var d = (dEl && dEl.value.trim()) || 'عمومی';
+  if (!q || !a) {
+    alert('لطفاً صورت سؤال و پاسخ را وارد کنید.');
+    return;
+  }
+  var raw = localStorage.getItem('planex_flashcards');
+  var list = raw ? JSON.parse(raw) : [];
+  list.unshift({
+    id: 'fc_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+    question: q,
+    answer: a,
+    deck: d,
+    box: 1,
+    streak: 0,
+    reviewCount: 0,
+    createdAt: '۱۴۰۵/۰۱/۰۱',
+    createdTimestamp: Date.now(),
+    lastReviewed: null,
+    nextReviewDate: Date.now()
+  });
+  localStorage.setItem('planex_flashcards', JSON.stringify(list));
+  if (!window.leitnerState) window.leitnerState = { activeIndex: 0, isFlipped: false, filterBox: 'all', showAddForm: false };
+  window.leitnerState.showAddForm = false;
+  window.saveRoutines();
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.deleteFlashcardItem = function(id) {
+  var raw = localStorage.getItem('planex_flashcards');
+  var list = raw ? JSON.parse(raw) : [];
+  list = list.filter(function(c) { return String(c.id) !== String(id); });
+  localStorage.setItem('planex_flashcards', JSON.stringify(list));
+  window.saveRoutines();
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.seedDefaultFlashcards = function() {
+  var defaultCards = [
+    {
+      id: 'fc_seed_1',
+      question: 'تکنیک بازیابی فعال (Active Recall) چیست و چرا موثرترین روش مطالعه است؟',
+      answer: 'تلاش فعالانه مغز برای به یاد آوردن مطالب بدون نگاه کردن به کتاب؛ این فرآیند باعث تقویت مسیرهای سیناپسی و انتقال اطلاعات به حافظه بلندمدت می‌شود.',
+      deck: 'متدولوژی مطالعه',
+      box: 1,
+      createdAt: '۱۴۰۵/۰۱/۰۱',
+      createdTimestamp: Date.now() - 86400000,
+      nextReviewDate: Date.now() - 1000
+    },
+    {
+      id: 'fc_seed_2',
+      question: 'در جعبه لایتنر ۵ خانه‌ای، هر خانه چه فواصل زمانی برای مرور دارد؟',
+      answer: 'خانه ۱: روزانه (۱ روز) | خانه ۲: ۲ روز | خانه ۳: ۴ روز | خانه ۴: ۸ روز | خانه ۵: ۱۶ روز (تثبیت دائم در حافظه).',
+      deck: 'جعبه لایتنر',
+      box: 2,
+      createdAt: '۱۴۰۵/۰۱/۰۱',
+      createdTimestamp: Date.now() - 172800000,
+      nextReviewDate: Date.now() - 1000
+    },
+    {
+      id: 'fc_seed_3',
+      question: 'بهترین استراتژی پومودورو برای یادگیری مباحث سنگین و تحلیلی چیست؟',
+      answer: 'پومودوروی پیشرفته ۵۰ دقیقه تمرکز عمیق بدون وقفه و ۱۰ دقیقه استراحت مطلق (آب خوردن و تنفس عمیق).',
+      deck: 'مدیریت زمان',
+      box: 1,
+      createdAt: '۱۴۰۵/۰۱/۰۱',
+      createdTimestamp: Date.now() - 86400000,
+      nextReviewDate: Date.now() - 1000
+    }
+  ];
+  localStorage.setItem('planex_flashcards', JSON.stringify(defaultCards));
+  window.saveRoutines();
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.prevLeitnerCard = function() {
+  if (!window.leitnerState) window.leitnerState = { activeIndex: 0, isFlipped: false, filterBox: 'all', showAddForm: false };
+  window.leitnerState.activeIndex = Math.max(0, (window.leitnerState.activeIndex || 0) - 1);
+  window.leitnerState.isFlipped = false;
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.nextLeitnerCard = function() {
+  if (!window.leitnerState) window.leitnerState = { activeIndex: 0, isFlipped: false, filterBox: 'all', showAddForm: false };
+  window.leitnerState.activeIndex = (window.leitnerState.activeIndex || 0) + 1;
+  window.leitnerState.isFlipped = false;
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+window.filterLeitnerBox = function(box) {
+  if (!window.leitnerState) window.leitnerState = { activeIndex: 0, isFlipped: false, filterBox: 'all', showAddForm: false };
+  window.leitnerState.filterBox = box;
+  window.leitnerState.activeIndex = 0;
+  window.leitnerState.isFlipped = false;
+  if (typeof window.renderApp === 'function') window.renderApp();
+};
+
+// Global Delegation for all Leitner & Flashcard Click Actions
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', function(e) {
+    var flipBtn = e.target.closest('#btn-flip-active-card');
+    if (flipBtn) {
+      e.preventDefault();
+      window.flipLeitnerCard();
+      return;
+    }
+    var reviewBtn = e.target.closest('.btn-leitner-review-action');
+    if (reviewBtn) {
+      e.preventDefault();
+      var id = reviewBtn.getAttribute('data-id');
+      var isCorrect = reviewBtn.getAttribute('data-correct') === 'true';
+      window.answerLeitnerCard(id, isCorrect);
+      return;
+    }
+    var seedBtn = e.target.closest('#btn-seed-default-flashcards');
+    if (seedBtn) {
+      e.preventDefault();
+      window.seedDefaultFlashcards();
+      return;
+    }
+    var addFormBtn = e.target.closest('#btn-toggle-add-flashcard-form');
+    if (addFormBtn) {
+      e.preventDefault();
+      window.toggleAddFlashcardForm();
+      return;
+    }
+    var cancelBtn = e.target.closest('#btn-cancel-add-flashcard');
+    if (cancelBtn) {
+      e.preventDefault();
+      window.toggleAddFlashcardForm();
+      return;
+    }
+    var saveBtn = e.target.closest('#btn-save-manual-flashcard');
+    if (saveBtn) {
+      e.preventDefault();
+      window.saveManualFlashcard();
+      return;
+    }
+    var prevBtn = e.target.closest('#btn-prev-leitner-card');
+    if (prevBtn) {
+      e.preventDefault();
+      window.prevLeitnerCard();
+      return;
+    }
+    var nextBtn = e.target.closest('#btn-next-leitner-card');
+    if (nextBtn) {
+      e.preventDefault();
+      window.nextLeitnerCard();
+      return;
+    }
+    var delBtn = e.target.closest('.btn-delete-flashcard');
+    if (delBtn) {
+      e.preventDefault();
+      var delId = delBtn.getAttribute('data-id');
+      window.deleteFlashcardItem(delId);
+      return;
+    }
+    var boxBtn = e.target.closest('.btn-filter-leitner-box');
+    if (boxBtn) {
+      e.preventDefault();
+      var b = boxBtn.getAttribute('data-box');
+      window.filterLeitnerBox(b);
+      return;
+    }
+    var tabBtn = e.target.closest('.btn-filter-leitner-tab');
+    if (tabBtn) {
+      e.preventDefault();
+      var f = tabBtn.getAttribute('data-filter');
+      window.filterLeitnerBox(f);
+      return;
+    }
+  });
+}
+
+  </script>
+
+</body>
+</html>
+

@@ -10,7 +10,6 @@ const STORAGE_KEYS = {
   HOURLY_LOGS: 'planex_hourly_logs',
   CATEGORIES: 'planex_categories',
   HABITS: 'planex_habits',
-  ROUTINES: 'planex_routines',
   DAILY_PLANS: 'planex_daily_plans',
   WEEKLY_GOALS: 'planex_weekly_goals',
   STUDY_TARGETS: 'planex_study_targets',
@@ -38,22 +37,11 @@ import { ACTIVITY_PALETTE_24, DEFAULT_CATEGORIES, DEFAULT_NON_STUDY_CATEGORIES, 
 export function isPlaceholderName(n) {
   if (!n || typeof n !== 'string') return true;
   const clean = n.trim().replace(/\u200C/g, ' ').replace(/\s+/g, ' ');
-  const placeholders = [
-    '',
-    'کاربر',
-    'کاربر پلنکس',
-    'دانشجو',
-    'دانش آموز',
-    'دانش آموز پر تلاش',
-    'دانش آموز پرتلاش',
-    'دانش‌آموز پرتلاش',
-    'دانش‌آموز پر تلاش',
-    'داوطلب پرتلاش',
-    'داوطلب پر تلاش',
-    'x',
-    'X'
-  ];
-  return placeholders.includes(clean) || clean.toLowerCase() === 'x';
+  return (
+    clean === '' ||
+    clean === 'کاربر' ||
+    clean.toLowerCase() === 'x'
+  );
 }
 
 class DatabaseEngine {
@@ -143,98 +131,6 @@ class DatabaseEngine {
           }
         }
 
-        // Respect routines/habits deletions and updates without additive union resurrecting deleted habits
-        if ((key === STORAGE_KEYS.HABITS || key === STORAGE_KEYS.ROUTINES || key === 'planex_habits' || key === 'planex_routines') && Array.isArray(val)) {
-          try {
-            let deletedMap = {};
-            try {
-              const rawDel = localStorage.getItem('planex_deleted_habit_ids');
-              if (rawDel) {
-                const parsed = JSON.parse(rawDel);
-                if (Array.isArray(parsed)) {
-                  parsed.forEach(k => { deletedMap[String(k)] = 1; });
-                } else if (typeof parsed === 'object' && parsed !== null) {
-                  deletedMap = parsed;
-                }
-              }
-            } catch (_) {}
-
-            if (data.planex_deleted_habit_ids) {
-              try {
-                const inDel = typeof data.planex_deleted_habit_ids === 'string'
-                  ? JSON.parse(data.planex_deleted_habit_ids)
-                  : data.planex_deleted_habit_ids;
-                if (Array.isArray(inDel)) {
-                  inDel.forEach(k => { deletedMap[String(k)] = 1; });
-                } else if (typeof inDel === 'object' && inDel !== null) {
-                  deletedMap = { ...deletedMap, ...inDel };
-                }
-                localStorage.setItem('planex_deleted_habit_ids', JSON.stringify(deletedMap));
-              } catch (_) {}
-            }
-
-            const isHabitDeleted = (h) => {
-              if (!h) return true;
-              const idStr = String(h.id || '');
-              const titleStr = String(h.title || '').trim();
-              const d1 = deletedMap[idStr];
-              const d2 = deletedMap[titleStr];
-              if (d1 !== undefined || d2 !== undefined) {
-                const delTs = Math.max(Number(d1 || 0), Number(d2 || 0));
-                const hTs = Number(h.updatedAt || h.updated_at || 0);
-                if (delTs === 1 || delTs === 0 || hTs <= delTs) {
-                  return true;
-                }
-              }
-              return false;
-            };
-
-            const existing = this.getHabits() || [];
-            const localRoutinesUpdatedAt = Number(localStorage.getItem('planex_routines_updated_at') || 0);
-
-            if (val.length === 0) {
-              if (existing.length > 0 && localRoutinesUpdatedAt > 0) {
-                return;
-              }
-              this.saveRoutines([], false);
-              return;
-            }
-
-            const map = new Map();
-            existing.forEach(h => {
-              if (h && (h.id || h.title) && !isHabitDeleted(h)) {
-                map.set(String(h.id || h.title), h);
-              }
-            });
-
-            val.forEach(h => {
-              if (!h || typeof h !== 'object' || isHabitDeleted(h)) return;
-              const k = String(h.id || h.title);
-              if (!map.has(k)) {
-                const inTs = Number(h.updatedAt || h.updated_at || 0);
-                if (map.size > 0 && localRoutinesUpdatedAt > 0 && inTs <= localRoutinesUpdatedAt) {
-                  return;
-                }
-                map.set(k, h);
-              } else {
-                const prev = map.get(k);
-                const prevTs = Number(prev.updatedAt || prev.updated_at || 0);
-                const inTs = Number(h.updatedAt || h.updated_at || 0);
-                const localNewer = prevTs > inTs;
-                map.set(k, {
-                  ...(localNewer ? h : prev),
-                  ...(localNewer ? prev : h),
-                  completedDays: { ...(h.completedDays || {}), ...(prev.completedDays || {}) }
-                });
-              }
-            });
-
-            const merged = Array.from(map.values()).filter(h => !isHabitDeleted(h));
-            this.saveRoutines(merged, false);
-            return;
-          } catch (_) {}
-        }
-
         // Never overwrite a custom local nickname with a default placeholder from backup data
         if ((key === 'planex_user_nickname' || key === 'planex_nickname' || key === 'planex_leaderboard_nickname') && typeof val === 'string') {
           if (localCustomName && isPlaceholderName(val)) {
@@ -247,6 +143,23 @@ class DatabaseEngine {
             val.name = localCustomName;
             val.nickname = localCustomName;
           }
+        }
+
+        // Deletion Tombstones: Never resurrect deleted habits from backup or sync
+        if ((key === STORAGE_KEYS.HABITS || key === 'planex_habits') && Array.isArray(val)) {
+          try {
+            const tombstones = JSON.parse(localStorage.getItem('planex_deleted_habit_ids') || '[]');
+            const titleTombstones = JSON.parse(localStorage.getItem('planex_deleted_habit_titles') || '[]');
+            const filteredHabits = val.filter(h => {
+              if (!h) return false;
+              if (tombstones.includes(String(h.id))) return false;
+              const t = (h.title || '').trim().toLowerCase();
+              if (t && titleTombstones.includes(t)) return false;
+              return true;
+            });
+            localStorage.setItem(key, JSON.stringify(filteredHabits));
+            return;
+          } catch (_) {}
         }
 
         if (typeof val === 'object') {
@@ -1179,39 +1092,30 @@ class DatabaseEngine {
     return Array.from(topicsSet);
   }
 
-  // Habits & Routines Persistence Engine
-  getRoutines() {
-    return this.getHabits();
-  }
-
-  saveRoutines(routines, immediate = false) {
-    if (!Array.isArray(routines)) return [];
-    try {
-      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(routines));
-      localStorage.setItem(STORAGE_KEYS.ROUTINES, JSON.stringify(routines));
-      localStorage.setItem('planex_routines_updated_at', String(Date.now()));
-    } catch (e) {
-      console.error('Error saving routines:', e);
-    }
-    if (typeof window !== 'undefined' && typeof window.triggerActionDrivenPush === 'function') {
-      window.triggerActionDrivenPush(immediate ? 0 : 150);
-    }
-    return routines;
-  }
-
+  // Habits
   getHabits() {
-    let raw = localStorage.getItem(STORAGE_KEYS.HABITS) || localStorage.getItem(STORAGE_KEYS.ROUTINES);
-    let habits = [];
-    try {
-      habits = JSON.parse(raw || '[]');
-      if (!Array.isArray(habits)) habits = [];
-    } catch (e) {
-      habits = [];
-    }
+    let habits = JSON.parse(localStorage.getItem(STORAGE_KEYS.HABITS) || '[]');
     let changed = false;
+
+    // Filter out any habits present in deletion tombstones
+    try {
+      const tombstones = JSON.parse(localStorage.getItem('planex_deleted_habit_ids') || '[]');
+      const titleTombstones = JSON.parse(localStorage.getItem('planex_deleted_habit_titles') || '[]');
+      if (tombstones.length > 0 || titleTombstones.length > 0) {
+        const initialLen = habits.length;
+        habits = habits.filter(h => {
+          if (!h) return false;
+          if (tombstones.includes(String(h.id))) return false;
+          const t = (h.title || '').trim().toLowerCase();
+          if (t && titleTombstones.includes(t)) return false;
+          return true;
+        });
+        if (habits.length !== initialLen) changed = true;
+      }
+    } catch (e) {}
+
     const seenIds = new Set();
     habits.forEach((h, index) => {
-      if (!h || typeof h !== 'object') return;
       if (!h.id || seenIds.has(h.id)) {
         h.id = Date.now().toString() + '_' + index + '_' + Math.random().toString(36).substr(2, 9);
         changed = true;
@@ -1220,7 +1124,6 @@ class DatabaseEngine {
     });
     if (changed) {
       localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
-      localStorage.setItem(STORAGE_KEYS.ROUTINES, JSON.stringify(habits));
     }
     return habits;
   }
@@ -1230,6 +1133,16 @@ class DatabaseEngine {
     let finalEmoji = emoji;
     let cleanTitle = String(title || '').trim();
     
+    // Clear title tombstone if the user explicitly re-creates the habit
+    try {
+      const titleTombstones = JSON.parse(localStorage.getItem('planex_deleted_habit_titles') || '[]');
+      const normTitle = cleanTitle.toLowerCase();
+      if (titleTombstones.includes(normTitle)) {
+        const filtered = titleTombstones.filter(t => t !== normTitle);
+        localStorage.setItem('planex_deleted_habit_titles', JSON.stringify(filtered));
+      }
+    } catch (_) {}
+
     // If emoji wasn't explicitly passed, extract emoji from start of title if present
     const emojiMatch = cleanTitle.match(/^(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]|\uD83E[\uDD00-\uDDFF]|\uD83D[\uDE80-\uDEFF]|[\u2600-\u27BF])\s*/u);
     if (emojiMatch) {
@@ -1240,35 +1153,17 @@ class DatabaseEngine {
     }
     if (!finalEmoji) finalEmoji = '✨';
 
-    // Remove from deleted tombstones if re-adding
-    try {
-      const raw = localStorage.getItem('planex_deleted_habit_ids');
-      if (raw) {
-        let deletedMap = JSON.parse(raw);
-        let changed = false;
-        if (typeof deletedMap === 'object' && deletedMap !== null) {
-          if (cleanTitle && deletedMap[cleanTitle]) { delete deletedMap[cleanTitle]; changed = true; }
-          if (title && deletedMap[title]) { delete deletedMap[title]; changed = true; }
-          if (changed) {
-            localStorage.setItem('planex_deleted_habit_ids', JSON.stringify(deletedMap));
-          }
-        }
-      }
-    } catch (e) {}
-
-    const now = Date.now();
     const newHabit = {
-      id: now.toString() + '_' + habits.length + '_' + Math.random().toString(36).substr(2, 9),
+      id: Date.now().toString() + '_' + habits.length + '_' + Math.random().toString(36).substr(2, 9),
       title: cleanTitle || title,
       emoji: finalEmoji,
       frequency,
       targetTime,
       daysCompleted: [false, false, false, false, false, false, false],
-      completedDays: {}, // monthKey -> {day: status} for 31-day matrix
-      updatedAt: now
+      completedDays: {} // monthKey -> {day: status} for 31-day matrix
     };
     habits.push(newHabit);
-    this.saveRoutines(habits);
+    localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
     return newHabit;
   }
 
@@ -1288,8 +1183,7 @@ class DatabaseEngine {
       if (updates.emoji !== undefined) habit.emoji = updates.emoji;
       if (updates.frequency !== undefined) habit.frequency = updates.frequency;
       if (updates.targetTime !== undefined) habit.targetTime = updates.targetTime;
-      habit.updatedAt = Date.now();
-      this.saveRoutines(habits);
+      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
       return habit;
     }
     return null;
@@ -1301,8 +1195,7 @@ class DatabaseEngine {
     if (habit) {
       if (!habit.daysCompleted) habit.daysCompleted = [false, false, false, false, false, false, false];
       habit.daysCompleted[dayIndex] = !habit.daysCompleted[dayIndex];
-      habit.updatedAt = Date.now();
-      this.saveRoutines(habits);
+      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
     }
   }
 
@@ -1318,8 +1211,7 @@ class DatabaseEngine {
       currentStatus = (currentStatus + 1) % 3;
       
       habit.completedDays[monthKey][day] = currentStatus;
-      habit.updatedAt = Date.now();
-      this.saveRoutines(habits);
+      localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
       return currentStatus;
     }
     return 0;
@@ -1329,31 +1221,30 @@ class DatabaseEngine {
     let habits = this.getHabits();
     const habitToDelete = habits.find(h => h.id == habitId || String(h.id) === String(habitId));
     habits = habits.filter(h => h.id != habitId && String(h.id) !== String(habitId));
+    localStorage.setItem(STORAGE_KEYS.HABITS, JSON.stringify(habits));
 
+    // Deletion Tombstones: Prevent sync resurrection
     try {
-      const now = Date.now();
-      let deletedMap = {};
-      const raw = localStorage.getItem('planex_deleted_habit_ids');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          parsed.forEach(k => { deletedMap[String(k)] = now; });
-        } else if (typeof parsed === 'object' && parsed !== null) {
-          deletedMap = parsed;
-        }
-      }
-      if (habitId) deletedMap[String(habitId)] = now;
-      if (habitToDelete && habitToDelete.title) {
-        deletedMap[String(habitToDelete.title).trim()] = now;
-      }
-      localStorage.setItem('planex_deleted_habit_ids', JSON.stringify(deletedMap));
-      localStorage.setItem('planex_routines_updated_at', String(now));
-    } catch (e) {}
+      const tombstones = JSON.parse(localStorage.getItem('planex_deleted_habit_ids') || '[]');
+      const idStr = String(habitId);
+      if (!tombstones.includes(idStr)) tombstones.push(idStr);
+      localStorage.setItem('planex_deleted_habit_ids', JSON.stringify(tombstones));
 
-    this.saveRoutines(habits, true);
-    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-      window.dispatchEvent(new CustomEvent('routine-deleted', { detail: { habitId, immediate: true } }));
-      window.dispatchEvent(new CustomEvent('routines-updated', { detail: { immediate: true } }));
+      if (habitToDelete && habitToDelete.title) {
+        const titleTombstones = JSON.parse(localStorage.getItem('planex_deleted_habit_titles') || '[]');
+        const normTitle = habitToDelete.title.trim().toLowerCase();
+        if (!titleTombstones.includes(normTitle)) titleTombstones.push(normTitle);
+        localStorage.setItem('planex_deleted_habit_titles', JSON.stringify(titleTombstones));
+      }
+    } catch (_) {}
+
+    // Trigger immediate push to cloud
+    if (typeof window !== 'undefined') {
+      if (typeof window.triggerActionDrivenPush === 'function') {
+        window.triggerActionDrivenPush();
+      } else if (window.personalSyncService && typeof window.personalSyncService.pushToCloud === 'function') {
+        window.personalSyncService.pushToCloud();
+      }
     }
   }
 
@@ -1606,9 +1497,6 @@ class DatabaseEngine {
     let list = this.getRoutineChecklist();
     list = list.filter(i => i.id !== id && i.id != id);
     localStorage.setItem('planex_routine_checklist', JSON.stringify(list));
-    if (typeof window !== 'undefined' && typeof window.triggerActionDrivenPush === 'function') {
-      window.triggerActionDrivenPush(0);
-    }
   }
 
   // Earned Gamification Medal Badge based on Level
@@ -3168,22 +3056,13 @@ class DatabaseEngine {
       profile.photo = storedAvatar;
       profile.photoUrl = storedAvatar;
     }
-    const effectiveName = this.getEffectiveUserName();
-    if (effectiveName) {
-      profile.name = effectiveName;
-      profile.nickname = effectiveName;
-    } else if (isPlaceholderName(profile.name)) {
-      profile.name = '';
-      profile.nickname = '';
-    }
     return profile;
   }
 
   setUserProfile(profileObj) {
     if (!profileObj || typeof profileObj !== 'object') return {};
     try {
-      let existing = {};
-      try { existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILE) || '{}'); } catch(e) {}
+      const existing = this.getUserProfile() || {};
       const updated = { ...existing, ...profileObj };
       const av = profileObj.avatar || profileObj.avatar_url || profileObj.photo || profileObj.photoUrl || localStorage.getItem('planex_user_avatar');
       if (av) {
@@ -3192,13 +3071,6 @@ class DatabaseEngine {
         updated.avatar_url = av;
         updated.photo = av;
         updated.photoUrl = av;
-      }
-      if (profileObj.name && !isPlaceholderName(profileObj.name)) {
-        updated.name = profileObj.name;
-        updated.nickname = profileObj.name;
-        localStorage.setItem('planex_user_nickname', profileObj.name);
-        localStorage.setItem('planex_nickname', profileObj.name);
-        localStorage.setItem('planex_leaderboard_nickname', profileObj.name);
       }
       localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(updated));
       if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
@@ -3217,21 +3089,6 @@ class DatabaseEngine {
 
   getProfile() {
     return this.getUserProfile();
-  }
-
-  getJournalEntry(dateKey) {
-    try {
-      const entries = JSON.parse(localStorage.getItem('planex_journal_entries')) || {};
-      return entries[dateKey] || { mood: '', rating: 0, note: '' };
-    } catch (e) { return { mood: '', rating: 0, note: '' }; }
-  }
-
-  saveJournalEntry(dateKey, mood, rating, note) {
-    try {
-      const entries = JSON.parse(localStorage.getItem('planex_journal_entries')) || {};
-      entries[dateKey] = { mood, rating, note };
-      localStorage.setItem('planex_journal_entries', JSON.stringify(entries));
-    } catch (e) {}
   }
 }
 

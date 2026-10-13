@@ -1,17 +1,17 @@
 package ir.planexapp.pwa
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Bitmap
+import android.content.pm.ApplicationInfo
 import android.graphics.Color
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.WindowManager
-import android.webkit.ConsoleMessage
+import android.webkit.CookieManager
+import android.webkit.RenderProcessGoneDetail
+import android.webkit.ServiceWorkerClient
+import android.webkit.ServiceWorkerController
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -20,268 +20,270 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.webkit.WebViewAssetLoader
+import java.io.ByteArrayInputStream
 
 class MainActivity : ComponentActivity() {
-
-    private var webView: WebView? = null
-    private var assetLoader: WebViewAssetLoader? = null
 
     companion object {
         private const val TAG = "PlanExWebView"
         private const val ASSET_DOMAIN = "appassets.androidplatform.net"
-        private const val LOCAL_BASE_URL = "https://appassets.androidplatform.net/index.html"
+        private const val LOCAL_BASE_URL = "https://$ASSET_DOMAIN/index.html"
 
-        private val ALLOWED_HOSTS = setOf(
+        private val ALLOWED_HOSTS = hashSetOf(
             "planexapp.ir",
+            "api.planexapp.ir",
+            "planexapp.pages.dev",
             "fonts.googleapis.com",
             "fonts.gstatic.com",
-            "cdn.jsdelivr.net"
+            "cdn.jsdelivr.net",
+            "telegram.org",
+            "api.telegram.org",
+            "t.me",
+            "telegram.me",
+            "hamibash.com"
         )
+
+        private val TELEGRAM_STUB_BYTES = (
+            "// PlanEx Android WebView Telegram SDK offline stub\n" +
+            "window.Telegram = window.Telegram || { WebApp: { ready: function(){}, expand: function(){}, close: function(){} } };"
+        ).toByteArray(Charsets.UTF_8)
+
+        private val EMPTY_CSS_BYTES = "/* offline font fallback */".toByteArray(Charsets.UTF_8)
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    private lateinit var webView: WebView
+    private lateinit var assetLoader: WebViewAssetLoader
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupFullscreen()
 
-        // Enable WebView debugging ONLY in debug builds
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                val isDebuggable = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
-                WebView.setWebContentsDebuggingEnabled(isDebuggable)
-            }
-        } catch (e: Throwable) {
-            Log.w(TAG, "Could not set WebView debugging mode", e)
+        // 1. Strict Debugging Control: Disable WebView debugging in production release builds
+        val isDebuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        WebView.setWebContentsDebuggingEnabled(isDebuggable)
+
+        webView = WebView(this)
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        setContentView(webView)
+
+        ViewCompat.setOnApplyWindowInsetsListener(webView) { v, insets ->
+            val systemBars: Insets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
         }
 
-        try {
-            // 1. Create WebView instance safely
-            val wv = WebView(this).apply {
-                setBackgroundColor(Color.parseColor("#0F172A"))
-                overScrollMode = View.OVER_SCROLL_NEVER
-            }
-            this.webView = wv
+        // 2. WebSettings & Persistence Configuration - Optimized for instant 0ms offline launch
+        val settings = webView.settings
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
+        settings.databaseEnabled = true
+        settings.allowFileAccess = true
+        settings.allowContentAccess = true
+        settings.allowFileAccessFromFileURLs = true
+        settings.allowUniversalAccessFromFileURLs = true
+        settings.javaScriptCanOpenWindowsAutomatically = true
 
-            // 2. Set content view IMMEDIATELY so decorView is attached to window
-            setContentView(wv)
+        // Offline and cache optimization
+        settings.cacheMode = WebSettings.LOAD_DEFAULT
+        settings.loadsImagesAutomatically = true
+        settings.blockNetworkImage = false
+        settings.mediaPlaybackRequiresUserGesture = false
+        settings.savePassword = false
+        settings.setGeolocationEnabled(false)
 
-            // 3. Apply Fullscreen / Insets AFTER setContentView inside safe block
-            setupFullscreen()
+        // Disable Google Safe Browsing checks to eliminate network lookup delay in Iranian network
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            settings.safeBrowsingEnabled = false
+        }
 
-            // 4. Setup WebViewAssetLoader for Vite ES Modules
-            val loader = WebViewAssetLoader.Builder()
-                .setDomain(ASSET_DOMAIN)
-                .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(this))
-                .build()
-            this.assetLoader = loader
+        // Enable third-party cookies for smooth sync
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setAcceptCookie(true)
+        cookieManager.setAcceptThirdPartyCookies(webView, true)
 
-            // 5. Configure WebSettings with strict security parameters
-            wv.settings.apply {
-                javaScriptEnabled = true
-                domStorageEnabled = true
-                databaseEnabled = true
-                allowFileAccess = false
-                allowContentAccess = false
-                @Suppress("DEPRECATION")
-                allowFileAccessFromFileURLs = false
-                @Suppress("DEPRECATION")
-                allowUniversalAccessFromFileURLs = false
-                mediaPlaybackRequiresUserGesture = false
-                mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                cacheMode = if (isNetworkAvailable()) {
-                    WebSettings.LOAD_DEFAULT
-                } else {
-                    WebSettings.LOAD_CACHE_ELSE_NETWORK
-                }
-                userAgentString = "$userAgentString PlanExAndroid/1.0"
-                setSupportZoom(false)
-                builtInZoomControls = false
-                displayZoomControls = false
-                loadWithOverviewMode = true
-                useWideViewPort = true
-                textZoom = 100
-            }
+        // 3. Configure WebViewAssetLoader pointing directly to APK assets
+        assetLoader = WebViewAssetLoader.Builder()
+            .setDomain(ASSET_DOMAIN)
+            .addPathHandler("/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
 
-            // Note: No dangerous @JavascriptInterface is registered on this WebView.
-
-            // 6. Setup WebViewClient
-            wv.webViewClient = object : WebViewClient() {
-                override fun shouldInterceptRequest(
-                    view: WebView?,
-                    request: WebResourceRequest?
-                ): WebResourceResponse? {
-                    val url = request?.url ?: return null
-                    if (url.host == ASSET_DOMAIN) {
-                        return loader.shouldInterceptRequest(url)
+        // 4. Intercept Service Worker requests if active to prevent network blocking
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            try {
+                ServiceWorkerController.getInstance().setServiceWorkerClient(object : ServiceWorkerClient() {
+                    override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? {
+                        return handleIntercept(request.url)
                     }
-                    return super.shouldInterceptRequest(view, request)
-                }
+                })
+            } catch (e: Exception) {
+                Log.w(TAG, "ServiceWorkerController initialization skipped: ${e.message}")
+            }
+        }
 
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    Log.d(TAG, "Loading: $url")
-                }
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+                val url = request?.url ?: return null
+                return handleIntercept(url)
+            }
 
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    Log.d(TAG, "Finished: $url")
-                }
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val url = request?.url?.toString() ?: return false
 
-                override fun shouldOverrideUrlLoading(
-                    view: WebView?,
-                    request: WebResourceRequest?
-                ): Boolean {
-                    val url = request?.url ?: return true
-                    val scheme = url.scheme?.lowercase() ?: return true
-                    val host = url.host?.lowercase() ?: ""
-
-                    // Allow internal asset loader domain and target app domain inside WebView
-                    if (scheme == "https" || scheme == "http") {
-                        if (host == ASSET_DOMAIN || ALLOWED_HOSTS.any { host == it || host.endsWith(".$it") }) {
-                            return false
-                        }
-                    }
-
-                    // Allow standard explicit intent schemes (tel, mailto, sms)
-                    if (scheme == "tel" || scheme == "mailto" || scheme == "sms") {
-                        try {
-                            startActivity(Intent(Intent.ACTION_VIEW, url))
-                        } catch (e: Throwable) {
-                            Log.w(TAG, "Could not launch intent for scheme: $scheme", e)
-                        }
+                // Handle Telegram, WhatsApp, and generic custom scheme intent links
+                if (url.startsWith("tg:") || url.contains("t.me/") || url.startsWith("intent:") || url.startsWith("whatsapp:")) {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        startActivity(intent)
                         return true
-                    }
-
-                    // Block all arbitrary external navigations and unknown schemes
-                    Log.w(TAG, "Blocked external navigation to: $url")
-                    return true
-                }
-
-                override fun onReceivedError(
-                    view: WebView?,
-                    request: WebResourceRequest?,
-                    error: WebResourceError?
-                ) {
-                    if (request?.isForMainFrame == true) {
-                        Log.e(TAG, "Main frame error: ${error?.description}")
+                    } catch (e: Exception) {
+                        // If Telegram app isn't installed, open in browser
+                        val fallbackUrl = url.replace("tg://resolve?domain=", "https://t.me/")
+                        try {
+                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUrl))
+                            startActivity(browserIntent)
+                            return true
+                        } catch (err: Exception) {
+                            Log.w(TAG, "Cannot launch fallback URL: $fallbackUrl", err)
+                        }
                     }
                 }
+
+                val uri = request?.url ?: return false
+                val host = uri.host
+
+                // Strict Domain Restriction for in-app WebView
+                if (host != null && (ALLOWED_HOSTS.contains(host) || host.endsWith("planexapp.ir") || host == ASSET_DOMAIN)) {
+                    return false
+                }
+
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Cannot launch external URL: $uri", e)
+                }
+                return true
             }
 
-            // 7. Setup WebChromeClient
-            wv.webChromeClient = object : WebChromeClient() {
-                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                    consoleMessage?.let {
-                        Log.d(TAG, "[JS ${it.messageLevel()}] ${it.message()} (${it.sourceId()}:${it.lineNumber()})")
-                    }
-                    return true
-                }
+            override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+                val didCrash = detail?.didCrash() ?: false
+                Log.w(TAG, "WebView render process gone (didCrash=$didCrash)")
+                try {
+                    view?.destroy()
+                } catch (ignored: Exception) {}
+                recreate()
+                return true
             }
 
-            // 8. Load URL
-            wv.loadUrl(LOCAL_BASE_URL)
-
-        } catch (e: Throwable) {
-            Log.e(TAG, "Fatal error initializing WebView app", e)
-            showFallbackError(e)
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                super.onReceivedError(view, request, error)
+                if (request?.isForMainFrame == true) {
+                    Log.w(TAG, "Main frame error: ${error?.description}")
+                }
+            }
         }
+
+        webView.webChromeClient = WebChromeClient()
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (::webView.isInitialized && webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    finish()
+                }
+            }
+        })
+
+        // Instantly load the local APK asset index with zero network dependency
+        webView.loadUrl(LOCAL_BASE_URL)
+    }
+
+    private fun handleIntercept(uri: Uri): WebResourceResponse? {
+        val host = uri.host ?: ""
+        val path = uri.path ?: ""
+
+        // A. Immediately stub out Telegram WebApp SDK without waiting for blocked connection
+        if (host == "telegram.org" || host.endsWith(".telegram.org") || path.endsWith("telegram-web-app.js")) {
+            return WebResourceResponse(
+                "application/javascript",
+                "UTF-8",
+                200,
+                "OK",
+                mapOf("Access-Control-Allow-Origin" to "*"),
+                ByteArrayInputStream(TELEGRAM_STUB_BYTES)
+            )
+        }
+
+        // B. Immediately return empty CSS for Google Fonts & JSDelivr CDN so fallback fonts render instantly without hanging
+        if (host == "fonts.googleapis.com" || host == "fonts.gstatic.com" || host == "cdn.jsdelivr.net" || host.endsWith(".jsdelivr.net")) {
+            return WebResourceResponse(
+                "text/css",
+                "UTF-8",
+                200,
+                "OK",
+                mapOf("Access-Control-Allow-Origin" to "*"),
+                ByteArrayInputStream(EMPTY_CSS_BYTES)
+            )
+        }
+
+        // C. If request is directed to the live domain (planexapp.ir / planexapp.pages.dev) for static assets,
+        // map it directly to the local APK asset loader
+        if (host == "planexapp.ir" || host == "www.planexapp.ir" || host == "planexapp.pages.dev") {
+            if (path.startsWith("/assets/") || path == "/" || path == "/index.html" ||
+                path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".svg") ||
+                path.endsWith(".css") || path.endsWith(".js") || path.endsWith(".json")) {
+                val assetUri = Uri.parse("https://$ASSET_DOMAIN$path")
+                val localResponse = assetLoader.shouldInterceptRequest(assetUri)
+                if (localResponse != null) return localResponse
+            }
+        }
+
+        // D. Normal local asset resolution from APK assets folder
+        val assetResponse = assetLoader.shouldInterceptRequest(uri)
+        if (assetResponse != null) {
+            return assetResponse
+        }
+
+        return null
+    }
+
+    override fun onPause() {
+        super.onPause()
+        CookieManager.getInstance().flush()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        CookieManager.getInstance().flush()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CookieManager.getInstance().flush()
     }
 
     private fun setupFullscreen() {
         try {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            window.statusBarColor = Color.TRANSPARENT
-            window.navigationBarColor = Color.TRANSPARENT
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                window.attributes.layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-            }
-            val decor = window.decorView
-            val controller = WindowInsetsControllerCompat(window, decor)
-            controller.hide(WindowInsetsCompat.Type.systemBars())
-            controller.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        } catch (t: Throwable) {
-            Log.w(TAG, "Could not set immersive fullscreen", t)
-        }
-    }
-
-    private fun showFallbackError(e: Throwable) {
-        try {
-            val fallbackWv = WebView(this)
-            fallbackWv.setBackgroundColor(Color.parseColor("#0F172A"))
-            setContentView(fallbackWv)
-            val html = """
-                <!DOCTYPE html>
-                <html dir="rtl" lang="fa">
-                <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <style>
-                    body { background: #0F172A; color: #fff; font-family: system-ui, sans-serif; padding: 30px; text-align: center; direction: rtl; }
-                    .card { background: #1E293B; border-radius: 16px; padding: 24px; border: 1px solid rgba(255,255,255,0.1); max-width: 400px; margin: 40px auto; }
-                    h2 { color: #F87171; margin-top: 0; }
-                    p { color: #94A3B8; font-size: 14px; line-height: 1.6; }
-                    .err { font-size: 11px; color: #64748B; background: #0F172A; padding: 10px; border-radius: 8px; font-family: monospace; word-break: break-all; margin-top: 15px; }
-                    button { background: #7C3AED; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-                  </style>
-                </head>
-                <body>
-                  <div class="card">
-                    <h2>⚠️ خطای راه‌اندازی برنامه</h2>
-                    <p>برنامه با مشکلی مواجه شد. لطفاً برنامه را ببندید و مجدداً تلاش کنید.</p>
-                    <div class="err">${e.localizedMessage ?: e.message ?: "Unknown Exception"}</div>
-                    <button onclick="location.reload()">تلاش مجدد</button>
-                  </div>
-                </body>
-                </html>
-            """.trimIndent()
-            fallbackWv.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
-        } catch (_: Throwable) {
-            // Last resort
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val wv = webView
-        if (wv != null && wv.canGoBack()) {
-            wv.goBack()
-        } else {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        try { webView?.onResume() } catch (_: Throwable) {}
-    }
-
-    override fun onPause() {
-        try { webView?.onPause() } catch (_: Throwable) {}
-        super.onPause()
-    }
-
-    override fun onDestroy() {
-        try {
-            webView?.destroy()
-            webView = null
-        } catch (_: Throwable) {}
-        super.onDestroy()
-    }
-
-    private fun isNetworkAvailable(): Boolean {
-        return try {
-            val cm = getSystemService(CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
-            val network = cm.activeNetwork ?: return false
-            val caps = cm.getNetworkCapabilities(network) ?: return false
-            caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        } catch (_: Throwable) {
-            false
+            val window = window
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = Color.parseColor("#0F172A")
+            window.navigationBarColor = Color.parseColor("#0F172A")
+            val controller = WindowInsetsControllerCompat(window, window.decorView)
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not set insets", e)
         }
     }
 }

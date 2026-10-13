@@ -501,7 +501,7 @@ export default {
       // ═══════════════════════════════════════════════════════════
       if (url.pathname === '/api/set-telegram-webhook' && request.method === 'GET') {
         const BOT_TOKEN = env.TELEGRAM_BOT_TOKEN || '8876966010:AAFzcwScCGOR86egf0tNoYP5KD08rHoUuEM';
-        const webhookUrl = 'https://planexapp.ir/api/telegram-webhook';
+        const webhookUrl = 'https://planexapp.pages.dev/api/telegram-webhook';
         try {
           const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}&allowed_updates=["message","callback_query"]`);
           const tgData = await tgRes.json();
@@ -1403,17 +1403,11 @@ function mergeAppData(cloudData = {}, incomingData = {}) {
     'planex_study_parts',
     'study_sessions',
     'planex_tasks',
+    'planex_habits',
     'planex_flashcards',
+    'planex_routines',
     'planex_my_groups'
   ];
-
-  // For habits & routines, respect client state directly so deletions are honored and not resurrected
-  if (incomingData.planex_habits !== undefined) {
-    result.planex_habits = incomingData.planex_habits;
-  }
-  if (incomingData.planex_routines !== undefined) {
-    result.planex_routines = incomingData.planex_routines;
-  }
 
   for (const arrKey of arrayKeys) {
     const cArr = Array.isArray(cloudData[arrKey]) ? cloudData[arrKey] : [];

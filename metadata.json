@@ -1,6 +1,8 @@
 {
   "name": "PlanEx",
-  "description": "اپلیکیشن حرفه‌ای برنامه‌ریزی و مدیریت زمان PlanEx - شامل ردیاب مطالعه، حالت تمرکز، تحلیل هفتگی و پشتیبانی کامل آفلاین.",
+  "description": "PlanEx Time Manager and Study Planner PWA & Android Application",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

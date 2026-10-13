@@ -4,7 +4,6 @@ import { personalSyncService } from '../services/personalSyncService.js';
 import { leaderboardService } from '../services/leaderboardService.js';
 import { API_BASE_URL } from '../config.js';
 
-
 export function normalizePhone(rawPhone) {
   if (!rawPhone) return '';
   let p = String(rawPhone).trim();
@@ -192,15 +191,52 @@ if (typeof window !== 'undefined') {
     }
 
     try {
+      let studyLogs = [];
+      try {
+        studyLogs = JSON.parse(localStorage.getItem('planex_study_logs') || '[]');
+      } catch (e) {}
+
+      let myGroups = [];
+      try {
+        myGroups = JSON.parse(localStorage.getItem('planex_my_groups') || '[]');
+      } catch (e) {}
+
+      const backupData = (typeof window.personalSyncService !== 'undefined' && typeof window.personalSyncService.exportLocalState === 'function')
+        ? window.personalSyncService.exportLocalState()
+        : {};
+
+      let profile = {};
+      try {
+        profile = (db && typeof db.getUserProfile === 'function')
+          ? db.getUserProfile()
+          : JSON.parse(localStorage.getItem('planex_user_profile') || '{}');
+      } catch (e) {
+        profile = {};
+      }
+      if (!profile || typeof profile !== 'object') profile = {};
+
+      const storedAvatar = localStorage.getItem('planex_user_avatar') || profile.avatar || profile.avatar_url || profile.photo || '';
+      if (storedAvatar && backupData && typeof backupData === 'object') {
+        backupData.planex_user_avatar = storedAvatar;
+      }
+
+      // Sanitized headers and stripped bulky payloads from auth request
+      const authController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const authTimeoutId = authController ? setTimeout(() => authController.abort(), 3000) : null;
       const res = await fetch(`${API_BASE_URL}/api/sync.php`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        signal: authController ? authController.signal : undefined,
         body: JSON.stringify({
           action: 'login',
           phone: phone,
           password: password
         })
       });
+      if (authTimeoutId) clearTimeout(authTimeoutId);
 
       const rawText = await res.text();
       let data = {};
@@ -263,11 +299,6 @@ if (typeof window !== 'undefined') {
 
         localStorage.setItem('planex_auth_user', JSON.stringify(authPayload));
         localStorage.setItem('planex_user_account', JSON.stringify(authPayload));
-
-        // Store auth token if provided by backend
-        if (data.token) {
-          localStorage.setItem('planex_auth_token', data.token);
-        }
 
         // Store nickname explicitly so Header.js picks it up as primary display name
         if (name && name !== 'کاربر پلنکس' && name !== 'کاربر مهمان') {
