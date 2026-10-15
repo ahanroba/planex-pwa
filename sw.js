@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planex-app-v2.3.4';
+const CACHE_NAME = 'planex-app-v2.3.5';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -9,16 +9,23 @@ const ASSETS_TO_CACHE = [
   '/fonts/Yekan.woff'
 ];
 
-// Install Event - Pre-caching core shell & skipping waiting immediately
+// Install Event - Pre-caching core shell & skipping waiting immediately (100% non-blocking)
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
+    caches.open(CACHE_NAME).then(async (cache) => {
       console.log('[ServiceWorker] Pre-caching offline PWA shell');
-      return Promise.allSettled(
-        ASSETS_TO_CACHE.map((url) =>
-          cache.add(url).catch((err) => console.warn('[ServiceWorker] Cache failed for', url, err))
-        )
+      await Promise.allSettled(
+        ASSETS_TO_CACHE.map(async (url) => {
+          try {
+            const response = await fetch(url, { cache: 'no-cache' });
+            if (response && response.ok) {
+              await cache.put(url, response);
+            }
+          } catch (err) {
+            console.warn('[ServiceWorker] Non-blocking cache skip for:', url, err);
+          }
+        })
       );
     })
   );
@@ -48,8 +55,8 @@ self.addEventListener('activate', (event) => {
 });
 
 // Fetch Event
-// - HTML/navigation: Cache-First با timeout 3s → fallback به کش (برای شبکه‌های فیلتر‌شده ایران)
-// - Static assets (JS/CSS/fonts/images): Cache-First → در پس‌زمینه revalidate می‌کند
+// - HTML/navigation: Cache-First if available (Stale-While-Revalidate), direct network on first load
+// - Static assets (JS/CSS/fonts/images): Cache-First if available, direct network on first load
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -65,72 +72,88 @@ self.addEventListener('fetch', (event) => {
                         (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
 
   if (isHtmlRequest) {
-    // Cache-First برای HTML با network timeout 3 ثانیه
-    // اگر کش موجود باشد فوراً سرویس می‌دهد و در پس‌زمینه آپدیت می‌کند (Stale-While-Revalidate)
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        const networkFetch = (async () => {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-            const networkResponse = await fetch(event.request, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (networkResponse && networkResponse.status === 200) {
-              const responseForReq = networkResponse.clone();
-              const responseForIndex = networkResponse.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseForReq);
-                cache.put('/index.html', responseForIndex);
-              }).catch((err) => console.warn('[ServiceWorker] Cache put failed:', err));
-            }
-            return networkResponse;
-          } catch (err) {
-            return cachedResponse || caches.match('/index.html') || caches.match('/');
-          }
-        })();
+      (async () => {
+        const cachedResponse = await caches.match(event.request) || await caches.match('/index.html') || await caches.match('/');
 
+        // 1. If cached, serve immediately (0ms) and revalidate in background
         if (cachedResponse) {
-          networkFetch.catch(() => {});
+          (async () => {
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 6000);
+              const networkResponse = await fetch(event.request, { signal: controller.signal });
+              clearTimeout(timeoutId);
+              if (networkResponse && networkResponse.status === 200) {
+                const cache = await caches.open(CACHE_NAME);
+                await cache.put(event.request, networkResponse.clone());
+                await cache.put('/index.html', networkResponse.clone());
+              }
+            } catch (err) {}
+          })();
           return cachedResponse;
         }
-        return networkFetch;
-      })
+
+        // 2. If NOT cached yet (First Load / Incognito): fetch from network without premature abort
+        try {
+          const networkResponse = await fetch(event.request);
+          if (networkResponse && networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(event.request, networkResponse.clone());
+            await cache.put('/index.html', networkResponse.clone());
+          }
+          return networkResponse;
+        } catch (err) {
+          const fallback = await caches.match('/index.html') || await caches.match('/');
+          if (fallback) return fallback;
+          throw err;
+        }
+      })()
     );
     return;
   }
 
-  // Cache-First با Stale-While-Revalidate برای فایل‌های استاتیک (JS، CSS، fonts، images)
+  // Cache-First with Stale-While-Revalidate for static assets (JS, CSS, fonts, images)
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const networkUpdate = (async () => {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000);
-          const networkResponse = await fetch(event.request, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          if (networkResponse && networkResponse.status === 200 &&
-              (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            }).catch((err) => console.warn('[ServiceWorker] Cache put failed:', err));
-          }
-          return networkResponse;
-        } catch (err) {
-          return cachedResponse;
-        }
-      })();
+    (async () => {
+      const cachedResponse = await caches.match(event.request);
 
+      // 1. If cache exists: return immediately and revalidate in background
       if (cachedResponse) {
-        networkUpdate.catch(() => {});
+        (async () => {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+            const networkResponse = await fetch(event.request, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (networkResponse && networkResponse.status === 200 &&
+                (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
+              const cache = await caches.open(CACHE_NAME);
+              await cache.put(event.request, networkResponse.clone());
+            }
+          } catch (err) {}
+        })();
         return cachedResponse;
       }
-      return networkUpdate;
-    })
+
+      // 2. If NOT cached yet (First Load / Incognito): fetch from network directly and populate cache
+      try {
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.status === 200 &&
+            (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(event.request, networkResponse.clone());
+        }
+        return networkResponse;
+      } catch (err) {
+        if (cachedResponse) return cachedResponse;
+        throw err;
+      }
+    })()
   );
 });
 
-// Notification Click Event
+// Notification Click Event - focus or open app window
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
